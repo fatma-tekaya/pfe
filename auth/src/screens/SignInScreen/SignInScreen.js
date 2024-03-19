@@ -1,22 +1,43 @@
 import { View, ScrollView ,Image, StyleSheet, useWindowDimensions } from 'react-native'
 import React , {useState} from 'react'
-import logo from '../../../assets/images/logo.png';
+import logo from '../../../assets/images/logo.svg';
 import CustomInput from '../../components/CustomInput';
 import CustomButton from '../../components/CustomButton';
 import SocialSignInButtons from '../../components/SocialSignInButtons';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios'; 
 
 const SignInScreen = () => {
-    const [username , setUsername]=useState('')
+    const [email , setEmail]=useState('')
     const [password , setPassword]=useState('')
     const{height}=useWindowDimensions();
     const navigation = useNavigation();
 
-    const onSignInPressed = () =>{
+    const onSignInPressed = async () =>{
       console.warn("Sign in");
-      //validate user mel back
-      navigation.navigate('HomeScreen');
-    }
+      try {
+      
+       
+        const response = await axios.post('http://192.168.1.19:5000/sign-in', {
+          email , password
+        });
+  
+         // Handle success response
+         if (response.status === 200) {
+          console.log('User logged in successfully:', response.data);
+  
+          // Navigate to the next screen (e.g., ConfirmEmail)
+          navigation.navigate('HomeScreen');
+        } else {
+          console.error('Failed to login user:', response.data);
+        }
+      } catch (error) {
+        // Handle error
+        console.error('Error while login user:', error);
+      }
+    };
+     
+    
     const onForgotPasswordPressed = () =>{
       console.warn("Forgot Password");
       navigation.navigate('ForgotPassword');
@@ -28,8 +49,8 @@ const SignInScreen = () => {
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
     <View style={styles.root}>
-      <Image source={logo} style={[styles.logo, {height:height*0.3 }]} resizeMode='contain'/>
-      <CustomInput placeholder="Username" value={username} setValue={setUsername}/>
+     <Image source={logo} style={[styles.logo, {height:height*0.3 }]} resizeMode='contain'/> 
+      <CustomInput placeholder="email" value={email} setValue={setEmail}/>
       <CustomInput placeholder="Password" value={password} setValue={setPassword}
       secureTextEntry={true}/>
     <CustomButton text="Sign In"
@@ -48,7 +69,7 @@ const SignInScreen = () => {
 const styles = StyleSheet.create({
     root:{
         alignItems:'center',
-        backgroundColor:'white',
+        //backgroundColor:'white',
         padding:40,
     },
     logo:{

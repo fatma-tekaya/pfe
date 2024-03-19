@@ -18,8 +18,8 @@ const App = () =>{
 const styles = StyleSheet.create({
  root: {
    flex:1,
-   //backgroundColor:'#F9FBfC',
-   backgroundColor:'white',
+   backgroundColor:'#F9FBfC',
+   //backgroundColor:'white',
  },
 });
 
