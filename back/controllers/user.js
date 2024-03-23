@@ -9,35 +9,35 @@ const nodemailer = require('nodemailer');
 
 
 // Contrôleur pour créer un nouvel utilisateur
-exports.createUser = async (req, res) => {
-  const { fullname, email, password } = req.body; // Extraction des données du corps de la requête
-  try {
-    const existingUser = await User.findOne({ email }); // Vérification si l'email est déjà utilisé
+// exports.createUser = async (req, res) => {
+//   const { fullname, email, password } = req.body; // Extraction des données du corps de la requête
+//   try {
+//     const existingUser = await User.findOne({ email }); // Vérification si l'email est déjà utilisé
 
-    if (existingUser) {
-      return res.json({
-        success: false,
-        message: 'This email is already in use, try sign-in',
-      });
-    }
+//     if (existingUser) {
+//       return res.json({
+//         success: false,
+//         message: 'This email is already in use, try sign-in',
+//       });
+//     }
 
-    // Hachage du mot de passe avant de l'enregistrer dans la base de données
-    const hashedPassword = await bcrypt.hash(password, 8);
+//     // Hachage du mot de passe avant de l'enregistrer dans la base de données
+//     const hashedPassword = await bcrypt.hash(password, 8);
 
-    const user = await User({
-      fullname,
-      email,
-      password: hashedPassword, // Utilisez le mot de passe haché
-    }); // Création d'un nouvel utilisateur avec les données fournies
-    await user.save(); // Sauvegarde de l'utilisateur dans la base de données
-    res.json({ success: true, user }); // Réponse JSON indiquant la réussite de la création de l'utilisateur
-  } catch (error) {
-    console.error('Error while creating user:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' }); // Gestion des erreurs
-  }
-};
+//     const user = await User({
+//       fullname,
+//       email,
+//       password: hashedPassword, // Utilisez le mot de passe haché
+//     }); // Création d'un nouvel utilisateur avec les données fournies
+//     await user.save(); // Sauvegarde de l'utilisateur dans la base de données
+//     res.json({ success: true, user }); // Réponse JSON indiquant la réussite de la création de l'utilisateur
+//   } catch (error) {
+//     console.error('Error while creating user:', error);
+//     res.status(500).json({ success: false, message: 'Internal server error' }); // Gestion des erreurs
+//   }
+// };
 
-/* // Fonction pour envoyer l'e-mail de confirmation
+ // Fonction pour envoyer l'e-mail de confirmation
 const sendConfirmationEmail = async (toEmail, confirmationToken) => {
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -130,7 +130,7 @@ exports.confirmEmailAndRegisterUser = async (req, res) => {
     console.error('Error confirming email:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
-}; */
+}; 
 
 // Contrôleur pour connecter un utilisateur
 exports.userSignIn = async (req, res) => {

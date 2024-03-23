@@ -22,7 +22,7 @@ const SignUpScreen = () => {
         }
   
         // Send a request to your backend to create a new user
-        const response = await axios.post('http://192.168.1.19:5000/create-user', {
+        const response = await axios.post('http://192.168.137.1:5000/create-user', {
           fullname: fullname,
           email,
           password,
