@@ -8,8 +8,8 @@ import AuthStack from './src/navigation/AuthStack';
 function App() {
   return (
     <NavigationContainer >
-      <AppStack />  
-      {/*  <AuthStack />*/}
+      {/*<AppStack />  */}
+        <AuthStack />
     </NavigationContainer>
   );
 }
