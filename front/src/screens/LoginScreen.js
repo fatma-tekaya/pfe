@@ -1,4 +1,4 @@
-import React from 'react';
+import React ,{useContext, useState}from 'react';
 import {
   SafeAreaView,
   View,
@@ -17,8 +17,12 @@ import TwitterSVG from '../assets/images/misc/twitter.svg';
 
 import CustomButton from '../components/CustomButton';
 import InputField from '../components/InputField';
+import { AuthContext } from '../context/AuthContext';
 
 const LoginScreen = ({navigation}) => {
+  const[email, setEmail] = useState(null);
+  const[password, setPassword] = useState(null);
+  const {login}=useContext(AuthContext);
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
       <View style={{paddingHorizontal: 25}}>
@@ -42,7 +46,8 @@ const LoginScreen = ({navigation}) => {
         </Text>
 
         <InputField
-          label={'Email ID'}
+          label={'Email'}
+          value={email}
           icon={
             <MaterialIcons
             name="alternate-email"
@@ -52,10 +57,12 @@ const LoginScreen = ({navigation}) => {
           />
           }
           keyboardType="email-address"
+          onChangeText={text=>setEmail(text)}
         />
 
 <InputField
           label={'Password'}
+          value={password}
           icon={
             <Ionicons
             name="lock-closed-outline"
@@ -67,9 +74,10 @@ const LoginScreen = ({navigation}) => {
           inputType="password"
           fieldButtonLabel={"Forgot?"}
           fieldButtonFunction={() => {}}
+          onChangeText={text=>setPassword(text)}
         />
         
-        <CustomButton label={"Login"} onPress={() => {}} />
+        <CustomButton label={"Login"} onPress={() => {login(email, password)}} />
 
         <Text style={{textAlign: 'center', color: '#666', marginBottom: 30}}>
           Or, login with ...
@@ -122,7 +130,7 @@ const LoginScreen = ({navigation}) => {
             justifyContent: 'center',
             marginBottom: 30,
           }}>
-          <Text>New to the app?</Text>
+          <Text style={{color:'#666'}}>New to the app?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
             <Text style={{color: '#AD40AF', fontWeight: '700'}}> Register</Text>
           </TouchableOpacity>

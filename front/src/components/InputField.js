@@ -8,6 +8,8 @@ export default function InputField({
   keyboardType,
   fieldButtonLabel,
   fieldButtonFunction,
+  value,
+  onChangeText,
 }) {
   return (
     <View
@@ -22,17 +24,21 @@ export default function InputField({
       {inputType == 'password' ? (
         <TextInput
           placeholder={label}
-          placeholderTextColor="#333"
+          placeholderTextColor="#666"
           keyboardType={keyboardType}
           style={{flex: 1, paddingVertical: 0, color:'black'}}
           secureTextEntry={true}
+          value={value}
+          onChangeText={onChangeText}
         />
       ) : (
         <TextInput
           placeholder={label}
-          placeholderTextColor="#333"
+          placeholderTextColor="#666"
           keyboardType={keyboardType}
           style={{flex: 1, paddingVertical: 0 , color:'black'}}
+          value={value}
+          onChangeText={onChangeText}       
         />
       )}
       <TouchableOpacity onPress={fieldButtonFunction}>

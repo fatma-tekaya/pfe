@@ -6,7 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
-import React , {useState} from 'react';
+import React , {useState , useContext} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Feather from 'react-native-vector-icons/Feather';
 import Carousel from 'react-native-snap-carousel';
@@ -15,10 +15,11 @@ import BannerSlider from '../components/BannerSlider';
 import {windowWidth} from '../utils/Dimensions';
 import CustomSwitch from '../components/CustomSwitch';
 import ListItem from '../components/ListItem';
-
+import { AuthContext } from '../context/AuthContext';
 
 const HomeScreen = ({navigation}) => {
   const [gamesTab , setGamesTab]= useState(1);
+  const {userInfo}= useContext(AuthContext) ;
   const renderBanner = ({item, index}) => {
     return <BannerSlider data={item} />;
   };
@@ -42,7 +43,7 @@ const HomeScreen = ({navigation}) => {
               fontFamily: 'Roboto-Medium',
               marginTop: 10,
             }}>
-            Hello Eyya
+            Hello {userInfo.user.fullname}
           </Text>
           <TouchableOpacity onPress={()=>navigation.openDrawer()}>
           <ImageBackground
