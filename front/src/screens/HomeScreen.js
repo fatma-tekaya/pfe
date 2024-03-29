@@ -43,7 +43,7 @@ const HomeScreen = ({navigation}) => {
               fontFamily: 'Roboto-Medium',
               marginTop: 10,
             }}>
-            Hello {userInfo.user.fullname}
+            Hello {userInfo.user.fullname} 
           </Text>
           <TouchableOpacity onPress={()=>navigation.openDrawer()}>
           <ImageBackground

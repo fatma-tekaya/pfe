@@ -6,6 +6,7 @@ const {
   userSignIn,
   uploadProfile,
   signOut,
+  facebookAuth,
 } = require('../controllers/user');
 const { isAuth } = require('../middelwares/auth');
 const {
@@ -29,6 +30,7 @@ const fileFilter = (req, file, cb) => {
 const uploads = multer({ storage, fileFilter });
 
 router.post('/create-user', validateUserSignUp, userVlidation, createUser);
+router.post('/facebookAuth',facebookAuth);
 //router.post('/create-user', validateUserSignUp, createUser);
 //router.get('/confirm-email/:token',confirmEmailAndRegisterUser);
 router.post('/sign-in', validateUserSignIn, userVlidation, userSignIn);

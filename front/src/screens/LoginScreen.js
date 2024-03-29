@@ -29,7 +29,7 @@ const LoginScreen = ({navigation}) => {
   
   const[email, setEmail] = useState(null);
   const[password, setPassword] = useState(null);
-  const {login}=useContext(AuthContext);
+  const {login , loginWithFacebook }=useContext(AuthContext);
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
       <View style={{paddingHorizontal: 25}}>
@@ -97,7 +97,7 @@ const LoginScreen = ({navigation}) => {
             marginBottom: 30,
           }}>
           <TouchableOpacity
-              onPress={() => {}}
+             onPress={() => {}}
             style={{
               borderColor: '#ddd',
               borderWidth: 2,
@@ -109,16 +109,18 @@ const LoginScreen = ({navigation}) => {
             <GoogleSVG height={24} width={24} />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => {}}
+             onPress={() => loginWithFacebook()}
             style={{
               borderColor: '#ddd',
               borderWidth: 2,
               borderRadius: 10,
+              marginHorizontal:35,
               paddingHorizontal: 50,
               paddingVertical: 10,
             }}>
             <FacebookSVG height={24} width={24} />
           </TouchableOpacity>
+          
           
         </View>
 

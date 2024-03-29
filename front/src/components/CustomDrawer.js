@@ -10,6 +10,7 @@ import { AuthContext } from '../context/AuthContext';
 
 const CustomDrawer = props => {
   const {logout}=useContext(AuthContext);
+  const {userInfo}=useContext(AuthContext);
   return (
     <View style={{flex: 1}}>
       <DrawerContentScrollView
@@ -23,10 +24,10 @@ const CustomDrawer = props => {
           source={require('../assets/images/user-profile.jpg')}
           style={{height: 80, width: 80, borderRadius: 40, marginBottom: 10}}
         />
-        <Text style={{fontSize:18,fontFamily:'Roboto-Medium'}}>Eya Triki</Text>
+        <Text style={{fontSize:18,fontFamily:'Roboto-Medium'}}> {userInfo.user.fullname} </Text>
         <View style={{flexDirection:'row'}}>
         <Text style={{fontFamily:'Roboto-Regular', marginRight:5}}> Welcome to  your account </Text>
-        <FontAwesome5 name="coins" size={14}  />
+        <Ionicons name="happy-outline" size={14} style={{marginTop:3}} />
         </View>
        </ImageBackground>
        <View style={{flex:1 , backgroundColor:'#fff', paddingTop:10}}> 

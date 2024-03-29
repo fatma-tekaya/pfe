@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {createContext ,useState ,useEffect} from 'react';
 import { BASE_URL } from '../config';
 import axios from 'axios';
+import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
+
 
 export const AuthContext = createContext();
 
@@ -29,6 +31,49 @@ export const AuthProvider = ({children}) => {
        
         setIsLoading(false);
     }
+
+
+    const loginWithFacebook = async () => {
+        setIsLoading(true);
+        try {
+          const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
+          if (result.isCancelled) {
+            console.log('Login with Facebook cancelled.');
+          } else {
+            const tokenData = await AccessToken.getCurrentAccessToken();
+            if (!tokenData) {
+              throw new Error('Failed to get access token for Facebook login.');
+            }
+            const accessToken = tokenData.accessToken.toString();
+            const response = await fetch('https://graph.facebook.com/me?fields=id,name,email&access_token=' + accessToken);
+    
+            const userInfo = await response.json();
+            setUserInfo(userInfo);
+            setUserToken(accessToken)
+    
+            await fetch(`${BASE_URL}/facebookAuth`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  id: userInfo.id,
+                  fullname: userInfo.name,
+                  email: userInfo.email, 
+                  accessToken: accessToken,
+                }),
+              });
+            console.log('Access token for Facebook login:', accessToken);
+           
+          }
+        } catch (error) {
+          console.error('Error during Facebook login:', error);
+        }
+        setIsLoading(false);
+      };
+    
+
+
     const logout=async()=>{
         setIsLoading(true);
         //await axios.post(`${BASE_URL}/sign-out`);
@@ -61,7 +106,7 @@ export const AuthProvider = ({children}) => {
     },[])
 
   return (
-  <AuthContext.Provider value={{login , logout, isLoading,userToken , userInfo}} >
+  <AuthContext.Provider value={{login , logout,loginWithFacebook, isLoading,userToken , userInfo}} >
     {children}
     </AuthContext.Provider>
     );

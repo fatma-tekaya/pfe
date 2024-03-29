@@ -171,6 +171,34 @@ exports.userSignIn = async (req, res) => {
   }
 };
 
+exports.facebookAuth = (req, res, next) => {
+  try {
+    console.log("test" + req.body.id);
+    User.findOne({ facebook_id: req.body.id }).then((user) => {
+      // user = users[0];
+
+      if (!user) {
+        var user = new User({
+          facebook_id: req.body.id,
+          fullname: req.body.fullname,
+          email:req.body.email,
+        });
+        user.save().then((result) =>
+          res.json({
+            status: "success",
+            message: "user successfully added",
+            data: result,
+          })
+        );
+      } else {
+        res.json({ data: user });
+      }
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 // Contrôleur pour déconnecter l'utilisateur
 exports.signOut = async (req, res) => {
   if (req.headers && req.headers.authorization) {
