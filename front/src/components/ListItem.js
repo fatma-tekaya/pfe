@@ -12,11 +12,11 @@ export default function ListItem({photo, title, subTitle, isFree , price, onPres
       <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
         <Image
           source={photo}
-          style={{width: 55, height: 55, borderRadius: 10, marginRight: 8}}
+          style={{width: 75, height: 75, borderRadius: 10, marginRight: 8}}
         />
         <View style={{width:windowWidth-220}}>
           <Text
-            style={{color: '#333', fontFamily: 'Roboto-Medium', fontSize: 14}}>
+            style={{color: '#333', fontFamily: 'Roboto-Medium', fontSize: 15}}>
             {subTitle}
           </Text>
           <Text
@@ -33,8 +33,8 @@ export default function ListItem({photo, title, subTitle, isFree , price, onPres
       </View>
       <TouchableOpacity onPress={onPress} style={{
         backgroundColor:'#0aada8',
-        padding:10,
-        width:100,
+        padding:12,
+        width:70,
         borderRadius:10,
       }}>
         <Text style={{
@@ -43,7 +43,7 @@ export default function ListItem({photo, title, subTitle, isFree , price, onPres
             fontFamily:'Roboto-Medium',
             fontSize:14,
         }}>
-            {isFree == 'Yes' && 'Pay'}
+            {isFree == 'Yes' && 'Details'}
             {isFree == 'No' && price}
         </Text>
       </TouchableOpacity>

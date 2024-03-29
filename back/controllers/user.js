@@ -188,6 +188,7 @@ exports.signOut = async (req, res) => {
     // Mise à jour des tokens de l'utilisateur dans la base de données
     await User.findByIdAndUpdate(req.user._id, { tokens: newTokens });
     res.json({ success: true, message: 'Sign out successfully!' }); // Réponse indiquant le succès de la déconnexion
+   console.log('logged out ')
   }
 };
 
@@ -238,6 +239,5 @@ exports.uploadProfile = async (req, res) => {
     console.log('Error while updating profile', error.message); // Affichage de l'erreur dans la console
   }
 };
-
 
 

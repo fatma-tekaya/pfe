@@ -10,7 +10,7 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import LoginSVG from '../assets/images/misc/login.svg';
+import LoginSVG from '../assets/images/log.svg';
 import GoogleSVG from '../assets/images/misc/google.svg';
 import FacebookSVG from '../assets/images/misc/facebook.svg';
 import TwitterSVG from '../assets/images/misc/twitter.svg';
@@ -19,7 +19,14 @@ import CustomButton from '../components/CustomButton';
 import InputField from '../components/InputField';
 import { AuthContext } from '../context/AuthContext';
 
+
+
+
+
 const LoginScreen = ({navigation}) => {
+
+ 
+  
   const[email, setEmail] = useState(null);
   const[password, setPassword] = useState(null);
   const {login}=useContext(AuthContext);
@@ -28,8 +35,8 @@ const LoginScreen = ({navigation}) => {
       <View style={{paddingHorizontal: 25}}>
         <View style={{alignItems: 'center'}}>
           <LoginSVG
-            height={300}
-            width={300}
+            height={220}
+            width={220}
             style={{transform: [{rotate: '-5deg'}]}}
           />
         </View>
@@ -86,16 +93,17 @@ const LoginScreen = ({navigation}) => {
         <View
           style={{
             flexDirection: 'row',
-            justifyContent: 'space-between',
+            //justifyContent: 'space-between',
             marginBottom: 30,
           }}>
           <TouchableOpacity
-            onPress={() => {}}
+              onPress={() => {}}
             style={{
               borderColor: '#ddd',
               borderWidth: 2,
               borderRadius: 10,
-              paddingHorizontal: 30,
+              marginHorizontal:35,
+              paddingHorizontal: 50,
               paddingVertical: 10,
             }}>
             <GoogleSVG height={24} width={24} />
@@ -106,22 +114,12 @@ const LoginScreen = ({navigation}) => {
               borderColor: '#ddd',
               borderWidth: 2,
               borderRadius: 10,
-              paddingHorizontal: 30,
+              paddingHorizontal: 50,
               paddingVertical: 10,
             }}>
             <FacebookSVG height={24} width={24} />
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {}}
-            style={{
-              borderColor: '#ddd',
-              borderWidth: 2,
-              borderRadius: 10,
-              paddingHorizontal: 30,
-              paddingVertical: 10,
-            }}>
-            <TwitterSVG height={24} width={24} />
-          </TouchableOpacity>
+          
         </View>
 
         <View

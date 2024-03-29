@@ -3,9 +3,9 @@ import React from 'react'
 
 const SettingsScreen = () => {
   return (
-    <View style={{flex:1 , justifyContnent:'center', alignItems:'center'}}>
-      <Text>SettingsScreen</Text>
-    </View>
+    <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+    <Text style={{color:'black'}}>Sttngs Screen</Text>
+  </View>
   )
 }
 

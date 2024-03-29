@@ -3,9 +3,9 @@ import React from 'react'
 
 const CartScreen = () => {
   return (
-    <View style={{flex:1 , justifyContnent:'center', alignItems:'center'}}>
-      <Text>CartScreen</Text>
-    </View>
+    <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+    <Text style={{color:'black'}}>Cart Screen</Text>
+  </View>
   )
 }
 

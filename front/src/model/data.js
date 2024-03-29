@@ -1,21 +1,21 @@
 export const sliderData = [
     {
       title: 'First Game',
-      image: require('../assets/images/homescreen/game-1.jpeg'),
+      image: require('../assets/images/homescreen/1.jpg'),
     },
     {
       title: 'Second Game',
-      image: require('../assets/images/homescreen/game-2.jpeg'),
+      image: require('../assets/images/homescreen/2.jpg'),
     },
     {
       title: 'Third Game',
-      image: require('../assets/images/homescreen/game-3.png'),
+      image: require('../assets/images/homescreen/4.jpg'),
     },
   ];
   
-  export const paidGames = [
+  export const healthTracker = [
     {
-      poster: require('../assets/images/spiderman.webp'),
+      poster: require('../assets/images/1.jpg'),
       title: 'Spider-Man',
       subtitle: 'Marvel',
       isFree: 'No',
@@ -23,7 +23,7 @@ export const sliderData = [
       id: '1',
     },
     {
-      poster: require('../assets/images/battlefield-2042.webp'),
+      poster: require('../assets/images/2.jpg'),
       title: 'Battlefield 2042',
       subtitle: 'EA',
       isFree: 'No',
@@ -31,7 +31,7 @@ export const sliderData = [
       id: '2',
     },
     {
-      poster: require('../assets/images/miles-morales.webp'),
+      poster: require('../assets/images/3.jpg'),
       title: 'Spider-Man: Miles Morales',
       subtitle: 'Marvel',
       isFree: 'No',
@@ -39,7 +39,7 @@ export const sliderData = [
       id: '3',
     },
     {
-      poster: require('../assets/images/halo-infinite.jpeg'),
+      poster: require('../assets/images/4.jpg'),
       title: 'Halo Infinite',
       subtitle: 'Xbox Game',
       isFree: 'No',
@@ -47,7 +47,7 @@ export const sliderData = [
       id: '4',
     },
     {
-      poster: require('../assets/images/FarCry6.png'),
+      poster: require('../assets/images/5.jpg'),
       title: 'Far Cry 6',
       subtitle: 'Ubisoft',
       isFree: 'No',
@@ -55,7 +55,7 @@ export const sliderData = [
       id: '5',
     },
     {
-      poster: require('../assets/images/god-of-war.jpeg'),
+      poster: require('../assets/images/6.jpg'),
       title: 'God of War: Ragnarok',
       subtitle: 'Sony',
       isFree: 'No',
@@ -64,46 +64,46 @@ export const sliderData = [
     },
   ];
   
-  export const freeGames = [
+  export const tipsAndAdvices = [
     {
-      poster: require('../assets/images/Altos-Odyssey.jpeg'),
-      title: 'Altos Odyssey',
-      subtitle: 'Noodlecake Studios',
+      poster: require('../assets/images/1.jpg'),
+      title: '°C',
+      subtitle: 'Human body temperature',
       isFree: 'Yes',
       id: '1',
     },
     {
-      poster: require('../assets/images/asphalt-9.jpeg'),
+      poster: require('../assets/images/7.jpg'),
       title: 'Asphalt 9',
-      subtitle: 'Gameloft',
+      subtitle: 'Blood Pressure',
       isFree: 'Yes',
       id: '2',
     },
     {
-      poster: require('../assets/images/genshin-impact.jpeg'),
+      poster: require('../assets/images/3.jpg'),
       title: 'Genshin Impact',
-      subtitle: 'miHoYo',
+      subtitle: 'Heart Rate',
       isFree: 'Yes',
       id: '3',
     },
     {
-      poster: require('../assets/images/fortnite.webp'),
+      poster: require('../assets/images/4.jpg'),
       title: 'Fortnite',
-      subtitle: 'Epic Games',
+      subtitle: 'Skin Diseases',
       isFree: 'Yes',
       id: '4',
     },
     {
-      poster: require('../assets/images/pokemon-unite.jpeg'),
+      poster: require('../assets/images/5.jpg'),
       title: 'Pokémon Unite',
-      subtitle: 'The Pokémon Company',
+      subtitle: 'Covid',
       isFree: 'Yes',
       id: '5',
     },
     {
-      poster: require('../assets/images/diablo-4.jpeg'),
+      poster: require('../assets/images/6.jpg'),
       title: 'Diablo 4',
-      subtitle: 'Blizzard Entertainment',
+      subtitle: 'Headache',
       isFree: 'Yes',
       id: '6',
     },

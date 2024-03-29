@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "460651638051",
+    "project_id": "auth-e323a",
+    "storage_bucket": "auth-e323a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:460651638051:android:674c117eb97ea90d8bf096",
+        "android_client_info": {
+          "package_name": "com.front"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdR7Gkb96npHrO7c4-McrNMemzUOcp-w8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

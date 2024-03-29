@@ -29,11 +29,13 @@ export const AuthProvider = ({children}) => {
        
         setIsLoading(false);
     }
-    const logout=()=>{
+    const logout=async()=>{
         setIsLoading(true);
+        //await axios.post(`${BASE_URL}/sign-out`);
         setUserToken(null);
         AsyncStorage.removeItem('userInfo');
         AsyncStorage.removeItem('userToken');
+        console.log('loggged out successfully')
         setIsLoading(false);
     }
 

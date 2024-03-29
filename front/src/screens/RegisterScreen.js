@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState,useContext} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -11,11 +11,11 @@ import {
 import DatePicker from 'react-native-date-picker';
 
 import InputField from '../components/InputField';
-
+import { AuthContext } from '../context/AuthContext';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import RegistrationSVG from '../assets/images/misc/registration.svg';
+import RegistrationSVG from '../assets/images/log.svg';
 import GoogleSVG from '../assets/images/misc/google.svg';
 import FacebookSVG from '../assets/images/misc/facebook.svg';
 import TwitterSVG from '../assets/images/misc/twitter.svg';
@@ -26,18 +26,24 @@ const RegisterScreen = ({navigation}) => {
   const [open, setOpen] = useState(false);
   const [dobLabel, setDobLabel] = useState('Date of Birth');
 
+  const[fullname, setFullname]=useState(null);
+  const[email, setEmail]=useState(null);
+  const[password, setPassword]=useState(null);
+  const[confirmPassword, setConfirmPassword]=useState(null);
+  //const {signup}=useContext(AuthContext);
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{paddingHorizontal: 25}}>
-        <View style={{alignItems: 'center'}}>
+         <View style={{alignItems: 'center'}}>
           <RegistrationSVG
-            height={300}
-            width={300}
-            style={{transform: [{rotate: '-5deg'}]}}
-          />
-        </View>
+          
+            height={150}
+            width={150}
+            style={{transform: [{rotate: '-5deg'}],marginTop:30}}
+        />
+        </View> 
 
         <Text
           style={{
@@ -45,7 +51,9 @@ const RegisterScreen = ({navigation}) => {
             fontSize: 28,
             fontWeight: '500',
             color: '#333',
-            marginBottom: 30,
+            textAlign:'left',
+            marginTop:15,
+            marginBottom: 50,
           }}>
           Register
         </Text>
@@ -53,7 +61,7 @@ const RegisterScreen = ({navigation}) => {
         <View
           style={{
             flexDirection: 'row',
-            justifyContent: 'space-between',
+            
             marginBottom: 30,
           }}>
           <TouchableOpacity
@@ -62,7 +70,8 @@ const RegisterScreen = ({navigation}) => {
               borderColor: '#ddd',
               borderWidth: 2,
               borderRadius: 10,
-              paddingHorizontal: 30,
+              marginHorizontal:35,
+              paddingHorizontal: 50,
               paddingVertical: 10,
             }}>
             <GoogleSVG height={24} width={24} />
@@ -73,22 +82,12 @@ const RegisterScreen = ({navigation}) => {
               borderColor: '#ddd',
               borderWidth: 2,
               borderRadius: 10,
-              paddingHorizontal: 30,
+              paddingHorizontal: 50,
               paddingVertical: 10,
             }}>
             <FacebookSVG height={24} width={24} />
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {}}
-            style={{
-              borderColor: '#ddd',
-              borderWidth: 2,
-              borderRadius: 10,
-              paddingHorizontal: 30,
-              paddingVertical: 10,
-            }}>
-            <TwitterSVG height={24} width={24} />
-          </TouchableOpacity>
+         
         </View>
 
         <Text style={{textAlign: 'center', color: '#666', marginBottom: 30}}>
@@ -97,6 +96,8 @@ const RegisterScreen = ({navigation}) => {
 
         <InputField
           label={'Full Name'}
+          value={fullname}
+          onChangeText={text=>setFullname(text)}
           icon={
             <Ionicons
               name="person-outline"
@@ -108,7 +109,9 @@ const RegisterScreen = ({navigation}) => {
         />
 
         <InputField
-          label={'Email ID'}
+          label={'Email'}
+          value={email}
+          onChangeText={text=>setEmail(text)}
           icon={
             <MaterialIcons
               name="alternate-email"
@@ -122,6 +125,8 @@ const RegisterScreen = ({navigation}) => {
 
         <InputField
           label={'Password'}
+          value={password}
+          onChangeText={text=>setPassword(text)}
           icon={
             <Ionicons
               name="lock-closed-outline"
@@ -135,6 +140,8 @@ const RegisterScreen = ({navigation}) => {
 
         <InputField
           label={'Confirm Password'}
+          value={confirmPassword}
+          onChangeText={text=>setConfirmPassword(text)}
           icon={
             <Ionicons
               name="lock-closed-outline"
@@ -146,7 +153,7 @@ const RegisterScreen = ({navigation}) => {
           inputType="password"
         />
 
-        <View
+        {/* <View
           style={{
             flexDirection: 'row',
             borderBottomColor: '#ccc',
@@ -182,7 +189,7 @@ const RegisterScreen = ({navigation}) => {
           onCancel={() => {
             setOpen(false);
           }}
-        />
+        /> */}
 
         <CustomButton label={'Register'} onPress={() => {}} />
 

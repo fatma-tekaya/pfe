@@ -1,7 +1,7 @@
 import React from 'react'
-import { SafeAreaView, View, Text, TouchableOpacity } from 'react-native';
+import { SafeAreaView, View, Text, TouchableOpacity,Image } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import GamingImg from '../assets/images/gaming.svg'
+import GamingImg from '../assets/images/bord.jpg'
 
 
 
@@ -26,7 +26,7 @@ const OnBoardingScreen = ({navigation}) => {
         </Text>
       </View>
       <View style={{flex:1, justifyContent:'center',alignItems:'center'}}>
-    <GamingImg width={300} height={300} style={{transform: [{rotate: '-15deg'}]}}/>
+    <Image source={require('../assets/images/bord.jpg')} width={100} height={100} />
     </View>
       <TouchableOpacity
         style={{
@@ -48,7 +48,7 @@ const OnBoardingScreen = ({navigation}) => {
             fontWeight: 'bold',
             fontFamily: 'Roboto-MediumItalic',
           }}>
-          Let''s Discover
+          Let's Discover
         </Text>
          <MaterialIcons name="arrow-forward" size={22} color="#fff" /> 
       </TouchableOpacity>

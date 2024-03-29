@@ -7,7 +7,9 @@ import Feather from 'react-native-vector-icons/Feather';
 import HomeScreen from '../screens/HomeScreen';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import GameDetailsScreen from '../screens/GameDetailsScreen';
-import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
+import MessagesScreen from '../screens/MessagesScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -52,14 +54,17 @@ const TabNavigator = () => {
           ),
         })}
       />
+   
       <Tab.Screen
-        name="Cart"
-        component={CartScreen}
+        name="Messages"
+        component={MessagesScreen}
         options={{
-          tabBarBadge: 3,
-          tabBarBadgeStyle: {backgroundColor: 'yellow'},
           tabBarIcon: ({color, size}) => (
-            <Feather name="shopping-bag" color={color} size={size} />
+            <Ionicons
+              name="chatbox-ellipses-outline"
+              color={color}
+              size={size}
+            />
           ),
         }}
       />
@@ -68,7 +73,27 @@ const TabNavigator = () => {
         component={FavoriteScreen}
         options={{
           tabBarIcon: ({color, size}) => (
-            <Ionicons name="heart-outline" color={color} size={size} />
+            <Feather name="camera" color={color} size={size} />
+          ),
+        }}
+      />
+         <Tab.Screen
+        name="Cart"
+        component={CartScreen}
+        options={{
+          tabBarBadge: 3,
+          tabBarBadgeStyle: {backgroundColor: 'yellow'},
+          tabBarIcon: ({color, size}) => (
+            <Ionicons name="notifications-outline" color={color} size={size} />
+          ),
+        }}
+      />
+       <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarIcon: ({color, size}) => (
+            <Ionicons name="person-outline" color={color} size={size} />
           ),
         }}
       />
@@ -79,11 +104,10 @@ const getTabBarVisibility = route => {
   console.log(route);
   const routeName = getFocusedRouteNameFromRoute(route) ?? 'Feed';
   console.log(routeName);
-  if(routeName == 'GameDetails'){
+  if (routeName == 'GameDetails') {
     return 'none';
   }
   return 'flex';
- 
 };
 
 export default TabNavigator;

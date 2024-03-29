@@ -36,7 +36,7 @@ const AuthStack = () => {
           <Ionicons name="person-outline" size={22} color={color}/>
         )
       }}/>
-      <Drawer.Screen name="Messages" component={MessagesScreen}  options={{
+      <Drawer.Screen name="Chat" component={MessagesScreen}  options={{
         drawerIcon:({color})=>(
           <Ionicons name="chatbox-ellipses-outline" size={22} color={color}/>
         )

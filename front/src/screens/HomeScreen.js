@@ -10,7 +10,7 @@ import React , {useState , useContext} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Feather from 'react-native-vector-icons/Feather';
 import Carousel from 'react-native-snap-carousel';
-import {freeGames, paidGames, sliderData} from '../model/data';
+import {tipsAndAdvices, healthTracker, sliderData} from '../model/data';
 import BannerSlider from '../components/BannerSlider';
 import {windowWidth} from '../utils/Dimensions';
 import CustomSwitch from '../components/CustomSwitch';
@@ -82,7 +82,7 @@ const HomeScreen = ({navigation}) => {
           }}>
           <Text
             style={{color: 'black', fontSize: 18, fontFamily: 'Roboto-Medium'}}>
-            Upcoming Games
+            Upcoming Features
           </Text>
           <TouchableOpacity onPress={() => {}}>
             <Text style={{color: '#0aada8'}}>See all</Text>
@@ -104,13 +104,13 @@ const HomeScreen = ({navigation}) => {
         }}>
           <CustomSwitch
             selectionMode={1}
-            option1="Free to play"
-            option2="Paid games"
+            option1="Tips and Advices"
+            option2="Health Tracker"
             onSelectSwitch={onSelectSwitch}
           />
         </View>
         {gamesTab == 1 &&
-        freeGames.map(item =>(
+        tipsAndAdvices.map(item =>(
           <ListItem key={item.id}
           photo={item.poster} 
           title={item.title} 
@@ -120,7 +120,7 @@ const HomeScreen = ({navigation}) => {
           {title:item.title , id:item.id})}
           />
         )) }
-        {gamesTab == 2 &&  paidGames.map(item =>(
+        {gamesTab == 2 &&  healthTracker.map(item =>(
           <ListItem key={item.id}
           photo={item.poster} 
           title={item.title} 

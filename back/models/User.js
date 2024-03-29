@@ -1,6 +1,4 @@
-
 const mongoose = require('mongoose');
-
 
 const userSchema = new mongoose.Schema({
   fullname: {
@@ -16,9 +14,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  //  isEmailConfirmed: {
+  //    type: Boolean,
+  //    default: false, // Par défaut, l'e-mail n'est pas confirmé
+  //  },
   avatar: String,
   tokens: [{ type: Object }],
 });
-
 
 module.exports = mongoose.model('User', userSchema);
