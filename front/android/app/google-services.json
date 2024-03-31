@@ -1,26 +1,36 @@
 {
   "project_info": {
-    "project_number": "460651638051",
-    "project_id": "auth-e323a",
-    "storage_bucket": "auth-e323a.appspot.com"
+    "project_number": "972071422730",
+    "project_id": "front-418622",
+    "storage_bucket": "front-418622.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:460651638051:android:674c117eb97ea90d8bf096",
+        "mobilesdk_app_id": "1:972071422730:android:59dee7ff057a16316c48f3",
         "android_client_info": {
           "package_name": "com.front"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "972071422730-3ocqp31uq1i7guc6pqiri6u0f9gmi2u2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyDdR7Gkb96npHrO7c4-McrNMemzUOcp-w8"
+          "current_key": "AIzaSyBnUhmFOSPpfHsYIrXETCVcJir8nYIlZWI"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "972071422730-3ocqp31uq1i7guc6pqiri6u0f9gmi2u2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -9,22 +9,29 @@ import {
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
 import LoginSVG from '../assets/images/log.svg';
 import GoogleSVG from '../assets/images/misc/google.svg';
 import FacebookSVG from '../assets/images/misc/facebook.svg';
 import TwitterSVG from '../assets/images/misc/twitter.svg';
-
+import { LoginButton } from 'react-native-fbsdk-next';
 import CustomButton from '../components/CustomButton';
 import InputField from '../components/InputField';
 import { AuthContext } from '../context/AuthContext';
-
+import { signInWithGoogle } from '../config/firebase/GoogleSignin';
 
 
 
 
 const LoginScreen = ({navigation}) => {
 
+  async function googleSignin(){
+signInWithGoogle().then(data=>{
+  if(!data){
+    console.log('no data')
+  }
+console.log("success data",data)
+})
+}
  
   
   const[email, setEmail] = useState(null);
@@ -97,7 +104,7 @@ const LoginScreen = ({navigation}) => {
             marginBottom: 30,
           }}>
           <TouchableOpacity
-             onPress={() => {}}
+             onPress={() => {googleSignin()}}
             style={{
               borderColor: '#ddd',
               borderWidth: 2,

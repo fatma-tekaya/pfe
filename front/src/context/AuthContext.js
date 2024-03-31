@@ -3,6 +3,7 @@ import React, {createContext ,useState ,useEffect} from 'react';
 import { BASE_URL } from '../config';
 import axios from 'axios';
 import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
+import ConfirmationSentScreen from '../screens/ConfirmationSentScreen';
 
 
 export const AuthContext = createContext();
@@ -11,7 +12,34 @@ export const AuthProvider = ({children}) => {
     const[isLoading , setIsLoading] = useState(false);
     const [userToken ,setUserToken] = useState(null);
     const [userInfo ,setUserInfo] = useState(null);
+    
 
+
+    const signup = async (fullname, email, password, navigation) => {
+      setIsLoading(true);
+      try {
+          const response = await axios.post(`${BASE_URL}/create-user`, {
+              fullname,
+              email,
+              password,
+          });
+  
+          const responseData = response.data;
+        
+          if (responseData.success) {
+             
+              console.log(responseData.message);
+              navigation.navigate('Confirmation');
+          } else {
+              console.error('Error signing up:', responseData.message);
+          }
+      } catch (error) {
+          console.error('Error signing up:', error);
+          throw error;
+      } 
+      setIsLoading(false);
+  };
+    
 
     const login = async (email , password)=>{
         setIsLoading(true);
@@ -106,7 +134,7 @@ export const AuthProvider = ({children}) => {
     },[])
 
   return (
-  <AuthContext.Provider value={{login , logout,loginWithFacebook, isLoading,userToken , userInfo}} >
+  <AuthContext.Provider value={{login , logout,loginWithFacebook,signup, isLoading,userToken , userInfo}} >
     {children}
     </AuthContext.Provider>
     );

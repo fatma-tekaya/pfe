@@ -5,69 +5,11 @@ const cloudinary = require('../helper/imageUpload');
 const nodemailer = require('nodemailer');
 
 
-
-
-
 // Contrôleur pour créer un nouvel utilisateur
-exports.createUser = async (req, res) => {
-  const { fullname, email, password } = req.body; // Extraction des données du corps de la requête
-  try {
-    const existingUser = await User.findOne({ email }); // Vérification si l'email est déjà utilisé
-
-    if (existingUser) {
-      return res.json({
-        success: false,
-        message: 'This email is already in use, try sign-in',
-      });
-    }
-
-    // Hachage du mot de passe avant de l'enregistrer dans la base de données
-    const hashedPassword = await bcrypt.hash(password, 8);
-
-    const user = await User({
-      fullname,
-      email,
-      password: hashedPassword, // Utilisez le mot de passe haché
-    }); // Création d'un nouvel utilisateur avec les données fournies
-    await user.save(); // Sauvegarde de l'utilisateur dans la base de données
-    res.json({ success: true, user }); // Réponse JSON indiquant la réussite de la création de l'utilisateur
-  } catch (error) {
-    console.error('Error while creating user:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' }); // Gestion des erreurs
-  }
-};
-
- // Fonction pour envoyer l'e-mail de confirmation
-// const sendConfirmationEmail = async (toEmail, confirmationToken) => {
-//   const transporter = nodemailer.createTransport({
-//     host: 'smtp.gmail.com',
-//     port: 465,
-//     secure: true,
-//     auth: {
-//       user: 'eya2000triki@gmail.com',
-//       pass: process.env.SMTP_SECRET
-//     }
-//   });
-
-//   const mailOptions = {
-//     from: 'eya2000triki@gmail.com',
-//     to: toEmail,
-//     subject: 'Confirmation de votre inscription',
-//     text: `Merci de vous être inscrit sur notre plateforme. Veuillez confirmer votre adresse e-mail en cliquant sur le lien suivant : http://example.com/confirm/${confirmationToken}`
-//   };
-
-//   try {
-//     await transporter.sendMail(mailOptions);
-//     console.log('E-mail de confirmation envoyé à', toEmail);
-//   } catch (error) {
-//     console.error('Erreur lors de l\'envoi de l\'e-mail de confirmation :', error);
-//   }
-// };
-
 // exports.createUser = async (req, res) => {
-//   const { fullname, email, password } = req.body;
+//   const { fullname, email, password } = req.body; // Extraction des données du corps de la requête
 //   try {
-//     const existingUser = await User.findOne({ email });
+//     const existingUser = await User.findOne({ email }); // Vérification si l'email est déjà utilisé
 
 //     if (existingUser) {
 //       return res.json({
@@ -76,61 +18,120 @@ exports.createUser = async (req, res) => {
 //       });
 //     }
 
-//     // Génération du token sans inclure le mot de passe
-//     const tokenData = { fullname, email };
-//     const confirmationToken = jwt.sign(tokenData, process.env.JWT_SECRET, {
-//       expiresIn: '1d',
-//     });
+//     // Hachage du mot de passe avant de l'enregistrer dans la base de données
+//     const hashedPassword = await bcrypt.hash(password, 8);
 
-//     // Envoi de l'e-mail de confirmation avec le token
-//     await sendConfirmationEmail(email, confirmationToken);
-
-//     res.json({ success: true, message: 'Confirmation email sent successfully' });
+//     const user = await User({
+//       fullname,
+//       email,
+//       password: hashedPassword, // Utilisez le mot de passe haché
+//     }); // Création d'un nouvel utilisateur avec les données fournies
+//     await user.save(); // Sauvegarde de l'utilisateur dans la base de données
+//     res.json({ success: true, user }); // Réponse JSON indiquant la réussite de la création de l'utilisateur
 //   } catch (error) {
 //     console.error('Error while creating user:', error);
-//     res.status(500).json({ success: false, message: 'Internal server error' });
+//     res.status(500).json({ success: false, message: 'Internal server error' }); // Gestion des erreurs
 //   }
 // };
 
-// exports.confirmEmailAndRegisterUser = async (req, res) => {
-//   const token = req.query.token;
+ // Fonction pour envoyer l'e-mail de confirmation
+const sendConfirmationEmail = async (toEmail, confirmationToken) => {
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+      user: 'eya2000triki@gmail.com',
+      pass: process.env.SMTP_SECRET
+    }
+  });
 
-//   try {
-//     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-//     const { fullname, email, password } = decodedToken;
+  const mailOptions = {
+    from: 'eya2000triki@gmail.com',
+    to: toEmail,
+    subject: 'Confirmation de votre inscription',
+    text: `Merci de vous être inscrit sur notre plateforme. Veuillez confirmer votre adresse e-mail en cliquant sur le lien suivant : ${confirmationToken}`
+  };
 
-//     // Recherche de l'utilisateur dans la base de données
-//     let existingUser = await User.findOne({ email });
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('E-mail de confirmation envoyé à', toEmail);
+  } catch (error) {
+    console.error('Erreur lors de l\'envoi de l\'e-mail de confirmation :', error);
+  }
+};
 
-//     // Si l'utilisateur n'existe pas, créer un nouvel utilisateur
-//     if (!existingUser) {
-//       // Hashage du mot de passe
-//       const hashedPassword = await bcrypt.hash(password, 10);
+exports.createUser = async (req, res) => {
+  const { fullname, email, password } = req.body;
+  try {
+    const existingUser = await User.findOne({ email });
 
-//       // Création du nouvel utilisateur avec le mot de passe hashé
-//       existingUser = new User({ fullname, email, password: hashedPassword });
+    if (existingUser) {
+      return res.json({
+        success: false,
+        message: 'This email is already in use, try sign-in',
+      });
+    }
 
-//       // Marquer l'e-mail comme confirmé
-//       existingUser.isEmailConfirmed = true;
+    const tokenData = { fullname, email, password };
+    const confirmationToken = jwt.sign(tokenData, process.env.JWT_SECRET, {
+      expiresIn: '1d',
+    });
 
-//       // Enregistrement du nouvel utilisateur dans la base de données
-//       await existingUser.save();
+    // Construction du lien de confirmation
+    const confirmationLink = `${req.protocol}://${req.get('host')}/confirm-email/${confirmationToken}`;
 
-//       // Répondre avec un message de succès
-//       return res.json({ success: true, message: 'Email confirmed successfully and user registered.' });
-//     }
 
-//     // Si l'utilisateur existe déjà, marquer simplement son e-mail comme confirmé
-//     existingUser.isEmailConfirmed = true;
-//     await existingUser.save();
+    // Envoi de l'e-mail de confirmation avec le lien de confirmation
+    await sendConfirmationEmail(email, confirmationLink);
 
-//     // Répondre avec un message de succès
-//     res.json({ success: true, message: 'Email confirmed successfully.' });
-//   } catch (error) {
-//     console.error('Error confirming email:', error);
-//     res.status(500).json({ success: false, message: 'Internal server error' });
-//   }
-// }; 
+    res.json({ success: true, message: 'Confirmation email sent successfully' });
+  } catch (error) {
+    console.error('Error while creating user:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+exports.confirmEmailAndRegisterUser = async (req, res) => {
+  const token = req.params.token; // Utilisez req.params.token pour récupérer le token du chemin de l'URL
+
+  try {
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const { fullname, email, password } = decodedToken;
+
+    // Recherche de l'utilisateur dans la base de données
+    let existingUser = await User.findOne({ email });
+
+    // Si l'utilisateur n'existe pas, créer un nouvel utilisateur
+    if (!existingUser) {
+      // Hashage du mot de passe
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Création du nouvel utilisateur avec le mot de passe hashé
+      existingUser = new User({ fullname, email, password: hashedPassword });
+
+      // Marquer l'e-mail comme confirmé
+      existingUser.isEmailConfirmed = true;
+
+      // Enregistrement du nouvel utilisateur dans la base de données
+      await existingUser.save();
+
+      // Répondre avec un message de succès
+      return res.json({ success: true, message: 'Email confirmed successfully and user registered.' });
+    }
+
+    // Si l'utilisateur existe déjà, marquer simplement son e-mail comme confirmé
+    existingUser.isEmailConfirmed = true;
+    await existingUser.save();
+
+    // Répondre avec un message de succès
+    res.json({ success: true, message: 'Email confirmed successfully.' });
+  } catch (error) {
+    console.error('Error confirming email:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
 
 // Contrôleur pour connecter un utilisateur
 exports.userSignIn = async (req, res) => {

@@ -30,7 +30,7 @@ const RegisterScreen = ({navigation}) => {
   const[email, setEmail]=useState(null);
   const[password, setPassword]=useState(null);
   const[confirmPassword, setConfirmPassword]=useState(null);
-  //const {signup}=useContext(AuthContext);
+  const {signup}=useContext(AuthContext);
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
       <ScrollView
@@ -191,7 +191,7 @@ const RegisterScreen = ({navigation}) => {
           }}
         /> */}
 
-        <CustomButton label={'Register'} onPress={() => {}} />
+        <CustomButton label={'Register'} onPress={() => {signup(fullname, email, password,navigation)}} />
 
         <View
           style={{
