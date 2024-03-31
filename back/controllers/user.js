@@ -41,13 +41,13 @@ const sendConfirmationEmail = async (toEmail, confirmationToken) => {
     port: 465,
     secure: true,
     auth: {
-      user: 'eya2000triki@gmail.com',
+      user: process.env.SMTP_EMAIL,
       pass: process.env.SMTP_SECRET
     }
   });
 
   const mailOptions = {
-    from: 'eya2000triki@gmail.com',
+    from: process.env.SMTP_EMAIL,
     to: toEmail,
     subject: 'Confirmation de votre inscription',
     text: `Merci de vous être inscrit sur notre plateforme. Veuillez confirmer votre adresse e-mail en cliquant sur le lien suivant : ${confirmationToken}`
@@ -157,6 +157,12 @@ exports.userSignIn = async (req, res) => {
       expiresIn: '1d',
     }); // Création d'un token JWT pour l'authentification de l'utilisateur
 
+    // Ajout du nouveau token à l'array tokens de l'utilisateur
+    user.tokens.push({ token });
+
+    // Sauvegarde de l'utilisateur avec le nouveau token
+    await user.save();
+
     res.json({
       success: true,
       user: {
@@ -171,6 +177,7 @@ exports.userSignIn = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal server error' }); // Gestion des erreurs
   }
 };
+
 
 exports.facebookAuth = (req, res, next) => {
   try {
@@ -268,5 +275,128 @@ exports.uploadProfile = async (req, res) => {
     console.log('Error while updating profile', error.message); // Affichage de l'erreur dans la console
   }
 };
+// Route for uploading additional pictures
+exports.uploadPicture = async (req, res) => {
+  const { user } = req; // Get the user from the request
+  
+  if (!user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized access!' });
+  }
 
+  const picture = req.file ? req.file.path : null; // Get the uploaded picture
 
+  try {
+    if (picture) {
+      // Add the picture path to the user's captures array
+      user.captures.push(picture);
+      
+      // Save the updated user document
+      await user.save();
+
+      res.status(200).json({ success: true, message: 'Picture uploaded successfully' });
+    } else {
+      res.status(400).json({ success: false, message: 'No picture provided' });
+    }
+  } catch (error) {
+    console.error('Error uploading picture:', error);
+    res.status(500).json({ success: false, message: 'Server error, try again later' });
+  }
+};
+
+// Fonction pour générer un code de vérification aléatoire
+const generateVerificationCode = () => {
+  return Math.floor(100000 + Math.random() * 900000); // Génère un nombre aléatoire à 6 chiffres
+};
+
+// Fonction pour envoyer l'e-mail de réinitialisation de mot de passe avec le code de vérification
+const sendResetPasswordEmail = async (email, verificationCode) => {
+  try {
+    // Configurer le transporteur de messagerie
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.SMTP_EMAIL,
+        pass: process.env.SMTP_SECRET
+      }
+    });
+
+    // Options de l'e-mail
+    const mailOptions = {
+      from: process.env.SMTP_EMAIL,
+      to: email,
+      subject: 'Réinitialisation de votre mot de passe',
+      text: `Votre code de vérification pour réinitialiser votre mot de passe est : ${verificationCode}`
+    };
+
+    // Envoyer l'e-mail
+    await transporter.sendMail(mailOptions);
+    console.log('E-mail de réinitialisation de mot de passe envoyé à', email);
+  } catch (error) {
+    throw new Error('Error sending reset password email');
+  }
+};
+
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // Générer le code de vérification
+    const verificationCode = generateVerificationCode();
+
+    // Mettre à jour le code de vérification dans la base de données
+    const user = await User.findOneAndUpdate({ email }, { verificationCode }, { new: true });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Envoyer l'e-mail de réinitialisation de mot de passe avec le code de vérification
+    await sendResetPasswordEmail(email, verificationCode);
+
+    res.json({ success: true, message: 'Reset password email sent successfully' });
+  } catch (error) {
+    console.error('Error in forgot password:', error);
+    res.status(500).json({ success: false, message: 'Error sending reset password email' });
+  }
+};
+
+// Contrôleur pour réinitialiser le mot de passe
+exports.resetPassword = async (req, res) => {
+  const { code, newPassword } = req.body; // Récupérer le code de vérification et le nouveau mot de passe depuis le corps de la requête
+  
+  try {
+    // Récupérer l'e-mail de l'utilisateur à partir du code de vérification
+    const user = await User.findOne({ verificationCode: code });
+
+    // Vérifier si l'utilisateur existe
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Invalid verification code' });
+    }
+
+    // Vérifier si le nouveau mot de passe est différent de l'ancien
+    if (newPassword === user.password) {
+      return res.status(400).json({ success: false, message: 'New password must be different from the old one' });
+    }
+
+    // Vérifier la longueur du nouveau mot de passe
+    if (newPassword.length < 8 || newPassword.length > 20) {
+      return res.status(400).json({ success: false, message: 'Password must be 8 to 20 characters long' });
+    }
+
+    // Hacher le nouveau mot de passe
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Mettre à jour le mot de passe de l'utilisateur dans la base de données
+    user.password = hashedPassword;
+    user.verificationCode = null; // Effacer le code de vérification après réinitialisation
+    await user.save();
+
+    // Répondre avec un message de succès
+    res.json({ success: true, message: 'Password reset successfully' });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ success: false, message: 'Error resetting password' });
+  }
+};

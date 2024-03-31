@@ -1,45 +1,38 @@
 const express = require('express');
-
 const router = express.Router();
-const {
-  createUser,
-  userSignIn,
-  uploadProfile,
-  signOut,
-  facebookAuth,
-} = require('../controllers/user');
+const { createUser, userSignIn, uploadProfile, signOut, facebookAuth, uploadPicture,forgotPassword,resetPassword } = require('../controllers/user');
 const { isAuth } = require('../middelwares/auth');
-const {
-  validateUserSignUp,
-  userVlidation,
-  validateUserSignIn,
-} = require('../middelwares/validation/user');
+const { validateUserSignUp, userVlidation, validateUserSignIn } = require('../middelwares/validation/user');
 const { confirmEmailAndRegisterUser } = require('../controllers/user');
-
 const multer = require('multer');
 
+// Define multer storage configuration
 const storage = multer.diskStorage({});
 
+// Define multer file filter
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image')) {
     cb(null, true);
   } else {
-    cb('invalid image file!', false);
+    cb('Invalid image file!', false);
   }
 };
+
+// Create multer instance with defined storage and file filter
 const uploads = multer({ storage, fileFilter });
 
-//router.post('/create-user', validateUserSignUp, userVlidation, createUser);
-router.post('/facebookAuth',facebookAuth);
+// Define routes
+router.post('/facebookAuth', facebookAuth);
 router.post('/create-user', validateUserSignUp, createUser);
-router.get('/confirm-email/:token',confirmEmailAndRegisterUser);
+router.get('/confirm-email/:token', confirmEmailAndRegisterUser);
 router.post('/sign-in', validateUserSignIn, userVlidation, userSignIn);
 router.post('/sign-out', isAuth, signOut);
-router.put(
-  '/upload-profile',
-  isAuth,
-  uploads.single('profile'),
-  uploadProfile
-);
 
+// Route for uploading profile picture
+router.put('/upload-profile', isAuth, uploads.single('profile'), uploadProfile);
+
+// Route for uploading additional pictures
+router.put('/upload-picture', isAuth, uploads.single('picture'), uploadPicture);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 module.exports = router;

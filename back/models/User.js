@@ -18,7 +18,11 @@ const userSchema = new mongoose.Schema({
   //    type: Boolean,
   //    default: false, // Par défaut, l'e-mail n'est pas confirmé
   //  },
+  verificationCode: {
+    type: String,
+  },
   avatar: String,
+  captures: [{ type: String }],
   tokens: [{ type: Object }],
 });
 

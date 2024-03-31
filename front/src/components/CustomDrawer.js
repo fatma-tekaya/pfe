@@ -24,7 +24,9 @@ const CustomDrawer = props => {
           source={require('../assets/images/user-profile.jpg')}
           style={{height: 80, width: 80, borderRadius: 40, marginBottom: 10}}
         />
-        <Text style={{fontSize:18,fontFamily:'Roboto-Medium'}}> {userInfo.user.fullname} </Text>
+        <Text style={{fontSize:18,fontFamily:'Roboto-Medium'}}> 
+        {/* {userInfo.user.fullname}  */}usernamee
+        </Text>
         <View style={{flexDirection:'row'}}>
         <Text style={{fontFamily:'Roboto-Regular', marginRight:5}}> Welcome to  your account </Text>
         <Ionicons name="happy-outline" size={14} style={{marginTop:3}} />
