@@ -85,7 +85,7 @@ exports.createUser = async (req, res) => {
     // Envoi de l'e-mail de confirmation avec le lien de confirmation
     await sendConfirmationEmail(email, confirmationLink);
 
-    res.json({ success: true, message: 'Confirmation email sent successfully' });
+    res.json({ success: true, message: `Confirmation email to ${email} sent successfully` });
   } catch (error) {
     console.error('Error while creating user:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });

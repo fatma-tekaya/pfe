@@ -9,8 +9,9 @@ const AppNav = () => {
     const {isLoading,userToken}=useContext(AuthContext);
     if (isLoading) {
         return(
-        <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
+        <View style={{flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'white'}}>
             <ActivityIndicator size={'large'}/>
+            <Text style={{color:'black'}}> wasaa baleek</Text>
         </View>);
     }
   return (

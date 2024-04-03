@@ -1,12 +1,12 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import CartScreen from '../screens/CartScreen';
+import NotifScreen from '../screens/NotifScreen';
 import FavoriteScreen from '../screens/FavoriteScreen';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import HomeScreen from '../screens/HomeScreen';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import GameDetailsScreen from '../screens/GameDetailsScreen';
+import SignDetailsScreen from '../screens/SignDetailsScreen';
 import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
 import MessagesScreen from '../screens/MessagesScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -22,8 +22,8 @@ const HomeStack = () => {
         options={{headerShown: false}}
       />
       <Stack.Screen
-        name="GameDetails"
-        component={GameDetailsScreen}
+        name="SignDetails"
+        component={SignDetailsScreen}
         options={({route}) => ({
           title: route.params.title,
         })}
@@ -78,8 +78,8 @@ const TabNavigator = () => {
         }}
       />
          <Tab.Screen
-        name="Cart"
-        component={CartScreen}
+        name="Notif"
+        component={NotifScreen}
         options={{
           tabBarBadge: 3,
           tabBarBadgeStyle: {backgroundColor: 'yellow'},

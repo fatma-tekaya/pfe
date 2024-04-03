@@ -18,13 +18,13 @@ import ListItem from '../components/ListItem';
 import { AuthContext } from '../context/AuthContext';
 
 const HomeScreen = ({navigation}) => {
-  const [gamesTab , setGamesTab]= useState(1);
+  const [swipeTab , setSwipeTab]= useState(1);
   const {userInfo}= useContext(AuthContext) ;
   const renderBanner = ({item, index}) => {
     return <BannerSlider data={item} />;
   };
   const onSelectSwitch=(value)=>{
-    setGamesTab(value)
+    setSwipeTab(value)
   }
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#fff' }}>
@@ -43,12 +43,15 @@ const HomeScreen = ({navigation}) => {
               fontFamily: 'Roboto-Medium',
               marginTop: 10,
             }}>
-            Hello usernamee
-            {/* {userInfo.user.fullname}  */}
+            Hello {userInfo.user.fullname}  
           </Text>
           <TouchableOpacity onPress={()=>navigation.openDrawer()}>
           <ImageBackground
-            source={require('../assets/images/user-profile.jpg')}
+           source={
+            userInfo.user.avatar
+              ? {uri: userInfo.user.avatar}
+              : require('../assets/images/user-profile.jpg')
+          }
             style={{width: 50, height: 50}}
             imageStyle={{borderRadius: 25}}
           />
@@ -110,25 +113,25 @@ const HomeScreen = ({navigation}) => {
             onSelectSwitch={onSelectSwitch}
           />
         </View>
-        {gamesTab == 1 &&
+        {swipeTab == 1 &&
         tipsAndAdvices.map(item =>(
           <ListItem key={item.id}
           photo={item.poster} 
           title={item.title} 
           subTitle={item.subtitle}
           isFree={item.isFree}
-          onPress={()=>navigation.navigate('GameDetails',
+          onPress={()=>navigation.navigate('SignDetails',
           {title:item.title , id:item.id})}
           />
         )) }
-        {gamesTab == 2 &&  healthTracker.map(item =>(
+        {swipeTab == 2 &&  healthTracker.map(item =>(
           <ListItem key={item.id}
           photo={item.poster} 
           title={item.title} 
           subTitle={item.subtitle}
           isFree={item.isFree}
           price={item.price}
-          onPress={()=>navigation.navigate('GameDetails',
+          onPress={()=>navigation.navigate('SignDetails',
            {title:item.title , id:item.id})}/>
           
         ))}

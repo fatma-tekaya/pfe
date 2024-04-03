@@ -12,33 +12,37 @@ export const AuthProvider = ({children}) => {
     const[isLoading , setIsLoading] = useState(false);
     const [userToken ,setUserToken] = useState(null);
     const [userInfo ,setUserInfo] = useState(null);
-    
 
 
-    const signup = async (fullname, email, password, navigation) => {
+
+    const signup = async (fullname, email, password, setIsLoading) => {
       setIsLoading(true);
       try {
-          const response = await axios.post(`${BASE_URL}/create-user`, {
-              fullname,
-              email,
-              password,
-          });
-  
-          const responseData = response.data;
+        const response = await axios.post(`${BASE_URL}/create-user`, {
+          fullname,
+          email,
+          password,
+        });
+    
+        const userInfo = response.data;
+        console.log(userInfo);
+    
+        if (userInfo.success) {
+          console.log(userInfo.message);
+          setIsLoading(false);
+           
+          // Assuming setUserInfo is a state setter function
         
-          if (responseData.success) {
-             
-              console.log(responseData.message);
-              navigation.navigate('Confirmation');
-          } else {
-              console.error('Error signing up:', responseData.message);
-          }
+          return userInfo; // Return success data (optional)
+        } else {
+          throw new Error(userInfo.message || 'Signup failed'); // Throw specific error
+        }
       } catch (error) {
-          console.error('Error signing up:', error);
-          throw error;
-      } 
-      setIsLoading(false);
-  };
+        console.error('Error signing up:', error);
+        setIsLoading(false);
+        throw error; // Re-throw for further handling
+      }
+    };
     
 
     const login = async (email , password)=>{
@@ -134,7 +138,7 @@ export const AuthProvider = ({children}) => {
     },[])
 
   return (
-  <AuthContext.Provider value={{login , logout,loginWithFacebook,signup, isLoading,userToken , userInfo}} >
+  <AuthContext.Provider value={{login , logout,loginWithFacebook,signup, isLoading,userToken ,setIsLoading, userInfo}} >
     {children}
     </AuthContext.Provider>
     );
