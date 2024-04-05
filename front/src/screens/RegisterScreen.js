@@ -21,13 +21,14 @@ import CustomButton from '../components/CustomButton';
 import {useNavigation} from '@react-navigation/native';
 import { useDrawerProgress } from '@react-navigation/drawer';
 
-const RegisterScreen = () => {
+const RegisterScreen = ({navigation}) => {
   const [fullname, setFullname] = useState(null);
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
   const [confirmPassword, setConfirmPassword] = useState(null);
   const {signup, setIsLoading} = useContext(AuthContext);
-  const navigation = useNavigation();
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [passwordVisible1, setPasswordVisible1] = useState(false);
 
   const handleSignup = async () => {
     if (!fullname || !email || !password || !confirmPassword) {
@@ -42,15 +43,19 @@ const RegisterScreen = () => {
       const userInfo = await signup(fullname, email, password, setIsLoading);
       // Handle successful signup (e.g., navigate to confirmation)
       console.log(userInfo.email)
-      // Appel de navigation vers le screen de confirmation avec l'email de l'utilisateur
-      navigation.navigate('Confirmation', { email});
+     
 
       // Pass data if needed
     } catch (error) {
       alert(error.message); // Display user-friendly error message
     }
   };
-
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
+  };
+  const togglePasswordVisibility1 = () => {
+    setPasswordVisible1(!passwordVisible1);
+  };
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
       <ScrollView
@@ -136,35 +141,55 @@ const RegisterScreen = () => {
           keyboardType="email-address"
         />
 
-        <InputField
-          label={'Password'}
-          value={password}
-          onChangeText={text => setPassword(text)}
-          icon={
-            <Ionicons
-              name="lock-closed-outline"
-              size={20}
-              color="#666"
-              style={{marginRight: 5}}
-            />
-          }
-          inputType="password"
-        />
+<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+  <InputField
+    label={'Password'}
+    value={password}
+    icon={
+      <Ionicons
+        name="lock-closed-outline"
+        size={20}
+        color="#666"
+        style={{ marginRight: 5 }}
+      />
+    }
+    inputType={passwordVisible ? "text" : "password"} 
+   
+    onChangeText={text => setPassword(text)}
+  />
+  <TouchableOpacity onPress={togglePasswordVisibility} style={{ position: 'absolute', right: 10, top: 10 }}>
+    <Ionicons
+      name={passwordVisible ? "eye-outline" : "eye-off-outline"}
+      size={20}
+      color="#666"
+    />
+  </TouchableOpacity>
+</View>
 
-        <InputField
-          label={'Confirm Password'}
-          value={confirmPassword}
-          onChangeText={text => setConfirmPassword(text)}
-          icon={
-            <Ionicons
-              name="lock-closed-outline"
-              size={20}
-              color="#666"
-              style={{marginRight: 5}}
-            />
-          }
-          inputType="password"
-        />
+<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+  <InputField
+    label={'Confirm Password'}
+    value={confirmPassword}
+    icon={
+      <Ionicons
+        name="lock-closed-outline"
+        size={20}
+        color="#666"
+        style={{ marginRight: 5 }}
+      />
+    }
+    inputType={passwordVisible1 ? "text" : "password"} 
+   
+    onChangeText={text => setConfirmPassword(text)}
+  />
+  <TouchableOpacity onPress={togglePasswordVisibility1} style={{ position: 'absolute', right: 10, top: 10 }}>
+    <Ionicons
+      name={passwordVisible1 ? "eye-outline" : "eye-off-outline"}
+      size={20}
+      color="#666"
+    />
+  </TouchableOpacity>
+</View>
 
         <CustomButton label={'Register'} onPress={handleSignup}  />
 

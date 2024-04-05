@@ -4,6 +4,9 @@ import OnboardingScreen from '../screens/OnBoardingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import ConfirmationSentScreen from '../screens/ConfirmationSentScreen';
+import ForgotScreen from '../screens/ForgotScreen';
+import CodeScreen from '../screens/CodeScreen';
+import ResetScreen from '../screens/ResetScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -13,6 +16,9 @@ const AuthStack = () => {
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Forgot" component={ForgotScreen}/>
+      <Stack.Screen name='Code' component={CodeScreen}/>
+      <Stack.Screen name='Reset' component={ResetScreen}/>
       <Stack.Screen name='Register' component={RegisterScreen} /> 
       <Stack.Screen name='Confirmation' component={ConfirmationSentScreen} /> 
 

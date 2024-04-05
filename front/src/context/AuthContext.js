@@ -4,7 +4,7 @@ import { BASE_URL } from '../config';
 import axios from 'axios';
 import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
 import ConfirmationSentScreen from '../screens/ConfirmationSentScreen';
-
+import { NavigationContainer } from '@react-navigation/native';
 
 export const AuthContext = createContext();
 
@@ -45,13 +45,15 @@ export const AuthProvider = ({children}) => {
     };
     
 
-    const login = async (email , password)=>{
+    const login = async (email , password,setIsLoading)=>{
         setIsLoading(true);
+        
         await axios.post(`${BASE_URL}/sign-in`,{
             email,
             password
         })
         .then(res=>{
+          
             console.log(res.data);
             let userInfo = res.data;
             setUserInfo(userInfo);
@@ -104,7 +106,24 @@ export const AuthProvider = ({children}) => {
         setIsLoading(false);
       };
     
+      
+        const forgotPassword= async (email, navigation) => {
+          setIsLoading(true);
+    try {
+      await axios.post(`${BASE_URL}/forgot-password`, { email });
+      console.log("Reset password email sent successfully");
+      alert("Please check your email");
+      setIsLoading(false);
+      console.log("Navigating to 'Code' screen...");
+      navigation.navigate('Code');
+    } catch (error) {
+      console.error("Error sending reset password email:", error);
+      alert("Error sending reset password email");
+      setIsLoading(false);
+    }
+  };
 
+      
 
     const logout=async()=>{
         setIsLoading(true);
@@ -138,7 +157,7 @@ export const AuthProvider = ({children}) => {
     },[])
 
   return (
-  <AuthContext.Provider value={{login , logout,loginWithFacebook,signup, isLoading,userToken ,setIsLoading, userInfo}} >
+  <AuthContext.Provider value={{login , logout,loginWithFacebook,signup,forgotPassword, isLoading,userToken ,setIsLoading, userInfo}} >
     {children}
     </AuthContext.Provider>
     );

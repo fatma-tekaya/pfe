@@ -1,20 +1,17 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { AuthContext } from '../context/AuthContext'; 
+import { View, Text,TouchableOpacity } from 'react-native'
+import React from 'react'
 
-const ConfirmationSentScreen = ({navigation, route }) => {
-  const { email } = route.params;
-
+const ResetScreen = ({navigation}) => {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text style={{ fontSize: 20, marginBottom: 20, color:'black' }}>
-        Your confirmation mail is sent successfully to {email}
+        Your Password has been updated successfully
       </Text>
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
         <Text style={{ color: '#AD40AF', fontSize: 18 }}>Please Login</Text>
       </TouchableOpacity>
     </View>
-  );
-};
+  )
+}
 
-export default ConfirmationSentScreen;
+export default ResetScreen
