@@ -132,7 +132,6 @@ exports.confirmEmailAndRegisterUser = async (req, res) => {
   }
 };
 
-
 // Contrôleur pour connecter un utilisateur
 exports.userSignIn = async (req, res) => {
   const { email, password } = req.body; // Extraction des données du corps de la requête
@@ -168,6 +167,11 @@ exports.userSignIn = async (req, res) => {
       user: {
         fullname: user.fullname,
         email: user.email,
+        location:user.location,
+        birthdate:user.birthdate,
+        gender:user.gender,
+        height:user.height,
+        weight:user.weight,
         avatar: user.avatar ? user.avatar : '',
       },
       token,
@@ -178,34 +182,66 @@ exports.userSignIn = async (req, res) => {
   }
 };
 
+exports.signInWithGoogle = async (req, res) => {
+  const { email, name , photo, idToken } = req.body.user;
 
-exports.facebookAuth = (req, res, next) => {
   try {
-    console.log("test" + req.body.id);
-    User.findOne({ facebook_id: req.body.id }).then((user) => {
-      // user = users[0];
+    // Vérifiez si l'utilisateur existe déjà dans la base de données
+    let user = await User.findOne({ email });
 
-      if (!user) {
-        var user = new User({
-          facebook_id: req.body.id,
-          fullname: req.body.fullname,
-          email:req.body.email,
-        });
-        user.save().then((result) =>
-          res.json({
-            status: "success",
-            message: "user successfully added",
-            data: result,
-          })
-        );
-      } else {
-        res.json({ data: user });
-      }
+    if (user) {
+      // Utilisateur existant : mettez à jour ses informations
+      user.fullname = name;
+      user.avatar = photo ? photo : user.avatar; // Mettez à jour la photo uniquement si une nouvelle photo est fournie
+      
+      // Mise à jour d'autres champs si nécessaire
+        
+      // Générez ou récupérez le token JWT pour l'utilisateur existant
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+        expiresIn: '1d',
+      });
+
+      // Ajoutez le nouveau token à la liste des tokens de l'utilisateur existant
+      user.tokens.push({ token });
+
+      // Enregistrez les modifications de l'utilisateur
+      await user.save();
+
+      // Répondez avec un message de succès et le token
+      return res.status(200).json({ success: true, message: 'User signed in successfully', token });
+    }
+
+    // Si l'utilisateur n'existe pas, créez un nouvel utilisateur
+    const newUser = new User({
+      fullname: name,
+      email: email,
+      avatar: photo ? photo : '',
+      googleId: idToken ,
+ 
+      // Ajoutez d'autres champs si nécessaire
     });
+
+    // Générez un token JWT pour l'authentification de l'utilisateur
+    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
+      expiresIn: '1d',
+    });
+
+    // Ajoutez le nouveau token à la liste des tokens du nouvel utilisateur
+    newUser.tokens.push({ token });
+
+    // Enregistrez le nouvel utilisateur dans la base de données
+    await newUser.save();
+
+    // Répondez avec un message de succès et le token
+    res.status(201).json({ success: true, message: 'User registered and signed in successfully', token });
   } catch (error) {
-    return next(error);
+    console.error('Error signing in with Google:', error);
+    // Gérez les erreurs internes du serveur
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
+
 
 // Contrôleur pour déconnecter l'utilisateur
 exports.signOut = async (req, res) => {
@@ -228,7 +264,6 @@ exports.signOut = async (req, res) => {
   }
 };
 
-// Contrôleur pour mettre à jour l'avatar de l'utilisateur
 exports.uploadProfile = async (req, res) => {
   const { user } = req; // Récupération de l'utilisateur depuis la requête
   if (!user)
@@ -236,14 +271,19 @@ exports.uploadProfile = async (req, res) => {
       .status(401)
       .json({ success: false, message: 'unauthorized access!' }); // Si l'utilisateur n'est pas authentifié, renvoyer un message d'erreur
 
-  const { fullname, email } = req.body;
+  const { fullname , birthdate, location, gender, height, weight } = req.body;
   const avatar = req.file ? req.file.path : null; // Si une nouvelle image est fournie, utilisez-la, sinon, laissez-la nulle
 
   try {
     // Construction de l'objet de mise à jour en fonction des champs fournis
     const updateFields = {};
     if (fullname) updateFields.fullname = fullname;
-    if (email) updateFields.email = email;
+    
+    if (birthdate) updateFields.birthdate = birthdate;
+    if (location) updateFields.location = location;
+    if (gender) updateFields.gender = gender;
+    if (height) updateFields.height = height;
+    if (weight) updateFields.weight = weight;
     if (avatar) {
       // Upload de la nouvelle image vers Cloudinary
       const result = await cloudinary.uploader.upload(avatar, {
@@ -257,11 +297,22 @@ exports.uploadProfile = async (req, res) => {
 
     // Mise à jour de l'utilisateur dans la base de données si des champs à mettre à jour sont fournis
     if (Object.keys(updateFields).length > 0) {
-      const updatedUser = await User.findByIdAndUpdate(
-        user._id,
-        updateFields,
-        { new: true }
-      );
+      let updatedUser;
+      if (user.googleId) {
+        // Si l'utilisateur s'est connecté avec Google, recherchez-le par son identifiant Google
+        updatedUser = await User.findOneAndUpdate(
+          { googleId: user.googleId },
+          updateFields,
+          { new: true }
+        );
+      } else {
+        // Si l'utilisateur n'est pas connecté avec Google, mettez simplement à jour son profil
+        updatedUser = await User.findByIdAndUpdate(
+          user._id,
+          updateFields,
+          { new: true }
+        );
+      }
       res.status(200).json({ success: true, user: updatedUser }); // Réponse indiquant le succès de la mise à jour du profil
     } else {
       res
@@ -275,6 +326,8 @@ exports.uploadProfile = async (req, res) => {
     console.log('Error while updating profile', error.message); // Affichage de l'erreur dans la console
   }
 };
+
+
 // Route for uploading additional pictures
 exports.uploadPicture = async (req, res) => {
   const { user } = req; // Get the user from the request
@@ -349,7 +402,7 @@ exports.forgotPassword = async (req, res) => {
     const user = await User.findOneAndUpdate({ email }, { verificationCode }, { new: true });
 
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res.status(200).json({ success: false, message: 'User not found' });
     }
 
     // Envoyer l'e-mail de réinitialisation de mot de passe avec le code de vérification
@@ -360,7 +413,7 @@ exports.forgotPassword = async (req, res) => {
     console.error('Error in forgot password:', error);
     res.status(500).json({ success: false, message: 'Error sending reset password email' });
   }
-};
+}; 
 
 // Contrôleur pour réinitialiser le mot de passe
 exports.resetPassword = async (req, res) => {

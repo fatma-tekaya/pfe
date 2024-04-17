@@ -10,7 +10,17 @@ const ForgotScreen = ({navigation}) => {
 
     const [email, setEmail] = useState(null);
     const { forgotPassword } = useContext(AuthContext);
-  
+    const navigateToCodeScreen = async () => {
+      try {
+        // Call the forgotPassword function to send reset code
+        await forgotPassword(email);
+        // If successful, navigate to the 'Code' screen
+        navigation.navigate('Code',{email});
+      } catch (error) {
+        console.error('Error sending reset password email:', error);
+        // Handle error (e.g., display an error message to the user)
+      }
+    };
     return (
       <SafeAreaView style={{ flex: 1, justifyContent: 'center' }}>
         <View style={{ paddingHorizontal: 25 }}>
@@ -29,7 +39,7 @@ const ForgotScreen = ({navigation}) => {
             keyboardType="email-address"
             onChangeText={text => setEmail(text)}
           />
-          <CustomButton label={"Send"} onPress={() => forgotPassword(email,navigation)} />
+          <CustomButton label={"Send"} onPress={() => navigateToCodeScreen()} />
         </View>
       </SafeAreaView>
     );

@@ -17,7 +17,7 @@ const AuthStack = () => {
     drawerContent={props => <CustomDrawer {...props} />}
     screenOptions={{
       headerShown: false,
-      drawerActiveBackgroundColor: '#aa18ea',
+      drawerActiveBackgroundColor: '#2F4F4F',
       drawerActiveTintColor: '#fff',
       drawerInactiveTintColor: '#333',
       drawerLabelStyle: {
@@ -31,16 +31,7 @@ const AuthStack = () => {
           <Ionicons name="home-outline" size={22} color={color}/>
         )
       }} />
-      <Drawer.Screen name="Profile" component={ProfileScreen}  options={{
-        drawerIcon:({color})=>(
-          <Ionicons name="person-outline" size={22} color={color}/>
-        )
-      }}/>
-      <Drawer.Screen name="Chat" component={MessagesScreen}  options={{
-        drawerIcon:({color})=>(
-          <Ionicons name="chatbox-ellipses-outline" size={22} color={color}/>
-        )
-      }} />
+     
       <Drawer.Screen name="Moments" component={MomentsScreen}  options={{
         drawerIcon:({color})=>(
           <Ionicons name="timer-outline" size={22} color={color}/>

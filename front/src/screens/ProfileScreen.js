@@ -7,7 +7,7 @@ import {
   SafeAreaView,
   ScrollView,
 } from 'react-native';
-import React, {useState, useContext} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import DatePicker from 'react-native-date-picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -31,7 +31,7 @@ const ProfileScreen = () => {
   const [height, setHeight] = useState(null);
   const [weight, setWeight] = useState(null);
   const [location, setLocation] = useState(null);
-
+  const {updateUserProfile} = useContext(AuthContext);
   const takePhotoFromCamera = () => {
     ImagePicker.openCamera({
       compressImageMaxWidth: 300,
@@ -43,7 +43,7 @@ const ProfileScreen = () => {
       setImage(image.path);
     });
   };
-
+  
   const choosePhotoFromLibrary = () => {
     ImagePicker.openPicker({
       width: 300,
@@ -56,31 +56,102 @@ const ProfileScreen = () => {
     });
   };
 
-  const handleUpload = () => {
-    // Implémentez votre logique d'upload ici
-    console.log('Image upload logic goes here');
+  useEffect(() => {
+    if (userInfo.user) {
+      setFullname(userInfo.user.fullname ||userInfo.user.name|| '');
+      setEmail(userInfo.user.email || '');
+      setGender(userInfo.user.gender || null);
+      setHeight(userInfo.user.height || '');
+      setWeight(userInfo.user.weight || '');
+      setLocation(userInfo.user.location || '');
+      if (userInfo.user.birthdate) {
+        setDate(new Date(userInfo.user.birthdate));
+        setDobLabel(new Date(userInfo.user.birthdate).toDateString());
+      }
+      // Assuming you have some logic to determine if there's an image or not
+      // For instance, if there's an image URL in userInfo.user.avatar, you might set it like this:
+      setImage(userInfo.user.avatar||userInfo.user.photo || null);
+    }
+  }, [userInfo]);
+  const getUpdatedData = () => {
+    const updatedData = {};
+
+    if (fullname ) {
+      updatedData.fullname = fullname;
+    }
+    if (email) {
+      updatedData.email = email;
+    }
+    if (location) {
+      updatedData.location = location;
+    }
+    if (gender) {
+      updatedData.gender = gender;
+    }
+    if (height) {
+      updatedData.height = height;
+    }
+    if (weight) {
+      updatedData.weight = weight;
+    }
+    if (image) {
+      updatedData.profile = image;
+    } else {
+      // Si aucune nouvelle image n'est sélectionnée, supprimez l'avatar du backend
+      updatedData.avatar = ''; // Assurez-vous que cette valeur correspond à la logique de suppression de l'avatar dans votre backend
+    }
+
+    return updatedData;
   };
 
   return (
     <SafeAreaView style={{flex: 1}}>
       <ScrollView contentContainerStyle={{flexGrow: 1}}>
         <View style={{flex: 1, paddingHorizontal: 25}}>
-          <View style={{alignItems: 'center', marginTop: 20}}>
-            {userInfo.user.avatar ? (
-              <Image
-                source={{uri: userInfo.user.avatar}}
-                style={{height: 100, width: 100, borderRadius: 50}}
-              />
+          <View
+            style={{alignItems: 'center', marginTop: 20, marginVertical: 20}}>
+            {image || userInfo.user.avatar ? (
+              <View style={{position: 'relative'}}>
+                {image && (
+                  <View style={{position: 'relative'}}>
+                    <Image
+                      source={{uri: image}}
+                      style={{height: 100, width: 100, borderRadius: 50}}
+                    />
+                    <TouchableOpacity
+                      style={{position: 'absolute', top: 0, right: 0}}
+                      onPress={() => setImage(null)}>
+                      <MaterialIcons name="cancel" size={24} color="black" />
+                    </TouchableOpacity>
+                  </View>
+                )}
+                {userInfo.user.avatar && !image && (
+                  <>
+                    <Image
+                      source={{uri: userInfo.user.avatar}}
+                      style={{height: 100, width: 100, borderRadius: 50}}
+                    />
+                    <TouchableOpacity
+                      style={{position: 'absolute', top: 0, right: 0}}
+                      onPress={() => {
+                        // Ajoutez ici la logique pour supprimer l'avatar du backend
+                        // Assurez-vous également de mettre à jour l'état image après la suppression
+                      }}>
+                      <MaterialIcons name="cancel" size={24} color="black" />
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
             ) : (
-              <MaterialIcons name="photo-camera" size={100} color="#AD40AF" />
+              <MaterialIcons name="photo-camera" size={100} color="#2F4F4F" />
             )}
+
             <TouchableOpacity
               style={{
-                backgroundColor: '#AD40AF',
+                backgroundColor: '#2F4F4F',
                 paddingVertical: 10,
                 paddingHorizontal: 20,
                 borderRadius: 10,
-                marginTop: 10,
                 marginTop: 10,
               }}
               onPress={takePhotoFromCamera}>
@@ -90,17 +161,19 @@ const ProfileScreen = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={{
-                backgroundColor: '#AD40AF',
+                backgroundColor: '#2F4F4F',
                 paddingVertical: 10,
                 paddingHorizontal: 20,
                 borderRadius: 10,
                 marginTop: 10,
               }}
               onPress={choosePhotoFromLibrary}>
-              <Text style={{color: '#fff',
-    fontWeight: '700'}}>Choisir une photo</Text>
+              <Text style={{color: '#fff', fontWeight: '700'}}>
+                Choisir une photo
+              </Text>
             </TouchableOpacity>
           </View>
+
           <InputField
             label={'Full Name'}
             value={fullname}
@@ -165,42 +238,45 @@ const ProfileScreen = () => {
               paddingBottom: 8,
               marginBottom: 25,
             }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-            <MaterialCommunityIcons
-              name="gender-male-female"
-              size={25}
-              color="#666"
-            />
-            <Text style={{ marginLeft: 5, fontSize: 16 ,color:'#666'}}>Gender</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
+              <MaterialCommunityIcons
+                name="gender-male-female"
+                size={25}
+                color="#666"
+              />
+              <Text style={{marginLeft: 5, fontSize: 16, color: '#666'}}>
+                Gender
+              </Text>
             </View>
-            <View style={{flexDirection: 'row', marginLeft: 5}}>
+            <View style={{flexDirection: 'row', marginLeft: 8}}>
               <TouchableOpacity
                 style={{
-                  backgroundColor: gender === 'male' ? '#AD40AF' : '#ccc',
+                  backgroundColor: gender === 'Male' ? '#2F4F4F' : '#ccc',
                   paddingVertical: 8,
-                  paddingHorizontal: 15,
+                  paddingHorizontal: 18,
                   borderRadius: 10,
                   marginRight: 10,
                 }}
-                onPress={() => setGender('male')}>
+                onPress={() => setGender('Male')}>
                 <Text style={{color: '#fff'}}>Male</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
-                  backgroundColor: gender === 'female' ? '#AD40AF' : '#ccc',
+                  backgroundColor: gender === 'Female' ? '#2F4F4F' : '#ccc',
                   paddingVertical: 8,
-                  paddingHorizontal: 15,
+                  paddingHorizontal: 18,
                   borderRadius: 10,
                 }}
-                onPress={() => setGender('female')}>
+                onPress={() => setGender('Female')}>
                 <Text style={{color: '#fff'}}>Female</Text>
               </TouchableOpacity>
             </View>
           </View>
 
           <InputField
-            label={'Height'}
-            value={height}
+            label={'Height (cm)'}
+            keyboardType={'numeric'}
+            value={height !== null ? height.toString() : ''}
             onChangeText={text => setHeight(text)}
             icon={
               <MaterialCommunityIcons
@@ -211,13 +287,17 @@ const ProfileScreen = () => {
             }
           />
           <InputField
-            label={'Weight'}
-            value={weight}
+            label={'Weight (kg)'}
+            keyboardType={'numeric'}
+            value={weight !== null ? weight.toString() : ''}
             onChangeText={text => setWeight(text)}
             icon={<FontAwesome6 name="weight-scale" size={20} color="#666" />}
           />
 
-          <CustomButton label={'Update'} onPress={handleUpload} />
+          <CustomButton
+            label={'Update'}
+            onPress={() => updateUserProfile(getUpdatedData())}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -30,7 +30,7 @@ const OnBoardingScreen = ({navigation}) => {
     </View>
       <TouchableOpacity
         style={{
-          backgroundColor: '#AD40AF',
+          backgroundColor: '#2F4F4F',
           padding: 20,
           width: '90%',
           borderRadius: 10,

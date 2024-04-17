@@ -43,13 +43,13 @@ const HomeScreen = ({navigation}) => {
               fontFamily: 'Roboto-Medium',
               marginTop: 10,
             }}>
-            Hello {userInfo.user.fullname}  
+            Hello {userInfo.user.fullname} {userInfo.user.name}
           </Text>
           <TouchableOpacity onPress={()=>navigation.openDrawer()}>
           <ImageBackground
            source={
-            userInfo.user.avatar
-              ? {uri: userInfo.user.avatar}
+            userInfo.user.avatar ||userInfo.user.photo 
+              ? {uri: userInfo.user.avatar ||userInfo.user.photo }
               : require('../assets/images/user-profile.jpg')
           }
             style={{width: 50, height: 50}}
@@ -121,7 +121,7 @@ const HomeScreen = ({navigation}) => {
           subTitle={item.subtitle}
           isFree={item.isFree}
           onPress={()=>navigation.navigate('SignDetails',
-          {title:item.title , id:item.id})}
+          {title:item.subtitle , id:item.id})}
           />
         )) }
         {swipeTab == 2 &&  healthTracker.map(item =>(
@@ -132,7 +132,7 @@ const HomeScreen = ({navigation}) => {
           isFree={item.isFree}
           price={item.price}
           onPress={()=>navigation.navigate('SignDetails',
-           {title:item.title , id:item.id})}/>
+           {title:item.subtitle , id:item.id})}/>
           
         ))}
       </ScrollView>

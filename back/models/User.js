@@ -12,18 +12,32 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    
   },
-  //  isEmailConfirmed: {
-  //    type: Boolean,
-  //    default: false, // Par défaut, l'e-mail n'est pas confirmé
-  //  },
+ birthdate:{
+  type : Date,
+ },
+ location:{
+  type:String,
+ },
+ gender:{
+  type:String,
+ },
+ height:{
+  type:Number,
+ },
+ weight:{
+  type:Number,
+ },
   verificationCode: {
     type: String,
   },
   avatar: String,
   captures: [{ type: String }],
   tokens: [{ type: Object }],
+  googleId: {
+    type: String,
+    unique: true,
+  },
 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -19,14 +19,14 @@ import FacebookSVG from '../assets/images/misc/facebook.svg';
 import TwitterSVG from '../assets/images/misc/twitter.svg';
 import CustomButton from '../components/CustomButton';
 import {useNavigation} from '@react-navigation/native';
-import { useDrawerProgress } from '@react-navigation/drawer';
+import {useDrawerProgress} from '@react-navigation/drawer';
 
 const RegisterScreen = ({navigation}) => {
   const [fullname, setFullname] = useState(null);
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
   const [confirmPassword, setConfirmPassword] = useState(null);
-  const {signup, setIsLoading} = useContext(AuthContext);
+  const {signup, setIsLoading,signInWithGoogle} = useContext(AuthContext);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordVisible1, setPasswordVisible1] = useState(false);
 
@@ -40,11 +40,15 @@ const RegisterScreen = ({navigation}) => {
       return;
     }
     try {
-      const userInfo = await signup(fullname, email, password, setIsLoading);
-      // Handle successful signup (e.g., navigate to confirmation)
-      console.log(userInfo.email)
-     
-
+      const userInfo = await signup(
+        fullname,
+        email,
+        password,
+        setIsLoading,
+        navigation,
+      );
+      //navigation.navigate('Confirmation', { email});
+      alert(`Confirmation email to ${email} sent successfully`);
       // Pass data if needed
     } catch (error) {
       alert(error.message); // Display user-friendly error message
@@ -77,34 +81,34 @@ const RegisterScreen = ({navigation}) => {
             color: '#333',
             textAlign: 'left',
             marginTop: 15,
-            marginBottom: 50,
+            marginBottom: 35,
           }}>
           Register
         </Text>
 
-        <View style={{flexDirection: 'row', marginBottom: 30}}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center', // Alignez les éléments verticalement au centre
+            marginBottom: 30,
+          }}>
           <TouchableOpacity
-            onPress={() => {}}
+            onPress={() => {
+              signInWithGoogle();
+            }}
             style={{
+              flexDirection: 'row', // Permet d'aligner l'icône et le texte horizontalement
+              alignItems: 'center', // Alignez les éléments verticalement au centre
               borderColor: '#ddd',
+              backgroundColor:'lightgrey',
               borderWidth: 2,
               borderRadius: 10,
-              marginHorizontal: 35,
-              paddingHorizontal: 50,
+              marginHorizontal: 75,
+              paddingHorizontal: 10, // Ajustez selon votre besoin
               paddingVertical: 10,
             }}>
             <GoogleSVG height={24} width={24} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {}}
-            style={{
-              borderColor: '#ddd',
-              borderWidth: 2,
-              borderRadius: 10,
-              paddingHorizontal: 50,
-              paddingVertical: 10,
-            }}>
-            <FacebookSVG height={24} width={24} />
+            <Text style={{marginLeft: 10 , color:'black'}}>Se connecter avec Gmail</Text>
           </TouchableOpacity>
         </View>
 
@@ -141,57 +145,59 @@ const RegisterScreen = ({navigation}) => {
           keyboardType="email-address"
         />
 
-<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-  <InputField
-    label={'Password'}
-    value={password}
-    icon={
-      <Ionicons
-        name="lock-closed-outline"
-        size={20}
-        color="#666"
-        style={{ marginRight: 5 }}
-      />
-    }
-    inputType={passwordVisible ? "text" : "password"} 
-   
-    onChangeText={text => setPassword(text)}
-  />
-  <TouchableOpacity onPress={togglePasswordVisibility} style={{ position: 'absolute', right: 10, top: 10 }}>
-    <Ionicons
-      name={passwordVisible ? "eye-outline" : "eye-off-outline"}
-      size={20}
-      color="#666"
-    />
-  </TouchableOpacity>
-</View>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <InputField
+            label={'Password'}
+            value={password}
+            icon={
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color="#666"
+                style={{marginRight: 5}}
+              />
+            }
+            inputType={passwordVisible ? 'text' : 'password'}
+            onChangeText={text => setPassword(text)}
+          />
+          <TouchableOpacity
+            onPress={togglePasswordVisibility}
+            style={{position: 'absolute', right: 10, top: 10}}>
+            <Ionicons
+              name={passwordVisible ? 'eye-outline' : 'eye-off-outline'}
+              size={20}
+              color="#666"
+            />
+          </TouchableOpacity>
+        </View>
 
-<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-  <InputField
-    label={'Confirm Password'}
-    value={confirmPassword}
-    icon={
-      <Ionicons
-        name="lock-closed-outline"
-        size={20}
-        color="#666"
-        style={{ marginRight: 5 }}
-      />
-    }
-    inputType={passwordVisible1 ? "text" : "password"} 
-   
-    onChangeText={text => setConfirmPassword(text)}
-  />
-  <TouchableOpacity onPress={togglePasswordVisibility1} style={{ position: 'absolute', right: 10, top: 10 }}>
-    <Ionicons
-      name={passwordVisible1 ? "eye-outline" : "eye-off-outline"}
-      size={20}
-      color="#666"
-    />
-  </TouchableOpacity>
-</View>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <InputField
+            label={'Confirm Password'}
+            value={confirmPassword}
+            icon={
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color="#666"
+                style={{marginRight: 5}}
+              />
+            }
+            inputType={passwordVisible1 ? 'text' : 'password'}
+            onChangeText={text => setConfirmPassword(text)}
+          />
+          <TouchableOpacity
+            onPress={togglePasswordVisibility1}
+            style={{position: 'absolute', right: 10, top: 10}}>
+            <Ionicons
+              name={passwordVisible1 ? 'eye-outline' : 'eye-off-outline'}
+              size={20}
+              color="#666"
+            />
+          </TouchableOpacity>
+        </View>
 
-        <CustomButton label={'Register'} onPress={handleSignup}  />
+        <CustomButton label={'Register'} onPress={handleSignup} />
 
         <View
           style={{
@@ -201,13 +207,12 @@ const RegisterScreen = ({navigation}) => {
           }}>
           <Text style={{color: '#666'}}>Already registered?</Text>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={{color: '#AD40AF', fontWeight: '700'}}> Login</Text>
+            <Text style={{color: '#2F4F4F', fontWeight: '700'}}> Login</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
-
 
 export default RegisterScreen;

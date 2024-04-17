@@ -15,7 +15,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {AuthContext} from '../context/AuthContext';
 
 const CustomDrawer = props => {
-  const {logout} = useContext(AuthContext);
+  const {logout,setIsLoading} = useContext(AuthContext);
   const {userInfo} = useContext(AuthContext);
   return (
     <View style={{flex: 1}}>
@@ -27,15 +27,15 @@ const CustomDrawer = props => {
           style={{padding: 20}}>
           <Image
             source={
-              userInfo.user.avatar
-                ? {uri: userInfo.user.avatar}
+              userInfo.user.avatar||userInfo.user.photo 
+                ? {uri: userInfo.user.avatar||userInfo.user.photo }
                 : require('../assets/images/user-profile.jpg')
             }
             style={{height: 80, width: 80, borderRadius: 40, marginBottom: 10}}
           />
 
           <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium'}}>
-            {userInfo.user.fullname}
+           {userInfo.user.fullname}  {userInfo.user.name} 
           </Text>
           <View style={{flexDirection: 'row'}}>
             <Text style={{fontFamily: 'Roboto-Regular', marginRight: 5}}>

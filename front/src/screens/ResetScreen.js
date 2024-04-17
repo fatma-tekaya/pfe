@@ -8,7 +8,7 @@ const ResetScreen = ({navigation}) => {
         Your Password has been updated successfully
       </Text>
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-        <Text style={{ color: '#AD40AF', fontSize: 18 }}>Please Login</Text>
+        <Text style={{ color: '#2F4F4F', fontSize: 18 }}>Please Login</Text>
       </TouchableOpacity>
     </View>
   )

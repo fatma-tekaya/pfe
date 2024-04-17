@@ -17,26 +17,16 @@ import {LoginButton} from 'react-native-fbsdk-next';
 import CustomButton from '../components/CustomButton';
 import InputField from '../components/InputField';
 import {AuthContext} from '../context/AuthContext';
-import {signInWithGoogle} from '../config/firebase/GoogleSignin';
 
 const LoginScreen = ({navigation}) => {
-  async function googleSignin() {
-    signInWithGoogle().then(data => {
-      if (!data) {
-        console.log('no data');
-      }
-      console.log('success data', data);
-    });
-  }
-
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
-  const {login, loginWithFacebook,setIsLoading} = useContext(AuthContext);
+  const {login, setIsLoading, signInWithGoogle} = useContext(AuthContext);
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
-  
+
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
       <View style={{paddingHorizontal: 25}}>
@@ -73,40 +63,45 @@ const LoginScreen = ({navigation}) => {
           keyboardType="email-address"
           onChangeText={text => setEmail(text)}
         />
-<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-  <InputField
-    label={'Password'}
-    value={password}
-    icon={
-      <Ionicons
-        name="lock-closed-outline"
-        size={20}
-        color="#666"
-        style={{ marginRight: 5 }}
-      />
-    }
-    inputType={passwordVisible ? "text" : "password"} 
-   
-    onChangeText={text => setPassword(text)}
-  />
-  <TouchableOpacity onPress={togglePasswordVisibility} style={{ position: 'absolute', right: 10, top: 10 }}>
-    <Ionicons
-      name={passwordVisible ? "eye-outline" : "eye-off-outline"}
-      size={20}
-      color="#666"
-    />
-  </TouchableOpacity>
-</View>
-<TouchableOpacity  
-    onPress={() => {
-      navigation.navigate('Forgot');
-    }}>
-      <Text style={{color: '#AD40AF', fontWeight: '700',textAlign:'center'}}> Forgot Password?</Text>
-</TouchableOpacity>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <InputField
+            label={'Password'}
+            value={password}
+            icon={
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color="#666"
+                style={{marginRight: 5}}
+              />
+            }
+            inputType={passwordVisible ? 'text' : 'password'}
+            onChangeText={text => setPassword(text)}
+          />
+          <TouchableOpacity
+            onPress={togglePasswordVisibility}
+            style={{position: 'absolute', right: 10, top: 10}}>
+            <Ionicons
+              name={passwordVisible ? 'eye-outline' : 'eye-off-outline'}
+              size={20}
+              color="#666"
+            />
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('Forgot');
+          }}>
+          <Text
+            style={{color: '#2F4F4F', fontWeight: '700', textAlign: 'center'}}>
+            {' '}
+            Forgot Password?
+          </Text>
+        </TouchableOpacity>
         <CustomButton
           label={'Login'}
           onPress={() => {
-            login(email, password,setIsLoading);
+            login(email, password, setIsLoading);
           }}
         />
 
@@ -117,34 +112,26 @@ const LoginScreen = ({navigation}) => {
         <View
           style={{
             flexDirection: 'row',
-            //justifyContent: 'space-between',
+            alignItems: 'center', // Alignez les éléments verticalement au centre
             marginBottom: 30,
           }}>
           <TouchableOpacity
             onPress={() => {
-              googleSignin();
+              signInWithGoogle();
             }}
             style={{
+              flexDirection: 'row', // Permet d'aligner l'icône et le texte horizontalement
+              alignItems: 'center', // Alignez les éléments verticalement au centre
               borderColor: '#ddd',
+              backgroundColor:'lightgrey',
               borderWidth: 2,
               borderRadius: 10,
-              marginHorizontal: 35,
-              paddingHorizontal: 50,
+              marginHorizontal: 75,
+              paddingHorizontal: 10, // Ajustez selon votre besoin
               paddingVertical: 10,
             }}>
             <GoogleSVG height={24} width={24} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => loginWithFacebook()}
-            style={{
-              borderColor: '#ddd',
-              borderWidth: 2,
-              borderRadius: 10,
-              marginHorizontal: 35,
-              paddingHorizontal: 50,
-              paddingVertical: 10,
-            }}>
-            <FacebookSVG height={24} width={24} />
+            <Text style={{marginLeft: 10 , color:'black'}}>Se connecter avec Gmail</Text>
           </TouchableOpacity>
         </View>
 
@@ -156,7 +143,7 @@ const LoginScreen = ({navigation}) => {
           }}>
           <Text style={{color: '#666'}}>New to the app?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={{color: '#AD40AF', fontWeight: '700'}}> Register</Text>
+            <Text style={{color: '#2F4F4F', fontWeight: '700'}}> Register</Text>
           </TouchableOpacity>
         </View>
       </View>

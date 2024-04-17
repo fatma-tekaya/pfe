@@ -16,7 +16,7 @@ export default function ListItem({photo, title, subTitle, isFree , price, onPres
         />
         <View style={{width:windowWidth-220}}>
           <Text
-            style={{color: '#333', fontFamily: 'Roboto-Medium', fontSize: 15}}>
+            style={{color: '#333', fontFamily: 'Roboto-Medium', fontSize: 16}}>
             {subTitle}
           </Text>
           <Text
@@ -24,15 +24,15 @@ export default function ListItem({photo, title, subTitle, isFree , price, onPres
             style={{
               color: '#333',
               fontFamily: 'Roboto-Medium',
-              fontSize: 14,
-              textTransform: 'uppercase',
+              fontSize: 12,
+              //textTransform: 'uppercase',
             }}>
             {title}
           </Text>
         </View>
       </View>
       <TouchableOpacity onPress={onPress} style={{
-        backgroundColor:'#0aada8',
+        backgroundColor:'#777',
         padding:12,
         width:70,
         borderRadius:10,
@@ -44,7 +44,7 @@ export default function ListItem({photo, title, subTitle, isFree , price, onPres
             fontSize:14,
         }}>
             {isFree == 'Yes' && 'Details'}
-            {isFree == 'No' && price}
+            {isFree == 'No' && 'Details'}
         </Text>
       </TouchableOpacity>
     </View>

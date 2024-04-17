@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createUser, userSignIn, uploadProfile, signOut, facebookAuth, uploadPicture,forgotPassword,resetPassword } = require('../controllers/user');
+const { createUser, userSignIn, uploadProfile, signOut,signInWithGoogle, uploadPicture,forgotPassword,resetPassword } = require('../controllers/user');
 const { isAuth } = require('../middelwares/auth');
 const { validateUserSignUp, userVlidation, validateUserSignIn } = require('../middelwares/validation/user');
 const { confirmEmailAndRegisterUser } = require('../controllers/user');
@@ -21,13 +21,12 @@ const fileFilter = (req, file, cb) => {
 // Create multer instance with defined storage and file filter
 const uploads = multer({ storage, fileFilter });
 
-// Define routes
-router.post('/facebookAuth', facebookAuth);
+
 router.post('/create-user', validateUserSignUp, createUser);
 router.get('/confirm-email/:token', confirmEmailAndRegisterUser);
 router.post('/sign-in', validateUserSignIn, userVlidation, userSignIn);
 router.post('/sign-out', isAuth, signOut);
-
+router.post('/google-signin', signInWithGoogle);
 // Route for uploading profile picture
 router.put('/upload-profile', isAuth, uploads.single('profile'), uploadProfile);
 
