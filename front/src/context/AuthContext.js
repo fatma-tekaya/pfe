@@ -76,46 +76,42 @@ export const AuthProvider = ({children}) => {
       setIsLoading(true);
       await GoogleSignin.configure({
         offlineAccess: false,
-        webClientId:
-          '972071422730-3ocqp31uq1i7guc6pqiri6u0f9gmi2u2.apps.googleusercontent.com',
+        webClientId: '972071422730-3ocqp31uq1i7guc6pqiri6u0f9gmi2u2.apps.googleusercontent.com',
         scopes: ['profile', 'email'],
       });
-
+  
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       console.log(userInfo);
-
-      const { idToken, user } = userInfo;
-    const googleCredentials = auth.GoogleAuthProvider.credential(idToken);
-    await auth().signInWithCredential(googleCredentials);
   
-    const response = await axios.post(`${BASE_URL}/google-signin`, {
-      idToken: idToken,
-      user: user,
-    });
-    const { data } = response;
-    const userToken  = data.token;
-    const fullname =userInfo.user.name;
-   
-    // Stockage des informations utilisateur dans AsyncStorage
-    AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
-    AsyncStorage.setItem('userToken', userToken);
+      const { idToken, user } = userInfo;
 
-    // Mise à jour de l'état de l'application avec les nouvelles informations utilisateur
-    setUserInfo(userInfo);
-    setUserToken(userToken);
-
-    console.log('User Token:', userToken);
-    console.log( fullname);
-    console.log('user Info' , userInfo)
-    return userInfo;
-  } catch (error) {
-    console.error('Error signing in with Google:', error);
-  }
-  finally {
-    setIsLoading(false); // Définir isLoading à false une fois que la connexion est terminée (quelle que soit la résultat)
-  }
-};
+      const response = await axios.post(`${BASE_URL}/google-signin`, {
+        idToken: idToken,
+        user: user,
+      });
+      const { data } = response;
+      const userToken = data.token;
+      const fullname = user.name;
+  
+      // Stockage des informations utilisateur dans AsyncStorage
+      AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+      AsyncStorage.setItem('userToken', userToken);
+  
+      // Mise à jour de l'état de l'application avec les nouvelles informations utilisateur
+      setUserInfo(userInfo);
+      setUserToken(userToken);
+  
+      console.log('User Token:', userToken);
+      console.log(fullname);
+      console.log('user Info', userInfo);
+      return userInfo;
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
+    } finally {
+      setIsLoading(false); // Définir isLoading à false une fois que la connexion est terminée (quelle que soit la résultat)
+    }
+  };
      
 
   
@@ -152,6 +148,7 @@ export const AuthProvider = ({children}) => {
         },
       );
       console.log('Profile updated successfully:', response.data);
+      
       // Traitez la réponse de l'API si nécessaire
     } catch (error) {
       console.error('Error updating profile:', error);

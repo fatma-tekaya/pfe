@@ -28,16 +28,20 @@ const userSchema = new mongoose.Schema({
  weight:{
   type:Number,
  },
+ googleToken: {
+  type: String,
+  default: null,
+},
+verifUserCode : {
+  type: String,
+},
   verificationCode: {
     type: String,
   },
   avatar: String,
   captures: [{ type: String }],
   tokens: [{ type: Object }],
-  googleId: {
-    type: String,
-    unique: true,
-  },
+ 
 });
-
+//userSchema.index({ googleId: 1 }, { unique: true, sparse: true });
 module.exports = mongoose.model('User', userSchema);

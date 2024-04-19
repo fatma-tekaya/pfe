@@ -5,37 +5,7 @@ const cloudinary = require('../helper/imageUpload');
 const nodemailer = require('nodemailer');
 
 
-// Contrôleur pour créer un nouvel utilisateur
-// exports.createUser = async (req, res) => {
-//   const { fullname, email, password } = req.body; // Extraction des données du corps de la requête
-//   try {
-//     const existingUser = await User.findOne({ email }); // Vérification si l'email est déjà utilisé
-
-//     if (existingUser) {
-//       return res.json({
-//         success: false,
-//         message: 'This email is already in use, try sign-in',
-//       });
-//     }
-
-//     // Hachage du mot de passe avant de l'enregistrer dans la base de données
-//     const hashedPassword = await bcrypt.hash(password, 8);
-
-//     const user = await User({
-//       fullname,
-//       email,
-//       password: hashedPassword, // Utilisez le mot de passe haché
-//     }); // Création d'un nouvel utilisateur avec les données fournies
-//     await user.save(); // Sauvegarde de l'utilisateur dans la base de données
-//     res.json({ success: true, user }); // Réponse JSON indiquant la réussite de la création de l'utilisateur
-//   } catch (error) {
-//     console.error('Error while creating user:', error);
-//     res.status(500).json({ success: false, message: 'Internal server error' }); // Gestion des erreurs
-//   }
-// };
-
- // Fonction pour envoyer l'e-mail de confirmation
-const sendConfirmationEmail = async (toEmail, confirmationToken) => {
+const sendVerificationCode = async (toEmail, verificationCode) => {
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
@@ -50,14 +20,14 @@ const sendConfirmationEmail = async (toEmail, confirmationToken) => {
     from: process.env.SMTP_EMAIL,
     to: toEmail,
     subject: 'Confirmation de votre inscription',
-    text: `Merci de vous être inscrit sur notre plateforme. Veuillez confirmer votre adresse e-mail en cliquant sur le lien suivant : ${confirmationToken}`
+    text: `Merci de vous être inscrit sur notre plateforme. Votre code de vérification est : ${verificationCode}`
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log('E-mail de confirmation envoyé à', toEmail);
+    console.log('Code de vérification envoyé à', toEmail);
   } catch (error) {
-    console.error('Erreur lors de l\'envoi de l\'e-mail de confirmation :', error);
+    console.error('Erreur lors de l\'envoi du code de vérification :', error);
   }
 };
 
@@ -73,19 +43,27 @@ exports.createUser = async (req, res) => {
       });
     }
 
-    const tokenData = { fullname, email, password };
-    const confirmationToken = jwt.sign(tokenData, process.env.JWT_SECRET, {
-      expiresIn: '1d',
+    // Génération d'un code de vérification
+    const verificationCode = Math.floor(100000 + Math.random() * 900000);
+
+    // Envoi du code de vérification par e-mail
+    await sendVerificationCode(email, verificationCode);
+
+    // Hachage du mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Enregistrement de l'utilisateur dans la base de données avec verified = false
+    const newUser = new User({
+      fullname,
+      email,
+      password: hashedPassword, // Mot de passe haché
+      verified: false,
+      verificationCode, // Utilisation du nouveau nom du champ
     });
 
-    // Construction du lien de confirmation
-    const confirmationLink = `${req.protocol}://${req.get('host')}/confirm-email/${confirmationToken}`;
+    await newUser.save();
 
-
-    // Envoi de l'e-mail de confirmation avec le lien de confirmation
-    await sendConfirmationEmail(email, confirmationLink);
-
-    res.json({ success: true, message: `Confirmation email to ${email} sent successfully` });
+    res.json({ success: true, message: `Verification code sent to ${email}` });
   } catch (error) {
     console.error('Error while creating user:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
@@ -93,44 +71,34 @@ exports.createUser = async (req, res) => {
 };
 
 exports.confirmEmailAndRegisterUser = async (req, res) => {
-  const token = req.params.token; // Utilisez req.params.token pour récupérer le token du chemin de l'URL
+  const { verificationCode } = req.body;
 
   try {
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const { fullname, email, password } = decodedToken;
+    // Recherche de l'utilisateur dans la base de données en utilisant le code de vérification
+    const user = await User.findOne({ verificationCode });
 
-    // Recherche de l'utilisateur dans la base de données
-    let existingUser = await User.findOne({ email });
-
-    // Si l'utilisateur n'existe pas, créer un nouvel utilisateur
-    if (!existingUser) {
-      // Hashage du mot de passe
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Création du nouvel utilisateur avec le mot de passe hashé
-      existingUser = new User({ fullname, email, password: hashedPassword });
-
-      // Marquer l'e-mail comme confirmé
-      existingUser.isEmailConfirmed = true;
-
-      // Enregistrement du nouvel utilisateur dans la base de données
-      await existingUser.save();
-
-      // Répondre avec un message de succès
-      return res.json({ success: true, message: 'Email confirmed successfully and user registered.' });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Si l'utilisateur existe déjà, marquer simplement son e-mail comme confirmé
-    existingUser.isEmailConfirmed = true;
-    await existingUser.save();
+    if (user.verified) {
+      return res.status(400).json({ success: false, message: 'User already verified' });
+    }
+
+    // Marquer l'utilisateur comme vérifié
+    user.verified = true;
+
+    // Enregistrement des modifications dans la base de données
+    await user.save();
 
     // Répondre avec un message de succès
-    res.json({ success: true, message: 'Email confirmed successfully.' });
+    res.json({ success: true, message: 'User verified successfully' });
   } catch (error) {
-    console.error('Error confirming email:', error);
+    console.error('Error verifying email:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
 
 // Contrôleur pour connecter un utilisateur
 exports.userSignIn = async (req, res) => {
@@ -182,20 +150,25 @@ exports.userSignIn = async (req, res) => {
   }
 };
 
+
+// Controller pour la connexion via Google
 exports.signInWithGoogle = async (req, res) => {
-  const { email, name , photo, idToken } = req.body.user;
+  const { email, name, photo, idToken } = req.body.user;
 
   try {
-    // Vérifiez si l'utilisateur existe déjà dans la base de données
-    let user = await User.findOne({ email });
+    let user = null;
+    // Vérifiez si l'utilisateur existe déjà dans la base de données en utilisant l'idToken comme identifiant Google
+    if (idToken) {
+      user = await User.findOne({ googleToken: idToken });
+    }
 
     if (user) {
-      // Utilisateur existant : mettez à jour ses informations
+      // Utilisateur existant : mettez à jour ses informations avec celles fournies par Google
       user.fullname = name;
       user.avatar = photo ? photo : user.avatar; // Mettez à jour la photo uniquement si une nouvelle photo est fournie
-      
+
       // Mise à jour d'autres champs si nécessaire
-        
+
       // Générez ou récupérez le token JWT pour l'utilisateur existant
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
         expiresIn: '1d',
@@ -207,17 +180,19 @@ exports.signInWithGoogle = async (req, res) => {
       // Enregistrez les modifications de l'utilisateur
       await user.save();
 
+      console.log('User signed in successfully');
+
       // Répondez avec un message de succès et le token
       return res.status(200).json({ success: true, message: 'User signed in successfully', token });
     }
 
-    // Si l'utilisateur n'existe pas, créez un nouvel utilisateur
+    // Si l'utilisateur n'existe pas, créez un nouvel utilisateur en utilisant les informations fournies par Google
     const newUser = new User({
       fullname: name,
       email: email,
       avatar: photo ? photo : '',
-      googleId: idToken ,
- 
+      // Stockez l'identifiant Google dans un champ différent
+      googleToken: idToken ,
       // Ajoutez d'autres champs si nécessaire
     });
 
@@ -231,6 +206,8 @@ exports.signInWithGoogle = async (req, res) => {
 
     // Enregistrez le nouvel utilisateur dans la base de données
     await newUser.save();
+
+    console.log("User registered and signed in successfully");
 
     // Répondez avec un message de succès et le token
     res.status(201).json({ success: true, message: 'User registered and signed in successfully', token });
@@ -298,14 +275,7 @@ exports.uploadProfile = async (req, res) => {
     // Mise à jour de l'utilisateur dans la base de données si des champs à mettre à jour sont fournis
     if (Object.keys(updateFields).length > 0) {
       let updatedUser;
-      if (user.googleId) {
-        // Si l'utilisateur s'est connecté avec Google, recherchez-le par son identifiant Google
-        updatedUser = await User.findOneAndUpdate(
-          { googleId: user.googleId },
-          updateFields,
-          { new: true }
-        );
-      } else {
+    {
         // Si l'utilisateur n'est pas connecté avec Google, mettez simplement à jour son profil
         updatedUser = await User.findByIdAndUpdate(
           user._id,
@@ -356,13 +326,13 @@ exports.uploadPicture = async (req, res) => {
   }
 };
 
-// Fonction pour générer un code de vérification aléatoire
+//Fonction pour générer un code de vérification aléatoire
 const generateVerificationCode = () => {
   return Math.floor(100000 + Math.random() * 900000); // Génère un nombre aléatoire à 6 chiffres
 };
 
 // Fonction pour envoyer l'e-mail de réinitialisation de mot de passe avec le code de vérification
-const sendResetPasswordEmail = async (email, verificationCode) => {
+const sendResetPasswordEmail = async (email, verifUserCode) => {
   try {
     // Configurer le transporteur de messagerie
     const transporter = nodemailer.createTransport({
@@ -380,7 +350,7 @@ const sendResetPasswordEmail = async (email, verificationCode) => {
       from: process.env.SMTP_EMAIL,
       to: email,
       subject: 'Réinitialisation de votre mot de passe',
-      text: `Votre code de vérification pour réinitialiser votre mot de passe est : ${verificationCode}`
+      text: `Votre code de vérification pour réinitialiser votre mot de passe est : ${verifUserCode}`
     };
 
     // Envoyer l'e-mail
@@ -396,17 +366,17 @@ exports.forgotPassword = async (req, res) => {
 
   try {
     // Générer le code de vérification
-    const verificationCode = generateVerificationCode();
+    const verifUserCode = generateVerificationCode();
 
     // Mettre à jour le code de vérification dans la base de données
-    const user = await User.findOneAndUpdate({ email }, { verificationCode }, { new: true });
+    const user = await User.findOneAndUpdate({ email }, { verifUserCode }, { new: true });
 
     if (!user) {
       return res.status(200).json({ success: false, message: 'User not found' });
     }
 
     // Envoyer l'e-mail de réinitialisation de mot de passe avec le code de vérification
-    await sendResetPasswordEmail(email, verificationCode);
+    await sendResetPasswordEmail(email, verifUserCode);
 
     res.json({ success: true, message: 'Reset password email sent successfully' });
   } catch (error) {
@@ -421,7 +391,7 @@ exports.resetPassword = async (req, res) => {
   
   try {
     // Récupérer l'e-mail de l'utilisateur à partir du code de vérification
-    const user = await User.findOne({ verificationCode: code });
+    const user = await User.findOne({ verifUserCode : code });
 
     // Vérifier si l'utilisateur existe
     if (!user) {
@@ -443,7 +413,7 @@ exports.resetPassword = async (req, res) => {
 
     // Mettre à jour le mot de passe de l'utilisateur dans la base de données
     user.password = hashedPassword;
-    user.verificationCode = null; // Effacer le code de vérification après réinitialisation
+    user.verifUserCode  = null; // Effacer le code de vérification après réinitialisation
     await user.save();
 
     // Répondre avec un message de succès

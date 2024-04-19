@@ -23,7 +23,7 @@ const uploads = multer({ storage, fileFilter });
 
 
 router.post('/create-user', validateUserSignUp, createUser);
-router.get('/confirm-email/:token', confirmEmailAndRegisterUser);
+router.get('/verify-email', confirmEmailAndRegisterUser);
 router.post('/sign-in', validateUserSignIn, userVlidation, userSignIn);
 router.post('/sign-out', isAuth, signOut);
 router.post('/google-signin', signInWithGoogle);

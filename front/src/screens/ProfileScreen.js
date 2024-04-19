@@ -59,8 +59,8 @@ const ProfileScreen = () => {
   useEffect(() => {
     if (userInfo.user) {
       setFullname(userInfo.user.fullname ||userInfo.user.name|| '');
-      setEmail(userInfo.user.email || '');
-      setGender(userInfo.user.gender || null);
+      setEmail(userInfo.user.email ||  '');
+      setGender(userInfo.user.gender  || null);
       setHeight(userInfo.user.height || '');
       setWeight(userInfo.user.weight || '');
       setLocation(userInfo.user.location || '');
