@@ -7,13 +7,14 @@ import ConfirmationSentScreen from '../screens/ConfirmationSentScreen';
 import ForgotScreen from '../screens/ForgotScreen';
 import CodeScreen from '../screens/CodeScreen';
 import ResetScreen from '../screens/ResetScreen';
-
+import SuccessScreen from '../screens/SuccessScreen';
 
 const Stack = createNativeStackNavigator();
 
 const AuthStack = () => {
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
+    
+    <Stack.Navigator initialRouteName="Onboarding" screenOptions={{headerShown: false}}>
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Forgot" component={ForgotScreen}/>
@@ -21,8 +22,11 @@ const AuthStack = () => {
       <Stack.Screen name='Reset' component={ResetScreen}/>
       <Stack.Screen name='Register' component={RegisterScreen} /> 
       <Stack.Screen name='Confirmation' component={ConfirmationSentScreen} /> 
+      <Stack.Screen name='Success' component={SuccessScreen} /> 
 
     </Stack.Navigator>
+
+    
   );
 };
 

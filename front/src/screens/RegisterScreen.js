@@ -5,6 +5,7 @@ import {
   View,
   Text,
   TextInput,
+  Image,
   TouchableOpacity,
 } from 'react-native';
 
@@ -21,16 +22,24 @@ import CustomButton from '../components/CustomButton';
 import {useNavigation} from '@react-navigation/native';
 import {useDrawerProgress} from '@react-navigation/drawer';
 
-const RegisterScreen = ({navigation}) => {
-  const [fullname, setFullname] = useState(null);
-  const [email, setEmail] = useState(null);
-  const [password, setPassword] = useState(null);
-  const [confirmPassword, setConfirmPassword] = useState(null);
-  const {signup, setIsLoading,signInWithGoogle} = useContext(AuthContext);
+const RegisterScreen = () => {
+  const [fullname, setFullname] = useState('Full name');
+  const [email, setEmail] = useState('test@gmail.com');
+  const [password, setPassword] = useState('123456');
+  const [confirmPassword, setConfirmPassword] = useState('123456');
+  const navigation = useNavigation()
+/*  const [data, setData] = useState({
+    fullname: null,
+    email: null,
+    password: null,
+    confirmPassword: null,
+  }); */
+  const {signup, setIsLoading, signInWithGoogle} = useContext(AuthContext);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordVisible1, setPasswordVisible1] = useState(false);
 
   const handleSignup = async () => {
+
     if (!fullname || !email || !password || !confirmPassword) {
       alert('Please fill in all fields');
       return;
@@ -40,20 +49,27 @@ const RegisterScreen = ({navigation}) => {
       return;
     }
     try {
-      const userInfo = await signup(
-        fullname,
-        email,
-        password,
-        setIsLoading,
-        navigation,
-      );
-      //navigation.navigate('Confirmation', { email});
-      alert(`Confirmation email to ${email} sent successfully`);
-      // Pass data if needed
+      setIsLoading(true)
+
+     
+        await signup(fullname, email, password).then(userInfo => {
+          if (userInfo && userInfo.success) {
+           setIsLoading(false)
+           navigation.navigate('Confirmation', {email}); // Navigate to Confirmation screen after successful signup
+           // alert(`Confirmation email sent successfully to ${email}`);
+         } else {
+           throw new Error('Signup failed'); // Throw an error if signup was not successful
+         } 
+       });
+      
+
+     
+      
     } catch (error) {
       alert(error.message); // Display user-friendly error message
     }
   };
+
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
@@ -66,11 +82,12 @@ const RegisterScreen = ({navigation}) => {
         showsVerticalScrollIndicator={false}
         style={{paddingHorizontal: 25}}>
         <View style={{alignItems: 'center'}}>
-          <RegistrationSVG
+          {/* <RegistrationSVG
             height={150}
             width={150}
             style={{transform: [{rotate: '-5deg'}], marginTop: 30}}
-          />
+          /> */}
+          <Image source={require('../assets/images/logosans.png')} />
         </View>
 
         <Text
@@ -80,7 +97,7 @@ const RegisterScreen = ({navigation}) => {
             fontWeight: '500',
             color: '#333',
             textAlign: 'left',
-            marginTop: 15,
+            marginTop: 0,
             marginBottom: 35,
           }}>
           Register
@@ -100,7 +117,7 @@ const RegisterScreen = ({navigation}) => {
               flexDirection: 'row', // Permet d'aligner l'icône et le texte horizontalement
               alignItems: 'center', // Alignez les éléments verticalement au centre
               borderColor: '#ddd',
-              backgroundColor:'lightgrey',
+              backgroundColor: 'lightgrey',
               borderWidth: 2,
               borderRadius: 10,
               marginHorizontal: 75,
@@ -108,7 +125,9 @@ const RegisterScreen = ({navigation}) => {
               paddingVertical: 10,
             }}>
             <GoogleSVG height={24} width={24} />
-            <Text style={{marginLeft: 10 , color:'black'}}>Se connecter avec Gmail</Text>
+            <Text style={{marginLeft: 10, color: 'black'}}>
+              Se connecter avec Gmail
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -207,7 +226,7 @@ const RegisterScreen = ({navigation}) => {
           }}>
           <Text style={{color: '#666'}}>Already registered?</Text>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={{color: '#2F4F4F', fontWeight: '700'}}> Login</Text>
+            <Text style={{color: '#0f3f61', fontWeight: '700'}}> Login</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

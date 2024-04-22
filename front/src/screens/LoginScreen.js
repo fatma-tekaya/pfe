@@ -3,6 +3,7 @@ import {
   SafeAreaView,
   View,
   Text,
+  Image,
   TextInput,
   TouchableOpacity,
 } from 'react-native';
@@ -31,11 +32,12 @@ const LoginScreen = ({navigation}) => {
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
       <View style={{paddingHorizontal: 25}}>
         <View style={{alignItems: 'center'}}>
-          <LoginSVG
+          {/* <LoginSVG
             height={220}
             width={220}
             style={{transform: [{rotate: '-5deg'}]}}
-          />
+          /> */}
+          <Image source={require('../assets/images/logosans.png')}/>
         </View>
 
         <Text
@@ -43,7 +45,7 @@ const LoginScreen = ({navigation}) => {
             fontFamily: 'Roboto-Medium',
             fontSize: 28,
             fontWeight: '500',
-            color: '#333',
+            color: '#4a6475',
             marginBottom: 30,
           }}>
           Login
@@ -93,7 +95,7 @@ const LoginScreen = ({navigation}) => {
             navigation.navigate('Forgot');
           }}>
           <Text
-            style={{color: '#2F4F4F', fontWeight: '700', textAlign: 'center'}}>
+            style={{color: '#0f3f61', fontWeight: '700', textAlign: 'center', marginBottom:10}}>
             {' '}
             Forgot Password?
           </Text>
@@ -143,7 +145,7 @@ const LoginScreen = ({navigation}) => {
           }}>
           <Text style={{color: '#666'}}>New to the app?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={{color: '#2F4F4F', fontWeight: '700'}}> Register</Text>
+            <Text style={{color: '#0f3f61', fontWeight: '700'}}> Register</Text>
           </TouchableOpacity>
         </View>
       </View>

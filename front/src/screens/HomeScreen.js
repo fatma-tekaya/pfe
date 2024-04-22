@@ -16,6 +16,8 @@ import {windowWidth} from '../utils/Dimensions';
 import CustomSwitch from '../components/CustomSwitch';
 import ListItem from '../components/ListItem';
 import { AuthContext } from '../context/AuthContext';
+import Entypo from 'react-native-vector-icons/Entypo';
+
 
 const HomeScreen = ({navigation}) => {
   const [swipeTab , setSwipeTab]= useState(1);
@@ -36,13 +38,16 @@ const HomeScreen = ({navigation}) => {
             marginBottom: 20,
             marginTop: 5,
           }}>
+            <TouchableOpacity onPress={()=>navigation.openDrawer()}>
+            < Entypo name='menu' color='black' size={30} style={{width: 50, height: 50, marginTop:4}}/>
+            </TouchableOpacity>
           <Text
             style={{
               color: 'black',
               fontSize: 20,
               fontFamily: 'Roboto-Medium',
-              marginTop: 10,
-            }}>
+              marginTop: 5,
+              marginLeft:-160            }}>
             Hello {userInfo.user.fullname} {userInfo.user.name}
           </Text>
           <TouchableOpacity onPress={()=>navigation.openDrawer()}>
@@ -52,7 +57,7 @@ const HomeScreen = ({navigation}) => {
               ? {uri: userInfo.user.avatar ||userInfo.user.photo }
               : require('../assets/images/user-profile.jpg')
           }
-            style={{width: 50, height: 50}}
+            style={{width: 50, height: 50, marginTop:-3}}
             imageStyle={{borderRadius: 25}}
           />
           </TouchableOpacity>
@@ -63,7 +68,7 @@ const HomeScreen = ({navigation}) => {
             borderColor: '#C6C6C6',
             borderWidth: 1,
             borderRadius: 8,
-            paddingHorizontal: 10,
+            paddingHorizontal: 8,
             paddingVertical: 2,
           }}>
           <Feather

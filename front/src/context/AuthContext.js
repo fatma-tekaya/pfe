@@ -2,11 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {createContext, useState, useEffect} from 'react';
 import {BASE_URL} from '../config';
 import axios from 'axios';
-import {LoginManager, AccessToken} from 'react-native-fbsdk-next';
-import ConfirmationSentScreen from '../screens/ConfirmationSentScreen';
-import {NavigationContainer} from '@react-navigation/native';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import auth from '@react-native-firebase/auth';
 
 export const AuthContext = createContext();
 
@@ -15,14 +11,7 @@ export const AuthProvider = ({children}) => {
   const [userToken, setUserToken] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
 
-  const signup = async (
-    fullname,
-    email,
-    password,
-    setIsLoading,
-    navigation,
-  ) => {
-    setIsLoading(true);
+  const signup = async (fullname, email, password) => {
     try {
       const response = await axios.post(`${BASE_URL}/create-user`, {
         fullname,
@@ -34,19 +23,20 @@ export const AuthProvider = ({children}) => {
 
       if (response.data.success) {
         const userInfo = response.data; // Assuming response.data contains user info
-        const userEmail = userInfo.email; // Access user email from response
-        console.log('User email:', userEmail); // Log user email for debugging
+        // Access user email from response
+        console.log('User email:', email); // Log user email for debugging
         console.log('Response data ', response.data);
-        // navigation.navigate('Confirmation', { email: userEmail });
+        //navigation.navigate('Confirmation');
+
         return response.data;
       } else {
         throw new Error(response.data.message || 'Signup failed'); // Throw specific error
       }
     } catch (error) {
       console.error('Error signing up:', error);
+      setIsLoading(false); // Move setIsLoading(false) here for error case
       throw error; // Re-throw for further handling
     }
-    setIsLoading(false);
   };
 
   const login = async (email, password, setIsLoading) => {
@@ -62,13 +52,15 @@ export const AuthProvider = ({children}) => {
         let userInfo = res.data;
         setUserInfo(userInfo);
         setUserToken(userInfo.token);
+        setIsLoading(false);
+
         console.log('User Token:' + userInfo.token);
         AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
         AsyncStorage.setItem('userToken', userInfo.token);
       })
-      .catch(err => console.error(err));
-
-    setIsLoading(false);
+      .catch(err => {
+        setIsLoading(false)
+        console.error(err)});
   };
 
   const signInWithGoogle = async () => {
@@ -76,32 +68,33 @@ export const AuthProvider = ({children}) => {
       setIsLoading(true);
       await GoogleSignin.configure({
         offlineAccess: false,
-        webClientId: '972071422730-3ocqp31uq1i7guc6pqiri6u0f9gmi2u2.apps.googleusercontent.com',
+        webClientId:
+          '972071422730-3ocqp31uq1i7guc6pqiri6u0f9gmi2u2.apps.googleusercontent.com',
         scopes: ['profile', 'email'],
       });
-  
+
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       console.log(userInfo);
-  
-      const { idToken, user } = userInfo;
+
+      const {idToken, user} = userInfo;
 
       const response = await axios.post(`${BASE_URL}/google-signin`, {
         idToken: idToken,
         user: user,
       });
-      const { data } = response;
+      const {data} = response;
       const userToken = data.token;
       const fullname = user.name;
-  
+
       // Stockage des informations utilisateur dans AsyncStorage
       AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
       AsyncStorage.setItem('userToken', userToken);
-  
+
       // Mise à jour de l'état de l'application avec les nouvelles informations utilisateur
       setUserInfo(userInfo);
       setUserToken(userToken);
-  
+
       console.log('User Token:', userToken);
       console.log(fullname);
       console.log('user Info', userInfo);
@@ -112,29 +105,23 @@ export const AuthProvider = ({children}) => {
       setIsLoading(false); // Définir isLoading à false une fois que la connexion est terminée (quelle que soit la résultat)
     }
   };
-     
-
-  
 
   // TODO check
-  const forgotPassword = async (email) => {
+  const forgotPassword = async email => {
     setIsLoading(true);
     try {
-      const resp = await axios.post(`${BASE_URL}/forgot-password`, { email });
+      const resp = await axios.post(`${BASE_URL}/forgot-password`, {email});
       console.log('Reset password email sent successfully');
-     
-      return resp;
+      setIsLoading(false);
+      return resp.data;
+      //return resp;
     } catch (error) {
       console.error('Error sending reset password email:', error);
       // Afficher un message d'erreur à l'utilisateur ou effectuer d'autres actions en cas d'erreur
       // Vous pouvez également renvoyer l'erreur pour une gestion plus avancée
       throw error;
-
-    } finally {
-      setIsLoading(false);
     }
   };
-  
 
   const updateUserProfile = async updatedData => {
     try {
@@ -148,7 +135,7 @@ export const AuthProvider = ({children}) => {
         },
       );
       console.log('Profile updated successfully:', response.data);
-      
+
       // Traitez la réponse de l'API si nécessaire
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -165,7 +152,7 @@ export const AuthProvider = ({children}) => {
         console.error('No token found in AsyncStorage');
         return; // Sortir de la fonction si aucun token n'est trouvé
       }
-  
+
       const resp = await axios.post(`${BASE_URL}/sign-out`, null, {
         headers: {
           Authorization: `Bearer ${storedToken}`, // Utiliser le token stocké pour l'authentification
@@ -189,7 +176,6 @@ export const AuthProvider = ({children}) => {
       setIsLoading(false);
     }
   };
-  
 
   const isLoggedIn = async () => {
     try {

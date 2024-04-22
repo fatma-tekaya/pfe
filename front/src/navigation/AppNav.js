@@ -1,24 +1,21 @@
-import { View, Text, ActivityIndicator } from 'react-native'
-import React ,{useContext} from 'react'
+import React, {useContext} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import AppStack from './AppStack';
 import AuthStack from './AuthStack';
-import { AuthContext } from '../context/AuthContext';
+import {AuthContext} from '../context/AuthContext';
+import CustomLoader from '../components/CustomLoader';
 
 const AppNav = () => {
-    const {isLoading,userToken}=useContext(AuthContext);
-    if (isLoading) {
-        return(
-        <View style={{flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'white'}}>
-            <ActivityIndicator size={'large'}/>
-            <Text style={{color:'black'}}> wasaa baleek</Text>
-        </View>);
-    }
+  const {isLoading, userToken} = useContext(AuthContext);
+  console.log('isLoading',isLoading)
   return (
-    <NavigationContainer >
-    {userToken !== null ? <AppStack /> : <AuthStack />}
-  </NavigationContainer>
-  )
-}
+    <>
+      <NavigationContainer>
+        {userToken !== null ? <AppStack /> : <AuthStack />}
+      </NavigationContainer>
+      {isLoading ? <CustomLoader /> : <></>}
+    </>
+  );
+};
 
-export default AppNav
+export default AppNav;

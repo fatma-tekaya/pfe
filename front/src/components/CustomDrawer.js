@@ -21,10 +21,10 @@ const CustomDrawer = props => {
     <View style={{flex: 1}}>
       <DrawerContentScrollView
         {...props}
-        contentContainerStyle={{backgroundColor: '#8200d6'}}>
+        contentContainerStyle={{backgroundColor: '#D3D3D3'}}>
         <ImageBackground
-          source={require('../assets/images/menu-bg.jpeg')}
-          style={{padding: 20}}>
+          source={require('../assets/images/bcg.jpg')}
+          style={{padding: 25}}>
           <Image
             source={
               userInfo.user.avatar||userInfo.user.photo 
