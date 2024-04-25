@@ -3,20 +3,23 @@ import React, {createContext, useState, useEffect} from 'react';
 import {BASE_URL} from '../config';
 import axios from 'axios';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {FormData} from "formdata-node";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({children}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userToken, setUserToken] = useState(null);
-  const [userInfo, setUserInfo] = useState(null);
+  const [userInfo, setUserInfo] = useState({});
 
-  const signup = async (fullname, email, password) => {
+
+  const signup = async (fullname, email, password,confirmPassword) => {
     try {
       const response = await axios.post(`${BASE_URL}/create-user`, {
         fullname,
         email,
         password,
+        confirmPassword,
       });
 
       console.log('Response from API:', response.data); // Log response for debugging
@@ -39,29 +42,57 @@ export const AuthProvider = ({children}) => {
     }
   };
 
-  const login = async (email, password, setIsLoading) => {
+  const confirm = async (verificationCode) => {
     setIsLoading(true);
+    try {
+      const response = await axios.post(`${BASE_URL}/verify-email`, {
+        verificationCode: verificationCode
+      });
+      //console.log('Response from API:', response);
+      if (response.data.success) {
+        console.log('User verified!');
+        setIsLoading(false);
+        return response.data.success;
+      } else {
+        alert("Invalid Code!");
+      }
+    } catch (error) {
+      console.log(error);
+      alert("Error confirming verification code!");
+    }
+    setIsLoading(false);
+  };
 
-    await axios
-      .post(`${BASE_URL}/sign-in`, {
+  const login = async (email, password) => {
+    setIsLoading(true);
+  
+    try {
+      const response = await axios.post(`${BASE_URL}/sign-in`, {
         email,
         password,
-      })
-      .then(res => {
-        console.log(res.data);
-        let userInfo = res.data;
-        setUserInfo(userInfo);
-        setUserToken(userInfo.token);
-        setIsLoading(false);
-
-        console.log('User Token:' + userInfo.token);
-        AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
-        AsyncStorage.setItem('userToken', userInfo.token);
-      })
-      .catch(err => {
-        setIsLoading(false)
-        console.error(err)});
+      });
+  
+      const userInfo = response.data;
+      console.log(userInfo);
+  
+      setUserInfo(userInfo);
+      setUserToken(userInfo.token);
+  
+      console.log('User Token:' + userInfo.token);
+      AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+      AsyncStorage.setItem('userToken', userInfo.token);
+  
+      setIsLoading(false); // Mettre isLoading à false une fois la requête terminée avec succès
+  
+      return userInfo;
+    } catch (error) {
+      console.error('Error during login:', error);
+      setIsLoading(false); // Mettre isLoading à false en cas d'erreur
+      throw error; // Lancer une erreur avec le message d'erreur du serveur en cas d'échec
+    }
   };
+  
+  
 
   const signInWithGoogle = async () => {
     try {
@@ -106,7 +137,7 @@ export const AuthProvider = ({children}) => {
     }
   };
 
-  // TODO check
+
   const forgotPassword = async email => {
     setIsLoading(true);
     try {
@@ -117,6 +148,20 @@ export const AuthProvider = ({children}) => {
       //return resp;
     } catch (error) {
       console.error('Error sending reset password email:', error);
+      // Afficher un message d'erreur à l'utilisateur ou effectuer d'autres actions en cas d'erreur
+      // Vous pouvez également renvoyer l'erreur pour une gestion plus avancée
+      throw error;
+    }
+  };
+  const resetPasssword = async (code ,newPassword)=>{
+    setIsLoading(true);
+    try {
+      const resp = await axios.post(`${BASE_URL}/reset-password`, {code ,newPassword});
+      console.log(' password Reset successfully');
+      setIsLoading(false);
+      return resp.data;
+    } catch (error) {
+      console.error('Error  reset password email:', error);
       // Afficher un message d'erreur à l'utilisateur ou effectuer d'autres actions en cas d'erreur
       // Vous pouvez également renvoyer l'erreur pour une gestion plus avancée
       throw error;
@@ -135,7 +180,7 @@ export const AuthProvider = ({children}) => {
         },
       );
       console.log('Profile updated successfully:', response.data);
-
+      
       // Traitez la réponse de l'API si nécessaire
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -188,6 +233,7 @@ export const AuthProvider = ({children}) => {
         setUserToken(userToken);
         setUserInfo(userInfo);
       }
+
       setIsLoading(false);
     } catch (error) {
       console.log(`isLogged in error ${error}`);
@@ -196,6 +242,9 @@ export const AuthProvider = ({children}) => {
   useEffect(() => {
     isLoggedIn();
   }, []);
+  
+  
+
 
   return (
     <AuthContext.Provider
@@ -205,10 +254,12 @@ export const AuthProvider = ({children}) => {
         signup,
         forgotPassword,
         updateUserProfile,
+        resetPasssword,
         signInWithGoogle,
         isLoading,
         userToken,
         setIsLoading,
+        confirm,
         userInfo,
       }}>
       {children}

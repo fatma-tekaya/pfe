@@ -23,10 +23,10 @@ import {useNavigation} from '@react-navigation/native';
 import {useDrawerProgress} from '@react-navigation/drawer';
 
 const RegisterScreen = () => {
-  const [fullname, setFullname] = useState('Full name');
-  const [email, setEmail] = useState('test@gmail.com');
-  const [password, setPassword] = useState('123456');
-  const [confirmPassword, setConfirmPassword] = useState('123456');
+  const [fullname, setFullname] = useState(null);
+  const [email, setEmail] = useState(null);
+  const [password, setPassword] = useState(null);
+  const [confirmPassword, setConfirmPassword] = useState(null);
   const navigation = useNavigation()
 /*  const [data, setData] = useState({
     fullname: null,
@@ -52,7 +52,7 @@ const RegisterScreen = () => {
       setIsLoading(true)
 
      
-        await signup(fullname, email, password).then(userInfo => {
+        await signup(fullname, email, password,confirmPassword).then(userInfo => {
           if (userInfo && userInfo.success) {
            setIsLoading(false)
            navigation.navigate('Confirmation', {email}); // Navigate to Confirmation screen after successful signup
@@ -61,9 +61,6 @@ const RegisterScreen = () => {
            throw new Error('Signup failed'); // Throw an error if signup was not successful
          } 
        });
-      
-
-     
       
     } catch (error) {
       alert(error.message); // Display user-friendly error message

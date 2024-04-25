@@ -32,11 +32,15 @@ const userSchema = new mongoose.Schema({
   type: String,
   default: null,
 },
-verifUserCode : {
-  type: String,
+verified:{
+  type:Boolean,
+  default:false,
 },
-  verificationCode: {
-    type: String,
+verifUserCode : {
+  type: Number,
+},
+verificationCode: {
+    type: Number,
   },
   avatar: String,
   captures: [{ type: String }],

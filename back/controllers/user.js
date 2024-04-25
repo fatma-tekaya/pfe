@@ -1,45 +1,56 @@
-const jwt = require('jsonwebtoken'); 
-const User = require('../models/User'); 
-const bcrypt = require('bcrypt'); // Importez bcrypt ici pour pouvoir utiliser les fonctions de hachage de mots de passe
-const cloudinary = require('../helper/imageUpload');
-const nodemailer = require('nodemailer');
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
+const bcrypt = require("bcrypt");
+const cloudinary = require("../helper/imageUpload");
+const nodemailer = require("nodemailer");
+//const asyncHandler = require("express-async-handler");
+const { validationResult } = require("express-validator");
 
 
+//Fonction  pour envoyer un mail de confirmation de user
 const sendVerificationCode = async (toEmail, verificationCode) => {
   const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: "smtp.gmail.com",
     port: 465,
     secure: true,
     auth: {
       user: process.env.SMTP_EMAIL,
-      pass: process.env.SMTP_SECRET
-    }
+      pass: process.env.SMTP_SECRET,
+    },
   });
 
   const mailOptions = {
     from: process.env.SMTP_EMAIL,
     to: toEmail,
-    subject: 'Confirmation de votre inscription',
-    text: `Merci de vous être inscrit sur notre plateforme. Votre code de vérification est : ${verificationCode}`
+    subject: "Confirmation de votre inscription",
+    text: `Merci de vous être inscrit sur notre plateforme. Votre code de vérification est : ${verificationCode}`,
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log('Code de vérification envoyé à', toEmail);
+    console.log("Code de vérification envoyé à", toEmail);
   } catch (error) {
-    console.error('Erreur lors de l\'envoi du code de vérification :', error);
+    console.error("Erreur lors de l'envoi du code de vérification :", error);
   }
 };
 
+// Fonction de creation d'utilisateurq
 exports.createUser = async (req, res) => {
-  const { fullname, email, password } = req.body;
+  const { fullname, email, password,confirmPassword } = req.body;
+
+  // Vérification des erreurs de validation
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log("err", errors.array());
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+
   try {
     const existingUser = await User.findOne({ email });
-
     if (existingUser) {
       return res.json({
         success: false,
-        message: 'This email is already in use, try sign-in',
+        message: "This email is already in use, try sign-in",
       });
     }
 
@@ -63,13 +74,16 @@ exports.createUser = async (req, res) => {
 
     await newUser.save();
 
-    res.json({ success: true, message: `Verification code sent to ${email}` });
+    res
+      .status(200)
+      .json({ success: true, message: `Verification code sent to ${email}` });
   } catch (error) {
-    console.error('Error while creating user:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error("Error while creating user:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
+// Fonction  pour envoyer le code de vérification
 exports.confirmEmailAndRegisterUser = async (req, res) => {
   const { verificationCode } = req.body;
 
@@ -78,11 +92,17 @@ exports.confirmEmailAndRegisterUser = async (req, res) => {
     const user = await User.findOne({ verificationCode });
 
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      console.log("User not found");
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     if (user.verified) {
-      return res.status(400).json({ success: false, message: 'User already verified' });
+      console.log("User already verified");
+      return res
+        .status(400)
+        .json({ success: false, message: "User already verified" });
     }
 
     // Marquer l'utilisateur comme vérifié
@@ -90,15 +110,14 @@ exports.confirmEmailAndRegisterUser = async (req, res) => {
 
     // Enregistrement des modifications dans la base de données
     await user.save();
-
+    console.log("User verified successfully");
     // Répondre avec un message de succès
-    res.json({ success: true, message: 'User verified successfully' });
+    res.status(200).json({ success: true, message: "User verified successfully" });
   } catch (error) {
-    console.error('Error verifying email:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error("Error verifying email:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
 
 // Contrôleur pour connecter un utilisateur
 exports.userSignIn = async (req, res) => {
@@ -106,22 +125,30 @@ exports.userSignIn = async (req, res) => {
   try {
     const user = await User.findOne({ email }); // Recherche de l'utilisateur dans la base de données
     if (!user) {
+      console.log("User not found with the given email!")
       return res.json({
         success: false,
-        message: 'User not found with the given email!',
+        message: "User not found with the given email!",
       });
     }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    if(!user.verified){
+      console.log('User is not verified Yet!')
       return res.json({
         success: false,
-        message: 'Email/password does not match!',
+        message: "User is not verified Yet!",
+      });
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      console.log("Email/password does not match!")
+      return res.json({
+        success: false,
+        message: "Email/password does not match!",
       });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1d',
+      expiresIn: "1d",
     }); // Création d'un token JWT pour l'authentification de l'utilisateur
 
     // Ajout du nouveau token à l'array tokens de l'utilisateur
@@ -129,27 +156,26 @@ exports.userSignIn = async (req, res) => {
 
     // Sauvegarde de l'utilisateur avec le nouveau token
     await user.save();
-
+    console.log("user signed in successfully")
     res.json({
       success: true,
       user: {
         fullname: user.fullname,
         email: user.email,
-        location:user.location,
-        birthdate:user.birthdate,
-        gender:user.gender,
-        height:user.height,
-        weight:user.weight,
-        avatar: user.avatar ? user.avatar : '',
+        location: user.location,
+        birthdate: user.birthdate,
+        gender: user.gender,
+        height: user.height,
+        weight: user.weight,
+        avatar: user.avatar ? user.avatar : "",
       },
       token,
     }); // Réponse JSON avec les informations utilisateur et le token
   } catch (error) {
-    console.error('Error while signing in:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' }); // Gestion des erreurs
+    console.error("Error while signing in:", error);
+    res.status(500).json({ success: false, message: "Internal server error" }); // Gestion des erreurs
   }
 };
-
 
 // Controller pour la connexion via Google
 exports.signInWithGoogle = async (req, res) => {
@@ -171,7 +197,7 @@ exports.signInWithGoogle = async (req, res) => {
 
       // Générez ou récupérez le token JWT pour l'utilisateur existant
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-        expiresIn: '1d',
+        expiresIn: "1d",
       });
 
       // Ajoutez le nouveau token à la liste des tokens de l'utilisateur existant
@@ -180,25 +206,27 @@ exports.signInWithGoogle = async (req, res) => {
       // Enregistrez les modifications de l'utilisateur
       await user.save();
 
-      console.log('User signed in successfully');
+      console.log("User signed in successfully");
 
       // Répondez avec un message de succès et le token
-      return res.status(200).json({ success: true, message: 'User signed in successfully', token });
+      return res
+        .status(200)
+        .json({ success: true, message: "User signed in successfully", token });
     }
 
     // Si l'utilisateur n'existe pas, créez un nouvel utilisateur en utilisant les informations fournies par Google
     const newUser = new User({
       fullname: name,
       email: email,
-      avatar: photo ? photo : '',
+      avatar: photo ? photo : "",
       // Stockez l'identifiant Google dans un champ différent
-      googleToken: idToken ,
+      googleToken: idToken,
       // Ajoutez d'autres champs si nécessaire
     });
 
     // Générez un token JWT pour l'authentification de l'utilisateur
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: '1d',
+      expiresIn: "1d",
     });
 
     // Ajoutez le nouveau token à la liste des tokens du nouvel utilisateur
@@ -210,37 +238,43 @@ exports.signInWithGoogle = async (req, res) => {
     console.log("User registered and signed in successfully");
 
     // Répondez avec un message de succès et le token
-    res.status(201).json({ success: true, message: 'User registered and signed in successfully', token });
+    res
+      .status(201)
+      .json({
+        success: true,
+        message: "User registered and signed in successfully",
+        token,
+      });
   } catch (error) {
-    console.error('Error signing in with Google:', error);
+    console.error("Error signing in with Google:", error);
     // Gérez les erreurs internes du serveur
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
 
 
 // Contrôleur pour déconnecter l'utilisateur
 exports.signOut = async (req, res) => {
   if (req.headers && req.headers.authorization) {
-    const token = req.headers.authorization.split(' ')[1]; // Extraction du token à partir des en-têtes de la requête
+    const token = req.headers.authorization.split(" ")[1]; // Extraction du token à partir des en-têtes de la requête
     if (!token) {
       return res
         .status(401)
-        .json({ success: false, message: 'Authorization fail!' }); // Si aucun token n'est fourni, renvoyer un message d'erreur
+        .json({ success: false, message: "Authorization fail!" }); // Si aucun token n'est fourni, renvoyer un message d'erreur
     }
 
     const tokens = req.user.tokens; // Récupération des tokens de l'utilisateur depuis la requête
 
-    const newTokens = tokens.filter(t => t.token !== token); // Filtrage des tokens pour exclure celui qui est utilisé pour la déconnexion
+    const newTokens = tokens.filter((t) => t.token !== token); // Filtrage des tokens pour exclure celui qui est utilisé pour la déconnexion
 
     // Mise à jour des tokens de l'utilisateur dans la base de données
     await User.findByIdAndUpdate(req.user._id, { tokens: newTokens });
-    res.json({ success: true, message: 'Sign out successfully!' }); // Réponse indiquant le succès de la déconnexion
-   console.log('logged out ')
+    res.json({ success: true, message: "Sign out successfully!" }); // Réponse indiquant le succès de la déconnexion
+    console.log("logged out ");
   }
 };
 
+//Fonction pour update  user profile
 exports.uploadProfile = async (req, res) => {
   const { user } = req; // Récupération de l'utilisateur depuis la requête
   if (!user)
@@ -298,12 +332,14 @@ exports.uploadProfile = async (req, res) => {
 };
 
 
-// Route for uploading additional pictures
+// Fonction for uploading additional pictures
 exports.uploadPicture = async (req, res) => {
   const { user } = req; // Get the user from the request
-  
+
   if (!user) {
-    return res.status(401).json({ success: false, message: 'Unauthorized access!' });
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized access!" });
   }
 
   const picture = req.file ? req.file.path : null; // Get the uploaded picture
@@ -312,17 +348,21 @@ exports.uploadPicture = async (req, res) => {
     if (picture) {
       // Add the picture path to the user's captures array
       user.captures.push(picture);
-      
+
       // Save the updated user document
       await user.save();
 
-      res.status(200).json({ success: true, message: 'Picture uploaded successfully' });
+      res
+        .status(200)
+        .json({ success: true, message: "Picture uploaded successfully" });
     } else {
-      res.status(400).json({ success: false, message: 'No picture provided' });
+      res.status(400).json({ success: false, message: "No picture provided" });
     }
   } catch (error) {
-    console.error('Error uploading picture:', error);
-    res.status(500).json({ success: false, message: 'Server error, try again later' });
+    console.error("Error uploading picture:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error, try again later" });
   }
 };
 
@@ -336,31 +376,32 @@ const sendResetPasswordEmail = async (email, verifUserCode) => {
   try {
     // Configurer le transporteur de messagerie
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
+      host: "smtp.gmail.com",
       port: 465,
       secure: true,
       auth: {
         user: process.env.SMTP_EMAIL,
-        pass: process.env.SMTP_SECRET
-      }
+        pass: process.env.SMTP_SECRET,
+      },
     });
 
     // Options de l'e-mail
     const mailOptions = {
       from: process.env.SMTP_EMAIL,
       to: email,
-      subject: 'Réinitialisation de votre mot de passe',
-      text: `Votre code de vérification pour réinitialiser votre mot de passe est : ${verifUserCode}`
+      subject: "Réinitialisation de votre mot de passe",
+      text: `Votre code de vérification pour réinitialiser votre mot de passe est : ${verifUserCode}`,
     };
 
     // Envoyer l'e-mail
     await transporter.sendMail(mailOptions);
-    console.log('E-mail de réinitialisation de mot de passe envoyé à', email);
+    console.log("E-mail de réinitialisation de mot de passe envoyé à", email);
   } catch (error) {
-    throw new Error('Error sending reset password email');
+    throw new Error("Error sending reset password email");
   }
 };
 
+//Fonction pour  vérifier si le code de vérification
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -369,43 +410,71 @@ exports.forgotPassword = async (req, res) => {
     const verifUserCode = generateVerificationCode();
 
     // Mettre à jour le code de vérification dans la base de données
-    const user = await User.findOneAndUpdate({ email }, { verifUserCode }, { new: true });
+    const user = await User.findOneAndUpdate(
+      { email },
+      { verifUserCode },
+      { new: true }
+    );
 
     if (!user) {
-      return res.status(200).json({ success: false, message: 'User not found' });
+      console.log("User not found")
+      return res
+        .status(200)
+        .json({ success: false, message: "User not found" });
     }
 
     // Envoyer l'e-mail de réinitialisation de mot de passe avec le code de vérification
     await sendResetPasswordEmail(email, verifUserCode);
-
-    res.json({ success: true, message: 'Reset password email sent successfully' });
+    console.log("Reset password email sent successfully")
+    res.json({
+      success: true,
+      message: "Reset password email sent successfully",
+    });
   } catch (error) {
-    console.error('Error in forgot password:', error);
-    res.status(500).json({ success: false, message: 'Error sending reset password email' });
+    console.error("Error in forgot password:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error sending reset password email" });
   }
-}; 
+};
 
 // Contrôleur pour réinitialiser le mot de passe
 exports.resetPassword = async (req, res) => {
   const { code, newPassword } = req.body; // Récupérer le code de vérification et le nouveau mot de passe depuis le corps de la requête
-  
+
   try {
     // Récupérer l'e-mail de l'utilisateur à partir du code de vérification
-    const user = await User.findOne({ verifUserCode : code });
+    const user = await User.findOne({ verifUserCode: code });
 
     // Vérifier si l'utilisateur existe
     if (!user) {
-      return res.status(404).json({ success: false, message: 'Invalid verification code' });
+      console.log("Invalid verification code" )
+      return res
+        .status(404)
+        .json({ success: false, message: "Invalid verification code" });
     }
 
-    // Vérifier si le nouveau mot de passe est différent de l'ancien
-    if (newPassword === user.password) {
-      return res.status(400).json({ success: false, message: 'New password must be different from the old one' });
+    // Comparer le nouveau mot de passe avec l'ancien
+    const passwordMatch = await bcrypt.compare(newPassword, user.password);
+    if (passwordMatch) {
+      console.log("New password must be different from the old one")
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "New password must be different from the old one",
+        });
     }
 
     // Vérifier la longueur du nouveau mot de passe
     if (newPassword.length < 8 || newPassword.length > 20) {
-      return res.status(400).json({ success: false, message: 'Password must be 8 to 20 characters long' });
+      console.log("Password must be 8 to 20 characters long")
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Password must be 8 to 20 characters long",
+        });
     }
 
     // Hacher le nouveau mot de passe
@@ -413,13 +482,15 @@ exports.resetPassword = async (req, res) => {
 
     // Mettre à jour le mot de passe de l'utilisateur dans la base de données
     user.password = hashedPassword;
-    user.verifUserCode  = null; // Effacer le code de vérification après réinitialisation
+    user.verifUserCode = null; // Effacer le code de vérification après réinitialisation
     await user.save();
-
+    console.log("Password reset successfully" )
     // Répondre avec un message de succès
-    res.json({ success: true, message: 'Password reset successfully' });
+    res.json({ success: true, message: "Password reset successfully" });
   } catch (error) {
-    console.error('Error resetting password:', error);
-    res.status(500).json({ success: false, message: 'Error resetting password' });
+    console.error("Error resetting password:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error resetting password" });
   }
 };

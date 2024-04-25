@@ -27,6 +27,31 @@ const LoginScreen = ({navigation}) => {
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      alert('Please fill in all fields');
+      return;
+    }
+  
+    try {
+      const resp = await login(email, password);
+  
+      // Vérifiez si l'authentification est réussie
+      if (resp.success) {
+        // L'authentification a réussi, naviguez vers la page d'accueil
+        console.log("User authenticated!");
+      } else {
+        // L'authentification a échoué, affichez un message d'erreur à l'utilisateur
+        alert(userInfo.message);
+      }
+    } catch (error) {
+      // Affichez un message d'erreur générique en cas d'erreur
+      alert("Error signing in. Please try again later.");
+      console.error(error);
+    }
+  };
+  
+  
 
   return (
     <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
@@ -102,9 +127,7 @@ const LoginScreen = ({navigation}) => {
         </TouchableOpacity>
         <CustomButton
           label={'Login'}
-          onPress={() => {
-            login(email, password, setIsLoading);
-          }}
+          onPress={handleSignIn}
         />
 
         <Text style={{textAlign: 'center', color: '#666', marginBottom: 30}}>

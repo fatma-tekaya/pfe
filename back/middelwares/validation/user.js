@@ -1,5 +1,6 @@
 const { check, validationResult } = require('express-validator');
 
+
 exports.validateUserSignUp = [
   check('fullname')
     .trim()

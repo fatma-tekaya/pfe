@@ -7,7 +7,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 
 const ForgotScreen = ({navigation}) => {
- // const navigate = useNavigation();
+ 
   const { forgotPassword } = useContext(AuthContext);
   const [email, setEmail] = useState(null);
 
@@ -17,7 +17,7 @@ const ForgotScreen = ({navigation}) => {
       const response = await forgotPassword(email);
       
       // Si la réinitialisation du mot de passe est réussie et redirectTo est défini sur 'Code'
-      if (response.success && response.redirectTo === 'Code') {
+      if (response.success) {
         console.log('navigationn', {email})
         navigation.navigate('Code',{email});
       } else {
