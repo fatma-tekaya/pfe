@@ -4,13 +4,14 @@ import {BASE_URL} from '../config';
 import axios from 'axios';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {FormData} from "formdata-node";
+import CustomLoader from "../components/CustomLoader";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({children}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userToken, setUserToken] = useState(null);
-  const [userInfo, setUserInfo] = useState({});
+  const [userInfo, setUserInfo] = useState(null);
 
 
   const signup = async (fullname, email, password,confirmPassword) => {
@@ -94,50 +95,6 @@ export const AuthProvider = ({children}) => {
   
   
 
-  const signInWithGoogle = async () => {
-    try {
-      setIsLoading(true);
-      await GoogleSignin.configure({
-        offlineAccess: false,
-        webClientId:
-          '972071422730-3ocqp31uq1i7guc6pqiri6u0f9gmi2u2.apps.googleusercontent.com',
-        scopes: ['profile', 'email'],
-      });
-
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      console.log(userInfo);
-
-      const {idToken, user} = userInfo;
-
-      const response = await axios.post(`${BASE_URL}/google-signin`, {
-        idToken: idToken,
-        user: user,
-      });
-      const {data} = response;
-      const userToken = data.token;
-      const fullname = user.name;
-
-      // Stockage des informations utilisateur dans AsyncStorage
-      AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
-      AsyncStorage.setItem('userToken', userToken);
-
-      // Mise à jour de l'état de l'application avec les nouvelles informations utilisateur
-      setUserInfo(userInfo);
-      setUserToken(userToken);
-
-      console.log('User Token:', userToken);
-      console.log(fullname);
-      console.log('user Info', userInfo);
-      return userInfo;
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-    } finally {
-      setIsLoading(false); // Définir isLoading à false une fois que la connexion est terminée (quelle que soit la résultat)
-    }
-  };
-
-
   const forgotPassword = async email => {
     setIsLoading(true);
     try {
@@ -153,6 +110,7 @@ export const AuthProvider = ({children}) => {
       throw error;
     }
   };
+  
   const resetPasssword = async (code ,newPassword)=>{
     setIsLoading(true);
     try {
@@ -168,26 +126,7 @@ export const AuthProvider = ({children}) => {
     }
   };
 
-  const updateUserProfile = async updatedData => {
-    try {
-      const response = await axios.put(
-        `${BASE_URL}/upload-profile`,
-        updatedData,
-        {
-          headers: {
-            Authorization: `jwt ${userToken}`, // Inclure le token dans les en-têtes de la requête
-          },
-        },
-      );
-      console.log('Profile updated successfully:', response.data);
-      
-      // Traitez la réponse de l'API si nécessaire
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      // Gérez les erreurs ici
-    }
-  };
-
+  
   const logout = async () => {
     setIsLoading(true);
     try {
@@ -198,22 +137,22 @@ export const AuthProvider = ({children}) => {
         return; // Sortir de la fonction si aucun token n'est trouvé
       }
 
-      const resp = await axios.post(`${BASE_URL}/sign-out`, null, {
-        headers: {
-          Authorization: `Bearer ${storedToken}`, // Utiliser le token stocké pour l'authentification
-        },
-      });
-      if (resp.data.success) {
+      // const resp = await axios.post(`${BASE_URL}/sign-out`, null, {
+      //   headers: {
+      //     Authorization: `Bearer ${storedToken}`, // Utiliser le token stocké pour l'authentification
+      //   },
+      // });
+      // if (resp.data.success) {
         // Déconnexion réussie
         setUserToken(null);
         AsyncStorage.removeItem('userInfo');
         AsyncStorage.removeItem('userToken');
         console.log('Logged out successfully');
-      } else {
-        // Gestion des erreurs côté frontend si la déconnexion a échoué
-        console.error('Logout failed:', resp.data.message);
-        // Affichez un message à l'utilisateur ou redirigez-le vers la page de connexion, par exemple
-      }
+      // } else {
+      //   // Gestion des erreurs côté frontend si la déconnexion a échoué
+      //   console.error('Logout failed:', resp.data.message);
+      //   // Affichez un message à l'utilisateur ou redirigez-le vers la page de connexion, par exemple
+      // }
     } catch (error) {
       // Gestion des erreurs réseau ou autres erreurs
       console.error('Error during logout:', error);
@@ -239,11 +178,75 @@ export const AuthProvider = ({children}) => {
       console.log(`isLogged in error ${error}`);
     }
   };
+
+
+  const signInOrSignUpWithGoogle = async () => {
+    try {
+      //await isLoggedIn(); // Check if the user is already logged in
+      setIsLoading(true);
+
+      // Configure Google Sign-In
+      await GoogleSignin.configure({
+        offlineAccess: false,
+        webClientId:
+          '972071422730-3ocqp31uq1i7guc6pqiri6u0f9gmi2u2.apps.googleusercontent.com',
+        scopes: ['profile', 'email'],
+      });
+      await GoogleSignin.hasPlayServices();
+
+      // Sign in with Google and get user info
+      const { idToken, user } = await GoogleSignin.signIn();
+
+      // Send user info to backend for authentication or registration
+      const response = await axios.post(`${BASE_URL}/google-signin`, {
+        idToken: idToken,
+        user: user,
+      });
+ 
+      const { data } = response;
+      const userToken = data.token;
+      const userInfo = {
+        ...response,
+        user: {
+          ...user,
+          fullname: user.name,
+          avatar: user.photo, // Update photo field with avatar
+        },
+      };
+  console.log(userInfo)
+ 
+      setUserInfo(userInfo);
+      setUserToken(userToken);
+  
+      
+      AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+     console.log("userInfo",userInfo)
+
+      
+      // Store user information in AsyncStorage
+      AsyncStorage.setItem('userToken', userToken);
+
+      // Update application state with new user information
+
+      setIsLoading(false);
+      console.log('User Token:', userToken);
+      console.log('User Info', user);
+
+      return user; // Return user info on success
+    } catch (error) {
+      console.error('Error signing in or signing up with Google:', error);
+      setIsLoading(false);
+      throw error; // Throw error to handle failure in calling component
+    }
+  };
+
   useEffect(() => {
     isLoggedIn();
   }, []);
   
-  
+  if (isLoading) {
+    return <CustomLoader />;
+  }
 
 
   return (
@@ -253,14 +256,14 @@ export const AuthProvider = ({children}) => {
         logout,
         signup,
         forgotPassword,
-        updateUserProfile,
+        
         resetPasssword,
-        signInWithGoogle,
+        signInOrSignUpWithGoogle,
         isLoading,
         userToken,
         setIsLoading,
         confirm,
-        userInfo,
+        userInfo
       }}>
       {children}
     </AuthContext.Provider>

@@ -48,13 +48,13 @@ const HomeScreen = ({navigation}) => {
               fontFamily: 'Roboto-Medium',
               marginTop: 5,
               marginLeft:-160            }}>
-            Hello {userInfo.user.fullname} {userInfo.user.name}
+            Hello {userInfo.user.fullname} 
           </Text>
           <TouchableOpacity onPress={()=>navigation.openDrawer()}>
           <ImageBackground
            source={
-            userInfo.user.avatar ||userInfo.user.photo 
-              ? {uri: userInfo.user.avatar ||userInfo.user.photo }
+            userInfo.user.avatar 
+              ? {uri: userInfo.user.avatar }
               : require('../assets/images/user-profile.jpg')
           }
             style={{width: 50, height: 50, marginTop:-3}}

@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ScrollView,
 } from 'react-native';
+import {BASE_URL} from '../config';
 import React, {useState, useContext, useEffect} from 'react';
 import DatePicker from 'react-native-date-picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -20,18 +21,80 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Entypo from 'react-native-vector-icons/Entypo';
 
 const ProfileScreen = () => {
+  const {userToken} = useContext(AuthContext);
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [dobLabel, setDobLabel] = useState('Date of Birth');
   const {userInfo} = useContext(AuthContext);
   const [image, setImage] = useState(null);
-  const [fullname, setFullname] = useState(null);
-  const [email, setEmail] = useState(null);
+  const [fullname, setFullname] = useState('');
+  const [email, setEmail] = useState('');
   const [gender, setGender] = useState(null);
-  const [height, setHeight] = useState(null);
-  const [weight, setWeight] = useState(null);
-  const [location, setLocation] = useState(null);
-  const {updateUserProfile} = useContext(AuthContext);
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
+  const [location, setLocation] = useState('');
+
+  const updateUserProfile = async updatedData => {
+    try {
+      const formData = new FormData();
+
+      // Append each field to the FormData object
+      for (const key in updatedData) {
+        formData.append(key, updatedData[key]);
+      }
+
+      // Append the image file to the FormData object
+      if (updatedData.avatar) {
+        formData.append('profile', {
+          // Change 'avatar' to 'profile'
+          uri: updatedData.avatar,
+          type: 'image/jpeg', // Adjust the type if necessary
+          name: 'avatar.jpg', // Adjust the filename if necessary
+        });
+      }
+
+      // Send the request
+      const response = await fetch(`${BASE_URL}/upload-profile`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `jwt ${userToken}`,
+          'Content-Type': 'multipart/form-data', // Set the content type to multipart/form-data
+        },
+        body: formData,
+      });
+
+      // Check if the request was successful (status code in the range 200-299)
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      // Handle the response data
+      const data = await response.text(); // Assuming the response is text/plain
+      console.log('Profile updated successfully:', data);
+
+      // Handle the response if needed
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      // Gérer les erreurs ici
+    }
+  };
+
+  useEffect(() => {
+    if (userInfo.user) {
+      setFullname(userInfo.user.fullname || userInfo.user.name || '');
+      setEmail(userInfo.user.email || '');
+      setGender(userInfo.user.gender || null);
+      setHeight(userInfo.user.height || '');
+      setWeight(userInfo.user.weight || '');
+      setLocation(userInfo.user.location || '');
+      if (userInfo.user.birthdate) {
+        setDate(new Date(userInfo.user.birthdate));
+        setDobLabel(new Date(userInfo.user.birthdate).toDateString());
+      }
+      setImage(userInfo.user.avatar  || null);
+    }
+  }, [userInfo]);
+
   const takePhotoFromCamera = () => {
     ImagePicker.openCamera({
       compressImageMaxWidth: 300,
@@ -43,7 +106,7 @@ const ProfileScreen = () => {
       setImage(image.path);
     });
   };
-  
+
   const choosePhotoFromLibrary = () => {
     ImagePicker.openPicker({
       width: 300,
@@ -56,50 +119,16 @@ const ProfileScreen = () => {
     });
   };
 
-  useEffect(() => {
-    if (userInfo.user) {
-      setFullname(userInfo.user.fullname ||userInfo.user.name|| '');
-      setEmail(userInfo.user.email ||  '');
-      setGender(userInfo.user.gender  || null);
-      setHeight(userInfo.user.height || '');
-      setWeight(userInfo.user.weight || '');
-      setLocation(userInfo.user.location || '');
-      if (userInfo.user.birthdate) {
-        setDate(new Date(userInfo.user.birthdate));
-        setDobLabel(new Date(userInfo.user.birthdate).toDateString());
-      }
-      // Assuming you have some logic to determine if there's an image or not
-      // For instance, if there's an image URL in userInfo.user.avatar, you might set it like this:
-      setImage(userInfo.user.avatar||userInfo.user.photo || null);
-    }
-  }, [userInfo]);
   const getUpdatedData = () => {
-    const updatedData = {};
-
-    if (fullname ) {
-      updatedData.fullname = fullname;
-    }
-    if (email) {
-      updatedData.email = email;
-    }
-    if (location) {
-      updatedData.location = location;
-    }
-    if (gender) {
-      updatedData.gender = gender;
-    }
-    if (height) {
-      updatedData.height = height;
-    }
-    if (weight) {
-      updatedData.weight = weight;
-    }
-    if (image) {
-      updatedData.profile = image;
-    } else {
-      // Si aucune nouvelle image n'est sélectionnée, supprimez l'avatar du backend
-      updatedData.avatar = ''; // Assurez-vous que cette valeur correspond à la logique de suppression de l'avatar dans votre backend
-    }
+    const updatedData = {
+      fullname,
+      email,
+      location,
+      gender,
+      height,
+      weight,
+      avatar: image,
+    };
 
     return updatedData;
   };
@@ -125,7 +154,7 @@ const ProfileScreen = () => {
                     </TouchableOpacity>
                   </View>
                 )}
-                {userInfo.user.avatar && !image && (
+                {/* {userInfo.user.avatar && !image && (
                   <>
                     <Image
                       source={{uri: userInfo.user.avatar}}
@@ -134,13 +163,12 @@ const ProfileScreen = () => {
                     <TouchableOpacity
                       style={{position: 'absolute', top: 0, right: 0}}
                       onPress={() => {
-                        // Ajoutez ici la logique pour supprimer l'avatar du backend
-                        // Assurez-vous également de mettre à jour l'état image après la suppression
+                      
                       }}>
-                      <MaterialIcons name="cancel" size={24} color="black" />
+                      <MaterialIcons name="cancel" size={24} color="black" /> 
                     </TouchableOpacity>
                   </>
-                )}
+                )} */}
               </View>
             ) : (
               <MaterialIcons name="photo-camera" size={100} color="#2F4F4F" />

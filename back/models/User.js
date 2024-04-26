@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
  },
  googleToken: {
   type: String,
-  default: null,
+ //default: null,
 },
 verified:{
   type:Boolean,

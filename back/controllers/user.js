@@ -183,9 +183,9 @@ exports.signInWithGoogle = async (req, res) => {
 
   try {
     let user = null;
-    // Vérifiez si l'utilisateur existe déjà dans la base de données en utilisant l'idToken comme identifiant Google
-    if (idToken) {
-      user = await User.findOne({ googleToken: idToken });
+    // Vérifiez si l'utilisateur existe déjà dans la base de données en utilisant son email
+    if (email) {
+      user = await User.findOne({ email });
     }
 
     if (user) {
@@ -219,6 +219,7 @@ exports.signInWithGoogle = async (req, res) => {
       fullname: name,
       email: email,
       avatar: photo ? photo : "",
+      verified:true,
       // Stockez l'identifiant Google dans un champ différent
       googleToken: idToken,
       // Ajoutez d'autres champs si nécessaire
@@ -317,8 +318,10 @@ exports.uploadProfile = async (req, res) => {
           { new: true }
         );
       }
+      console.log("updated Successfuly!");
       res.status(200).json({ success: true, user: updatedUser }); // Réponse indiquant le succès de la mise à jour du profil
     } else {
+      console.log("No fields provided for update")
       res
         .status(400)
         .json({ success: false, message: 'No fields provided for update' }); // Si aucun champ à mettre à jour n'est fourni dans la requête, renvoyer un message d'erreur

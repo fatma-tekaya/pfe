@@ -23,7 +23,7 @@ const LoginScreen = ({navigation}) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
-  const {login, setIsLoading, signInWithGoogle} = useContext(AuthContext);
+  const {login, setIsLoading, signInOrSignUpWithGoogle} = useContext(AuthContext);
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
@@ -142,7 +142,7 @@ const LoginScreen = ({navigation}) => {
           }}>
           <TouchableOpacity
             onPress={() => {
-              signInWithGoogle();
+              signInOrSignUpWithGoogle();
             }}
             style={{
               flexDirection: 'row', // Permet d'aligner l'icône et le texte horizontalement

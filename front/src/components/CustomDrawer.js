@@ -27,15 +27,15 @@ const CustomDrawer = props => {
           style={{padding: 25}}>
           <Image
             source={
-              userInfo.user.avatar||userInfo.user.photo 
-                ? {uri: userInfo.user.avatar||userInfo.user.photo }
+              userInfo.user.avatar
+                ? {uri: userInfo.user.avatar }
                 : require('../assets/images/user-profile.jpg')
             }
             style={{height: 80, width: 80, borderRadius: 40, marginBottom: 10}}
           />
 
           <Text style={{fontSize: 18, fontFamily: 'Roboto-Medium'}}>
-           {userInfo.user.fullname}  {userInfo.user.name} 
+           {userInfo.user.fullname} 
           </Text>
           <View style={{flexDirection: 'row'}}>
             <Text style={{fontFamily: 'Roboto-Regular', marginRight: 5}}>
