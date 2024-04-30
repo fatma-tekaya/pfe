@@ -4,13 +4,14 @@ import {BASE_URL} from '../config';
 import axios from 'axios';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {FormData} from "formdata-node";
+import CustomLoader from "../components/CustomLoader";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({children}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userToken, setUserToken] = useState(null);
-  const [userInfo, setUserInfo] = useState({});
+  const [userInfo, setUserInfo] = useState(null);
 
 
   const signup = async (fullname, email, password,confirmPassword) => {
@@ -92,51 +93,55 @@ export const AuthProvider = ({children}) => {
     }
   };
   
-  
-
-  const signInWithGoogle = async () => {
+  const signInOrSignUpWithGoogle = async () => {
     try {
       setIsLoading(true);
+  
       await GoogleSignin.configure({
         offlineAccess: false,
-        webClientId:
-          '972071422730-3ocqp31uq1i7guc6pqiri6u0f9gmi2u2.apps.googleusercontent.com',
+        webClientId: '972071422730-3ocqp31uq1i7guc6pqiri6u0f9gmi2u2.apps.googleusercontent.com',
         scopes: ['profile', 'email'],
       });
-
       await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      console.log(userInfo);
-
-      const {idToken, user} = userInfo;
-
+  
+      // Sign out before signing in to ensure a clean sign-in process
+      await GoogleSignin.signOut();
+  
+      // Sign in with Google and force account selection
+      const { idToken, user } = await GoogleSignin.signIn({ forceCodeForRefreshToken: true });
+  
+      // Send user info to backend for authentication or registration
       const response = await axios.post(`${BASE_URL}/google-signin`, {
         idToken: idToken,
         user: user,
       });
-      const {data} = response;
+  
+      const { data } = response;
       const userToken = data.token;
-      const fullname = user.name;
-
-      // Stockage des informations utilisateur dans AsyncStorage
-      AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
-      AsyncStorage.setItem('userToken', userToken);
-
-      // Mise à jour de l'état de l'application avec les nouvelles informations utilisateur
+      const userInfo = {
+        user: {
+          ...data.user,
+          fullname: user.name,
+          avatar: user.photo,
+        },
+      };
+  
       setUserInfo(userInfo);
       setUserToken(userToken);
-
-      console.log('User Token:', userToken);
-      console.log(fullname);
-      console.log('user Info', userInfo);
-      return userInfo;
+  
+      AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+      AsyncStorage.setItem('userToken', userToken);
+  
+      setIsLoading(false);
+  
+      return user; // Return user info on success
     } catch (error) {
-      console.error('Error signing in with Google:', error);
-    } finally {
-      setIsLoading(false); // Définir isLoading à false une fois que la connexion est terminée (quelle que soit la résultat)
+      console.error('Error signing in or signing up with Google:', error);
+      setIsLoading(false);
+      throw error; // Throw error to handle failure in calling component
     }
   };
-
+  
 
   const forgotPassword = async email => {
     setIsLoading(true);
@@ -153,6 +158,7 @@ export const AuthProvider = ({children}) => {
       throw error;
     }
   };
+  
   const resetPasssword = async (code ,newPassword)=>{
     setIsLoading(true);
     try {
@@ -168,26 +174,7 @@ export const AuthProvider = ({children}) => {
     }
   };
 
-  const updateUserProfile = async updatedData => {
-    try {
-      const response = await axios.put(
-        `${BASE_URL}/upload-profile`,
-        updatedData,
-        {
-          headers: {
-            Authorization: `jwt ${userToken}`, // Inclure le token dans les en-têtes de la requête
-          },
-        },
-      );
-      console.log('Profile updated successfully:', response.data);
-      
-      // Traitez la réponse de l'API si nécessaire
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      // Gérez les erreurs ici
-    }
-  };
-
+  
   const logout = async () => {
     setIsLoading(true);
     try {
@@ -222,6 +209,7 @@ export const AuthProvider = ({children}) => {
     }
   };
 
+
   const isLoggedIn = async () => {
     try {
       setIsLoading(true);
@@ -239,11 +227,71 @@ export const AuthProvider = ({children}) => {
       console.log(`isLogged in error ${error}`);
     }
   };
+
+  const updateUserProfile = async updatedData => {
+    try {
+      const formData = new FormData();
+  
+      // Append each field to the FormData object
+      for (const key in updatedData) {
+        formData.append(key, updatedData[key]);
+      }
+  
+      // Append the image file to the FormData object
+      if (updatedData.avatar) {
+        formData.append('profile', {
+          uri: updatedData.avatar,
+          type: 'image/jpeg',
+          name: 'avatar.jpg',
+        });
+      }
+  
+      // Send the request
+      const response = await fetch(`${BASE_URL}/upload-profile`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `jwt ${userToken}`,
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
+  
+      // Check if the request was successful (status code in the range 200-299)
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+  
+      // Handle the response data
+      const data = await response.json();
+      const updatedUserInfo = {
+        ...userInfo,
+        user: {
+          ...userInfo.user,
+          ...updatedData,
+        },
+      };
+  
+      setUserInfo(updatedUserInfo); // Mettre à jour les données utilisateur dans le contexte
+      AsyncStorage.setItem('userInfo', JSON.stringify(updatedUserInfo)); // Stocker les données utilisateur mises à jour dans AsyncStorage
+  
+      console.log('Profile updated successfully:', data);
+  
+      // Handle the response if needed
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      // Gérer les erreurs ici
+    }
+  };
+  
+ 
+
   useEffect(() => {
     isLoggedIn();
   }, []);
   
-  
+  if (isLoading) {
+    return <CustomLoader />;
+  }
 
 
   return (
@@ -253,14 +301,16 @@ export const AuthProvider = ({children}) => {
         logout,
         signup,
         forgotPassword,
-        updateUserProfile,
+        setUserInfo,
         resetPasssword,
-        signInWithGoogle,
+        signInOrSignUpWithGoogle,
         isLoading,
         userToken,
         setIsLoading,
+        setUserInfo,
         confirm,
         userInfo,
+        updateUserProfile,
       }}>
       {children}
     </AuthContext.Provider>

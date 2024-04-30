@@ -148,7 +148,7 @@ const ProfileScreen = () => {
 
             <TouchableOpacity
               style={{
-                backgroundColor: '#2F4F4F',
+                backgroundColor: '#0f3f61',
                 paddingVertical: 10,
                 paddingHorizontal: 20,
                 borderRadius: 10,
@@ -161,7 +161,7 @@ const ProfileScreen = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={{
-                backgroundColor: '#2F4F4F',
+                backgroundColor: '#0f3f61',
                 paddingVertical: 10,
                 paddingHorizontal: 20,
                 borderRadius: 10,
@@ -251,7 +251,7 @@ const ProfileScreen = () => {
             <View style={{flexDirection: 'row', marginLeft: 8}}>
               <TouchableOpacity
                 style={{
-                  backgroundColor: gender === 'Male' ? '#2F4F4F' : '#ccc',
+                  backgroundColor: gender === 'Male' ? '#0f3f61' : '#ccc',
                   paddingVertical: 8,
                   paddingHorizontal: 18,
                   borderRadius: 10,
@@ -262,7 +262,7 @@ const ProfileScreen = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
-                  backgroundColor: gender === 'Female' ? '#2F4F4F' : '#ccc',
+                  backgroundColor: gender === 'Female' ? '#0f3f61' : '#ccc',
                   paddingVertical: 8,
                   paddingHorizontal: 18,
                   borderRadius: 10,

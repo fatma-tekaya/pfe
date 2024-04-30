@@ -34,7 +34,7 @@ const RegisterScreen = () => {
     password: null,
     confirmPassword: null,
   }); */
-  const {signup, setIsLoading, signInWithGoogle} = useContext(AuthContext);
+  const {signup, setIsLoading, signInOrSignUpWithGoogle} = useContext(AuthContext);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordVisible1, setPasswordVisible1] = useState(false);
 
@@ -108,7 +108,7 @@ const RegisterScreen = () => {
           }}>
           <TouchableOpacity
             onPress={() => {
-              signInWithGoogle();
+              signInOrSignUpWithGoogle();
             }}
             style={{
               flexDirection: 'row', // Permet d'aligner l'icône et le texte horizontalement

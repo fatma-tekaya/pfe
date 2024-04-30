@@ -6,7 +6,6 @@ const nodemailer = require("nodemailer");
 //const asyncHandler = require("express-async-handler");
 const { validationResult } = require("express-validator");
 
-
 //Fonction  pour envoyer un mail de confirmation de user
 const sendVerificationCode = async (toEmail, verificationCode) => {
   const transporter = nodemailer.createTransport({
@@ -36,7 +35,7 @@ const sendVerificationCode = async (toEmail, verificationCode) => {
 
 // Fonction de creation d'utilisateurq
 exports.createUser = async (req, res) => {
-  const { fullname, email, password,confirmPassword } = req.body;
+  const { fullname, email, password, confirmPassword } = req.body;
 
   // Vérification des erreurs de validation
   const errors = validationResult(req);
@@ -112,7 +111,9 @@ exports.confirmEmailAndRegisterUser = async (req, res) => {
     await user.save();
     console.log("User verified successfully");
     // Répondre avec un message de succès
-    res.status(200).json({ success: true, message: "User verified successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "User verified successfully" });
   } catch (error) {
     console.error("Error verifying email:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -125,14 +126,14 @@ exports.userSignIn = async (req, res) => {
   try {
     const user = await User.findOne({ email }); // Recherche de l'utilisateur dans la base de données
     if (!user) {
-      console.log("User not found with the given email!")
+      console.log("User not found with the given email!");
       return res.json({
         success: false,
         message: "User not found with the given email!",
       });
     }
-    if(!user.verified){
-      console.log('User is not verified Yet!')
+    if (!user.verified) {
+      console.log("User is not verified Yet!");
       return res.json({
         success: false,
         message: "User is not verified Yet!",
@@ -140,7 +141,7 @@ exports.userSignIn = async (req, res) => {
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      console.log("Email/password does not match!")
+      console.log("Email/password does not match!");
       return res.json({
         success: false,
         message: "Email/password does not match!",
@@ -156,7 +157,7 @@ exports.userSignIn = async (req, res) => {
 
     // Sauvegarde de l'utilisateur avec le nouveau token
     await user.save();
-    console.log("user signed in successfully")
+    console.log("user signed in successfully");
     res.json({
       success: true,
       user: {
@@ -179,22 +180,26 @@ exports.userSignIn = async (req, res) => {
 
 // Controller pour la connexion via Google
 exports.signInWithGoogle = async (req, res) => {
+  console.log("User here ", req.body.user);
   const { email, name, photo, idToken } = req.body.user;
 
   try {
     let user = null;
-    // Vérifiez si l'utilisateur existe déjà dans la base de données en utilisant l'idToken comme identifiant Google
-    if (idToken) {
-      user = await User.findOne({ googleToken: idToken });
+    // Vérifiez si l'utilisateur existe déjà dans la base de données en utilisant son email
+    if (email) {
+      user = await User.findOne({ email });
+      console.log("classic user ", user)
     }
 
     if (user) {
       // Utilisateur existant : mettez à jour ses informations avec celles fournies par Google
       user.fullname = name;
       user.avatar = photo ? photo : user.avatar; // Mettez à jour la photo uniquement si une nouvelle photo est fournie
-
+      user.email = email 
+      user.googleToken = idToken
       // Mise à jour d'autres champs si nécessaire
 
+      // TODO REVIEW
       // Générez ou récupérez le token JWT pour l'utilisateur existant
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
         expiresIn: "1d",
@@ -207,11 +212,16 @@ exports.signInWithGoogle = async (req, res) => {
       await user.save();
 
       console.log("User signed in successfully");
-
+      console.log("final user here ", user)
       // Répondez avec un message de succès et le token
       return res
         .status(200)
-        .json({ success: true, message: "User signed in successfully", token });
+        .json({
+          success: true,
+          message: "User signed in successfully",
+          token,
+          user,
+        });
     }
 
     // Si l'utilisateur n'existe pas, créez un nouvel utilisateur en utilisant les informations fournies par Google
@@ -219,6 +229,12 @@ exports.signInWithGoogle = async (req, res) => {
       fullname: name,
       email: email,
       avatar: photo ? photo : "",
+      verified: true,
+      birthdate: null,
+      location: "",
+      gender: null,
+      height: null,
+      weight: null,
       // Stockez l'identifiant Google dans un champ différent
       googleToken: idToken,
       // Ajoutez d'autres champs si nécessaire
@@ -238,20 +254,18 @@ exports.signInWithGoogle = async (req, res) => {
     console.log("User registered and signed in successfully");
 
     // Répondez avec un message de succès et le token
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "User registered and signed in successfully",
-        token,
-      });
+    res.status(201).json({
+      success: true,
+      message: "User registered and signed in successfully",
+      token,
+      user,
+    });
   } catch (error) {
     console.error("Error signing in with Google:", error);
     // Gérez les erreurs internes du serveur
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
 
 // Contrôleur pour déconnecter l'utilisateur
 exports.signOut = async (req, res) => {
@@ -280,16 +294,16 @@ exports.uploadProfile = async (req, res) => {
   if (!user)
     return res
       .status(401)
-      .json({ success: false, message: 'unauthorized access!' }); // Si l'utilisateur n'est pas authentifié, renvoyer un message d'erreur
+      .json({ success: false, message: "unauthorized access!" }); // Si l'utilisateur n'est pas authentifié, renvoyer un message d'erreur
 
-  const { fullname , birthdate, location, gender, height, weight } = req.body;
+  const { fullname, birthdate, location, gender, height, weight } = req.body;
   const avatar = req.file ? req.file.path : null; // Si une nouvelle image est fournie, utilisez-la, sinon, laissez-la nulle
 
   try {
     // Construction de l'objet de mise à jour en fonction des champs fournis
     const updateFields = {};
     if (fullname) updateFields.fullname = fullname;
-    
+
     if (birthdate) updateFields.birthdate = birthdate;
     if (location) updateFields.location = location;
     if (gender) updateFields.gender = gender;
@@ -301,7 +315,7 @@ exports.uploadProfile = async (req, res) => {
         public_id: `${user._id}_profile`,
         width: 500,
         height: 500,
-        crop: 'fill',
+        crop: "fill",
       });
       updateFields.avatar = result.url; // Mettre à jour l'avatar avec l'URL de l'image téléchargée
     }
@@ -309,28 +323,27 @@ exports.uploadProfile = async (req, res) => {
     // Mise à jour de l'utilisateur dans la base de données si des champs à mettre à jour sont fournis
     if (Object.keys(updateFields).length > 0) {
       let updatedUser;
-    {
-        // Si l'utilisateur n'est pas connecté avec Google, mettez simplement à jour son profil
-        updatedUser = await User.findByIdAndUpdate(
-          user._id,
-          updateFields,
-          { new: true }
-        );
-      }
+
+      // Si l'utilisateur n'est pas connecté avec Google, mettez simplement à jour son profil
+      updatedUser = await User.findByIdAndUpdate(user._id, updateFields, {
+        new: true,
+      });
+
+      console.log("updated Successfuly!");
       res.status(200).json({ success: true, user: updatedUser }); // Réponse indiquant le succès de la mise à jour du profil
     } else {
+      console.log("No fields provided for update");
       res
         .status(400)
-        .json({ success: false, message: 'No fields provided for update' }); // Si aucun champ à mettre à jour n'est fourni dans la requête, renvoyer un message d'erreur
+        .json({ success: false, message: "No fields provided for update" }); // Si aucun champ à mettre à jour n'est fourni dans la requête, renvoyer un message d'erreur
     }
   } catch (error) {
     res
       .status(500)
-      .json({ success: false, message: 'server error, try after some time' }); // En cas d'erreur lors de la mise à jour du profil, renvoyer un message d'erreur
-    console.log('Error while updating profile', error.message); // Affichage de l'erreur dans la console
+      .json({ success: false, message: "server error, try after some time" }); // En cas d'erreur lors de la mise à jour du profil, renvoyer un message d'erreur
+    console.log("Error while updating profile", error.message); // Affichage de l'erreur dans la console
   }
 };
-
 
 // Fonction for uploading additional pictures
 exports.uploadPicture = async (req, res) => {
@@ -417,7 +430,7 @@ exports.forgotPassword = async (req, res) => {
     );
 
     if (!user) {
-      console.log("User not found")
+      console.log("User not found");
       return res
         .status(200)
         .json({ success: false, message: "User not found" });
@@ -425,7 +438,7 @@ exports.forgotPassword = async (req, res) => {
 
     // Envoyer l'e-mail de réinitialisation de mot de passe avec le code de vérification
     await sendResetPasswordEmail(email, verifUserCode);
-    console.log("Reset password email sent successfully")
+    console.log("Reset password email sent successfully");
     res.json({
       success: true,
       message: "Reset password email sent successfully",
@@ -448,7 +461,7 @@ exports.resetPassword = async (req, res) => {
 
     // Vérifier si l'utilisateur existe
     if (!user) {
-      console.log("Invalid verification code" )
+      console.log("Invalid verification code");
       return res
         .status(404)
         .json({ success: false, message: "Invalid verification code" });
@@ -457,24 +470,20 @@ exports.resetPassword = async (req, res) => {
     // Comparer le nouveau mot de passe avec l'ancien
     const passwordMatch = await bcrypt.compare(newPassword, user.password);
     if (passwordMatch) {
-      console.log("New password must be different from the old one")
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "New password must be different from the old one",
-        });
+      console.log("New password must be different from the old one");
+      return res.status(400).json({
+        success: false,
+        message: "New password must be different from the old one",
+      });
     }
 
     // Vérifier la longueur du nouveau mot de passe
     if (newPassword.length < 8 || newPassword.length > 20) {
-      console.log("Password must be 8 to 20 characters long")
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Password must be 8 to 20 characters long",
-        });
+      console.log("Password must be 8 to 20 characters long");
+      return res.status(400).json({
+        success: false,
+        message: "Password must be 8 to 20 characters long",
+      });
     }
 
     // Hacher le nouveau mot de passe
@@ -484,7 +493,7 @@ exports.resetPassword = async (req, res) => {
     user.password = hashedPassword;
     user.verifUserCode = null; // Effacer le code de vérification après réinitialisation
     await user.save();
-    console.log("Password reset successfully" )
+    console.log("Password reset successfully");
     // Répondre avec un message de succès
     res.json({ success: true, message: "Password reset successfully" });
   } catch (error) {

@@ -37,7 +37,7 @@ const TabNavigator = () => {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: {backgroundColor: '#2F4F4F'},
+        tabBarStyle: {backgroundColor: '#0f3f61'},
         tabBarInactiveTintColor: '#fff',
         tabBarActiveTintColor: 'yellow',
       }}>
@@ -47,7 +47,7 @@ const TabNavigator = () => {
         options={({route}) => ({
           tabBarStyle: {
             display: getTabBarVisibility(route),
-            backgroundColor: '#2F4F4F',
+            backgroundColor: '#0f3f61',
           },
           tabBarIcon: ({color, size}) => (
             <Ionicons name="home-outline" color={color} size={size} />
