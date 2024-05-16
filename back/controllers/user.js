@@ -5,7 +5,7 @@ const cloudinary = require("../helper/imageUpload");
 const nodemailer = require("nodemailer");
 //const asyncHandler = require("express-async-handler");
 const { validationResult } = require("express-validator");
-
+require('dotenv').config();
 //Fonction  pour envoyer un mail de confirmation de user
 const sendVerificationCode = async (toEmail, verificationCode) => {
   const transporter = nodemailer.createTransport({
@@ -120,6 +120,56 @@ exports.confirmEmailAndRegisterUser = async (req, res) => {
   }
 };
 
+const generateAccessToken = (user) => {
+  return jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
+};
+
+const generateRefreshToken = (user) => {
+  return jwt.sign({ userId: user._id }, process.env.REFRESH_SECRET);
+};
+
+exports.refresh = async (req, res) => {
+  // Prendre le refresh token de l'utilisateur depuis la requête
+  const refreshToken = req.body.token;
+
+  // Vérifier si aucun token n'est fourni
+  if (!refreshToken) {
+    return res.status(401).json("You are not authenticated!");
+  }
+
+  try {
+    // Vérifier si le token est valide
+    const decodedUser = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+
+    // Si le token est valide, générer un nouveau token d'accès
+    const newToken = generateAccessToken(decodedUser);
+    const newRefreshToken = generateRefreshToken(decodedUser);
+
+    // Mettre à jour le refreshToken de l'utilisateur dans la base de données
+    const user = await User.findOneAndUpdate(
+      { refreshToken },
+      { refreshToken: newRefreshToken }
+    );
+
+    // Vérifier si l'utilisateur est trouvé et mettre à jour le refreshToken
+    if (!user) {
+      return res.status(403).json("Refresh token is not valid!");
+    }
+
+    // Répondre avec les nouveaux tokens
+    res.status(200).json({
+      token: newToken,
+      refreshToken: newRefreshToken,
+     
+    });
+  } catch (error) {
+    console.error("Error while refreshing token:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
 // Contrôleur pour connecter un utilisateur
 exports.userSignIn = async (req, res) => {
   const { email, password } = req.body; // Extraction des données du corps de la requête
@@ -141,19 +191,16 @@ exports.userSignIn = async (req, res) => {
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      console.log("Email/password does not match!");
+      console.log("Password is incorrect!");
       return res.json({
         success: false,
-        message: "Email/password does not match!",
+        message: "Password is incorrect!",
       });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    }); // Création d'un token JWT pour l'authentification de l'utilisateur
-
-    // Ajout du nouveau token à l'array tokens de l'utilisateur
-    user.tokens.push({ token });
+    const token = generateAccessToken(user)
+    const refreshToken = generateRefreshToken(user)
+   
 
     // Sauvegarde de l'utilisateur avec le nouveau token
     await user.save();
@@ -171,7 +218,13 @@ exports.userSignIn = async (req, res) => {
         avatar: user.avatar ? user.avatar : "",
       },
       token,
-    }); // Réponse JSON avec les informations utilisateur et le token
+      refreshToken,
+    }); 
+    
+    user.refreshToken = refreshToken;
+    await user.save();
+    
+// Réponse JSON avec les informations utilisateur et le token
   } catch (error) {
     console.error("Error while signing in:", error);
     res.status(500).json({ success: false, message: "Internal server error" }); // Gestion des erreurs
@@ -197,6 +250,7 @@ exports.signInWithGoogle = async (req, res) => {
       user.avatar = photo ? photo : user.avatar; // Mettez à jour la photo uniquement si une nouvelle photo est fournie
       user.email = email 
       user.googleToken = idToken
+      //user.token = idToken
       // Mise à jour d'autres champs si nécessaire
 
       // TODO REVIEW
@@ -206,7 +260,7 @@ exports.signInWithGoogle = async (req, res) => {
       });
 
       // Ajoutez le nouveau token à la liste des tokens de l'utilisateur existant
-      user.tokens.push({ token });
+      //user.tokens.push({ token });
 
       // Enregistrez les modifications de l'utilisateur
       await user.save();
@@ -246,7 +300,7 @@ exports.signInWithGoogle = async (req, res) => {
     });
 
     // Ajoutez le nouveau token à la liste des tokens du nouvel utilisateur
-    newUser.tokens.push({ token });
+    //newUser.tokens.push({ token });
 
     // Enregistrez le nouvel utilisateur dans la base de données
     await newUser.save();
@@ -268,25 +322,25 @@ exports.signInWithGoogle = async (req, res) => {
 };
 
 // Contrôleur pour déconnecter l'utilisateur
-exports.signOut = async (req, res) => {
-  if (req.headers && req.headers.authorization) {
-    const token = req.headers.authorization.split(" ")[1]; // Extraction du token à partir des en-têtes de la requête
-    if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Authorization fail!" }); // Si aucun token n'est fourni, renvoyer un message d'erreur
-    }
+// exports.signOut = async (req, res) => {
+//   if (req.headers && req.headers.authorization) {
+//     const token = req.headers.authorization.split(" ")[1]; // Extraction du token à partir des en-têtes de la requête
+//     if (!token) {
+//       return res
+//         .status(401)
+//         .json({ success: false, message: "Authorization fail!" }); // Si aucun token n'est fourni, renvoyer un message d'erreur
+//     }
 
-    const tokens = req.user.tokens; // Récupération des tokens de l'utilisateur depuis la requête
+//     const tokens = req.user.tokens; // Récupération des tokens de l'utilisateur depuis la requête
 
-    const newTokens = tokens.filter((t) => t.token !== token); // Filtrage des tokens pour exclure celui qui est utilisé pour la déconnexion
+//     const newTokens = tokens.filter((t) => t.token !== token); // Filtrage des tokens pour exclure celui qui est utilisé pour la déconnexion
 
-    // Mise à jour des tokens de l'utilisateur dans la base de données
-    await User.findByIdAndUpdate(req.user._id, { tokens: newTokens });
-    res.json({ success: true, message: "Sign out successfully!" }); // Réponse indiquant le succès de la déconnexion
-    console.log("logged out ");
-  }
-};
+//     // Mise à jour des tokens de l'utilisateur dans la base de données
+//     await User.findByIdAndUpdate(req.user._id, { tokens: newTokens });
+//     res.json({ success: true, message: "Sign out successfully!" }); // Réponse indiquant le succès de la déconnexion
+//     console.log("logged out ");
+//   }
+// };
 
 //Fonction pour update  user profile
 exports.uploadProfile = async (req, res) => {

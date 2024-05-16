@@ -1,9 +1,14 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const userSchema = new mongoose.Schema({
   fullname: {
     type: String,
     required: true,
+  },
+  refreshToken: {
+    type: String,
+    default: null,
   },
   email: {
     type: String,
@@ -42,9 +47,18 @@ verifUserCode : {
 verificationCode: {
     type: Number,
   },
-  avatar: String,
+  avatar: {
+    type: String,
+    default: null,
+  },
   captures: [{ type: String }],
-  tokens: [{ type: Object }],
+  conversations: [{ type: Schema.Types.ObjectId, ref: 'Conversation' }],
+
+//  roles:{
+//   type:[String],
+//   enum:["user","admin","doctor"],
+//   default:["user"],
+//  }
  
 });
 //userSchema.index({ googleId: 1 }, { unique: true, sparse: true });

@@ -6,15 +6,17 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {FormData} from "formdata-node";
 import CustomLoader from "../components/CustomLoader";
 
+
 export const AuthContext = createContext();
 
 export const AuthProvider = ({children}) => {
+
   const [isLoading, setIsLoading] = useState(false);
   const [userToken, setUserToken] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
-
-
-  const signup = async (fullname, email, password,confirmPassword) => {
+ 
+  const signup = async (fullname, email, password, confirmPassword, navigation) => {
+    setIsLoading(true)
     try {
       const response = await axios.post(`${BASE_URL}/create-user`, {
         fullname,
@@ -22,47 +24,46 @@ export const AuthProvider = ({children}) => {
         password,
         confirmPassword,
       });
-
-      console.log('Response from API:', response.data); // Log response for debugging
-
+  
+      console.log('Response from API:', response.data);
+  
       if (response.data.success) {
-        const userInfo = response.data; // Assuming response.data contains user info
-        // Access user email from response
-        console.log('User email:', email); // Log user email for debugging
-        console.log('Response data ', response.data);
-        //navigation.navigate('Confirmation');
-
-        return response.data;
+        console.log('Response data', response.data);
+        setIsLoading(false);
+        navigation.navigate('Confirmation', { email }); // Utilisez navigation ici
       } else {
-        throw new Error(response.data.message || 'Signup failed'); // Throw specific error
+        setIsLoading(false);
+        throw new Error(response.data.message || 'Signup failed');
       }
     } catch (error) {
       console.error('Error signing up:', error);
-      setIsLoading(false); // Move setIsLoading(false) here for error case
-      throw error; // Re-throw for further handling
+      setIsLoading(false);
+      throw error;
     }
   };
-
-  const confirm = async (verificationCode) => {
+  
+  const confirm = async (verificationCode, email, navigation) => {
     setIsLoading(true);
     try {
       const response = await axios.post(`${BASE_URL}/verify-email`, {
-        verificationCode: verificationCode
+        verificationCode
       });
-      //console.log('Response from API:', response);
+  
       if (response.data.success) {
         console.log('User verified!');
         setIsLoading(false);
-        return response.data.success;
+        navigation.navigate('Success', { email }); // Utilisez navigation ici
       } else {
         alert("Invalid Code!");
+        setIsLoading(false);
       }
     } catch (error) {
-      console.log(error);
+      console.error('Error confirming verification code:', error);
       alert("Error confirming verification code!");
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
+  
 
   const login = async (email, password) => {
     setIsLoading(true);
@@ -82,7 +83,8 @@ export const AuthProvider = ({children}) => {
       console.log('User Token:' + userInfo.token);
       AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
       AsyncStorage.setItem('userToken', userInfo.token);
-  
+      AsyncStorage.setItem('refreshToken', userInfo.refreshToken);
+      console.log("rfresh" , userInfo.refreshToken);
       setIsLoading(false); // Mettre isLoading à false une fois la requête terminée avec succès
   
       return userInfo;
@@ -142,19 +144,24 @@ export const AuthProvider = ({children}) => {
     }
   };
   
-
-  const forgotPassword = async email => {
+  const forgotPassword = async (email, navigation) => {
     setIsLoading(true);
     try {
-      const resp = await axios.post(`${BASE_URL}/forgot-password`, {email});
-      console.log('Reset password email sent successfully');
+      const resp = await axios.post(`${BASE_URL}/forgot-password`, { email });
+     if(resp.data.success){
+      console.log(resp.data);
       setIsLoading(false);
-      return resp.data;
-      //return resp;
+      navigation.navigate('Code', { email });
+      
+      
+      return resp.data;}else{
+        setIsLoading(false);
+        alert(resp.data.message)
+      }
+      
     } catch (error) {
       console.error('Error sending reset password email:', error);
-      // Afficher un message d'erreur à l'utilisateur ou effectuer d'autres actions en cas d'erreur
-      // Vous pouvez également renvoyer l'erreur pour une gestion plus avancée
+      setIsLoading(false);
       throw error;
     }
   };
@@ -173,7 +180,6 @@ export const AuthProvider = ({children}) => {
       throw error;
     }
   };
-
   
   const logout = async () => {
     setIsLoading(true);
@@ -185,22 +191,22 @@ export const AuthProvider = ({children}) => {
         return; // Sortir de la fonction si aucun token n'est trouvé
       }
 
-      const resp = await axios.post(`${BASE_URL}/sign-out`, null, {
-        headers: {
-          Authorization: `Bearer ${storedToken}`, // Utiliser le token stocké pour l'authentification
-        },
-      });
-      if (resp.data.success) {
-        // Déconnexion réussie
+      // const resp = await axios.post(`${BASE_URL}/sign-out`, null, {
+      //   headers: {
+      //     Authorization: `Bearer ${storedToken}`, // Utiliser le token stocké pour l'authentification
+      //   },
+      // });
+      // if (resp.data.success) {
+      //   // Déconnexion réussie
         setUserToken(null);
         AsyncStorage.removeItem('userInfo');
         AsyncStorage.removeItem('userToken');
         console.log('Logged out successfully');
-      } else {
-        // Gestion des erreurs côté frontend si la déconnexion a échoué
-        console.error('Logout failed:', resp.data.message);
-        // Affichez un message à l'utilisateur ou redirigez-le vers la page de connexion, par exemple
-      }
+      // } else {
+      //   // Gestion des erreurs côté frontend si la déconnexion a échoué
+      //   console.error('Logout failed:', resp.data.message);
+      //   // Affichez un message à l'utilisateur ou redirigez-le vers la page de connexion, par exemple
+      // }
     } catch (error) {
       // Gestion des erreurs réseau ou autres erreurs
       console.error('Error during logout:', error);
@@ -208,39 +214,20 @@ export const AuthProvider = ({children}) => {
       setIsLoading(false);
     }
   };
-
-
-  const isLoggedIn = async () => {
-    try {
-      setIsLoading(true);
-      let userInfo = await AsyncStorage.getItem('userInfo');
-      let userToken = await AsyncStorage.getItem('userToken');
-      userInfo = JSON.parse(userInfo);
-
-      if (userInfo) {
-        setUserToken(userToken);
-        setUserInfo(userInfo);
-      }
-
-      setIsLoading(false);
-    } catch (error) {
-      console.log(`isLogged in error ${error}`);
-    }
-  };
-
+  
   const updateUserProfile = async updatedData => {
     try {
       const formData = new FormData();
-  
+      
       // Append each field to the FormData object
       for (const key in updatedData) {
         formData.append(key, updatedData[key]);
       }
   
       // Append the image file to the FormData object
-      if (updatedData.avatar) {
+      if (updatedData.profile) {
         formData.append('profile', {
-          uri: updatedData.avatar,
+          uri: updatedData.profile,
           type: 'image/jpeg',
           name: 'avatar.jpg',
         });
@@ -250,8 +237,7 @@ export const AuthProvider = ({children}) => {
       const response = await fetch(`${BASE_URL}/upload-profile`, {
         method: 'PUT',
         headers: {
-          Authorization: `jwt ${userToken}`,
-          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${userToken}`,
         },
         body: formData,
       });
@@ -267,32 +253,72 @@ export const AuthProvider = ({children}) => {
         ...userInfo,
         user: {
           ...userInfo.user,
-          ...updatedData,
+          ...data.user, // Ensure to merge the updated user data
         },
       };
   
       setUserInfo(updatedUserInfo); // Mettre à jour les données utilisateur dans le contexte
-      AsyncStorage.setItem('userInfo', JSON.stringify(updatedUserInfo)); // Stocker les données utilisateur mises à jour dans AsyncStorage
+      await AsyncStorage.setItem('userInfo', JSON.stringify(updatedUserInfo)); // Stocker les données utilisateur mises à jour dans AsyncStorage
   
       console.log('Profile updated successfully:', data);
-  
-      // Handle the response if needed
     } catch (error) {
       console.error('Error updating profile:', error);
       // Gérer les erreurs ici
     }
   };
-  
+  if (isLoading) {
+     <CustomLoader />;
+} 
+
  
 
   useEffect(() => {
-    isLoggedIn();
-  }, []);
-  
-  if (isLoading) {
-    return <CustomLoader />;
-  }
+    const startTokenRefreshTimer = async () => {
+      const refreshInterval = 60 * 60 * 1000; // 30 minutes
 
+      const timerId = setTimeout(async () => {
+        try {
+          const refreshToken = await AsyncStorage.getItem('refreshToken');
+
+          const response = await axios.post(`${BASE_URL}/refresh`, {
+            token: refreshToken,
+          });
+
+          const { token: newToken, refreshToken: newRefreshToken } = response.data;
+
+          await AsyncStorage.setItem('userToken', newToken);
+          await AsyncStorage.setItem('refreshToken', newRefreshToken);
+
+          startTokenRefreshTimer();
+        } catch (error) {
+          console.error('Error refreshing token:', error);
+        }
+      }, refreshInterval);
+
+      return () => clearTimeout(timerId); // Nettoyer le timer lorsqu'il n'est plus nécessaire
+    };
+
+    const loadInitialData = async () => {
+      setIsLoading(true);
+      try {
+        const storedUserToken = await AsyncStorage.getItem('userToken');
+        const storedUserInfo = await AsyncStorage.getItem('userInfo');
+        if (storedUserToken && storedUserInfo) {
+          setUserToken(storedUserToken);
+          setUserInfo(JSON.parse(storedUserInfo));
+        }
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    loadInitialData();
+  }, []);
+
+  
+ 
 
   return (
     <AuthContext.Provider
@@ -301,7 +327,6 @@ export const AuthProvider = ({children}) => {
         logout,
         signup,
         forgotPassword,
-        setUserInfo,
         resetPasssword,
         signInOrSignUpWithGoogle,
         isLoading,

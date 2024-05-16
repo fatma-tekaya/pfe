@@ -43,7 +43,7 @@ const ProfileScreen = () => {
       setImage(image.path);
     });
   };
-  
+
   const choosePhotoFromLibrary = () => {
     ImagePicker.openPicker({
       width: 300,
@@ -58,9 +58,9 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     if (userInfo.user) {
-      setFullname(userInfo.user.fullname ||userInfo.user.name|| '');
-      setEmail(userInfo.user.email ||  '');
-      setGender(userInfo.user.gender  || null);
+      setFullname(userInfo.user.fullname || userInfo.user.name || '');
+      setEmail(userInfo.user.email || '');
+      setGender(userInfo.user.gender || null);
       setHeight(userInfo.user.height || '');
       setWeight(userInfo.user.weight || '');
       setLocation(userInfo.user.location || '');
@@ -70,13 +70,13 @@ const ProfileScreen = () => {
       }
       // Assuming you have some logic to determine if there's an image or not
       // For instance, if there's an image URL in userInfo.user.avatar, you might set it like this:
-      setImage(userInfo.user.avatar||userInfo.user.photo || null);
+      setImage(userInfo.user.avatar || userInfo.user.photo || null);
     }
   }, [userInfo]);
   const getUpdatedData = () => {
     const updatedData = {};
 
-    if (fullname ) {
+    if (fullname) {
       updatedData.fullname = fullname;
     }
     if (email) {
@@ -94,11 +94,11 @@ const ProfileScreen = () => {
     if (weight) {
       updatedData.weight = weight;
     }
+    if (date) updatedData.birthdate = date.toISOString(); // Assurez-vous de formater correctement la date
     if (image) {
       updatedData.profile = image;
     } else {
-      // Si aucune nouvelle image n'est sélectionnée, supprimez l'avatar du backend
-      updatedData.avatar = ''; // Assurez-vous que cette valeur correspond à la logique de suppression de l'avatar dans votre backend
+      updatedData.profile = ''; // Suppression de l'avatar si aucune image n'est fournie
     }
 
     return updatedData;
