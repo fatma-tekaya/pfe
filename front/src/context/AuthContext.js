@@ -80,7 +80,7 @@ export const AuthProvider = ({children}) => {
       setUserInfo(userInfo);
       setUserToken(userInfo.token);
   
-      console.log('User Token:' + userInfo.token);
+      //console.log('User Token:' + userInfo.token);
       AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
       AsyncStorage.setItem('userToken', userInfo.token);
       AsyncStorage.setItem('refreshToken', userInfo.refreshToken);

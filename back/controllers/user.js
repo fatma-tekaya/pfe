@@ -231,95 +231,72 @@ exports.userSignIn = async (req, res) => {
   }
 };
 
-// Controller pour la connexion via Google
 exports.signInWithGoogle = async (req, res) => {
   console.log("User here ", req.body.user);
-  const { email, name, photo, idToken } = req.body.user;
+  const { email, name, photo, idToken, gender, birthdate, weight, height, location } = req.body.user;
 
   try {
-    let user = null;
-    // Vérifiez si l'utilisateur existe déjà dans la base de données en utilisant son email
-    if (email) {
-      user = await User.findOne({ email });
-      console.log("classic user ", user)
-    }
+    let user = await User.findOne({ email });
+    console.log("User found: ", user);
 
     if (user) {
-      // Utilisateur existant : mettez à jour ses informations avec celles fournies par Google
+      // Mise à jour de l'utilisateur existant avec les informations potentiellement nouvelles
       user.fullname = name;
-      user.avatar = photo ? photo : user.avatar; // Mettez à jour la photo uniquement si une nouvelle photo est fournie
-      user.email = email 
-      user.googleToken = idToken
-      //user.token = idToken
-      // Mise à jour d'autres champs si nécessaire
-
-      // TODO REVIEW
-      // Générez ou récupérez le token JWT pour l'utilisateur existant
-      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "1d",
-      });
-
-      // Ajoutez le nouveau token à la liste des tokens de l'utilisateur existant
-      //user.tokens.push({ token });
-
-      // Enregistrez les modifications de l'utilisateur
+      user.avatar = photo || user.avatar;
+      user.googleToken = idToken;
+      user.gender = gender || user.gender; // Mettre à jour seulement si fourni
+      user.birthdate = birthdate || user.birthdate;
+      user.weight = weight || user.weight;
+      user.height = height || user.height;
+      user.location = location || user.location;
       await user.save();
-
-      console.log("User signed in successfully");
-      console.log("final user here ", user)
-      // Répondez avec un message de succès et le token
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "User signed in successfully",
-          token,
-          user,
-        });
+    } else {
+      // Création d'un nouvel utilisateur si non trouvé
+      user = new User({
+        fullname: name,
+        email,
+        avatar: photo || "",
+        verified: true,
+        googleToken: idToken,
+        gender: gender, // Ajoutez ces champs comme propriétés du nouvel utilisateur
+        birthdate: birthdate,
+        weight: weight,
+        height: height,
+        location: location
+      });
+      await user.save();
     }
 
-    // Si l'utilisateur n'existe pas, créez un nouvel utilisateur en utilisant les informations fournies par Google
-    const newUser = new User({
-      fullname: name,
-      email: email,
-      avatar: photo ? photo : "",
-      verified: true,
-      birthdate: null,
-      location: "",
-      gender: null,
-      height: null,
-      weight: null,
-      // Stockez l'identifiant Google dans un champ différent
-      googleToken: idToken,
-      // Ajoutez d'autres champs si nécessaire
-    });
+    // Génération des tokens
+    const token = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
-    // Générez un token JWT pour l'authentification de l'utilisateur
-    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
-
-    // Ajoutez le nouveau token à la liste des tokens du nouvel utilisateur
-    //newUser.tokens.push({ token });
-
-    // Enregistrez le nouvel utilisateur dans la base de données
-    await newUser.save();
-
-    console.log("User registered and signed in successfully");
-
-    // Répondez avec un message de succès et le token
-    res.status(201).json({
+    // Retour des informations de l'utilisateur et des tokens
+    console.log("User signed in successfully: ", user.fullname);
+    res.status(user ? 200 : 201).json({
       success: true,
-      message: "User registered and signed in successfully",
+      message: "User signed in successfully",
       token,
-      user,
+      refreshToken,
+      user: {
+        _id: user._id,
+        fullname: user.fullname,
+        email: user.email,
+        avatar: user.avatar,
+        verified: true,
+        gender: user.gender,
+        birthdate: user.birthdate,
+        weight: user.weight,
+        height: user.height,
+        location: user.location
+      }
     });
   } catch (error) {
     console.error("Error signing in with Google:", error);
-    // Gérez les erreurs internes du serveur
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 
 // Contrôleur pour déconnecter l'utilisateur
 // exports.signOut = async (req, res) => {

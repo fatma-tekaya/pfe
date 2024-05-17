@@ -8,11 +8,33 @@ import HomeScreen from '../screens/HomeScreen';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import SignDetailsScreen from '../screens/SignDetailsScreen';
 import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
-import MessagesScreen from '../screens/MessagesScreen';
+import MessagesScreen from '../screens/ConversationScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import ConversationsListScreen from '../screens/ConversationsListScreen';
+import ConversationScreen from '../screens/ConversationScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+
+
+
+const MessagesStack = createNativeStackNavigator();
+const MessagesStackNavigator = () => (
+  <MessagesStack.Navigator>
+    <MessagesStack.Screen
+      name="ConversationsList"
+      component={ConversationsListScreen}
+      options={{ headerShown: true, title: 'Conversations' }}
+    />
+    <MessagesStack.Screen
+      name="Conversation"
+      component={ConversationScreen}
+      options={({ route }) => ({ title: route.params.conversationTitle })}
+    />
+    
+  </MessagesStack.Navigator>
+);
+
 const HomeStack = () => {
   return (
     <Stack.Navigator>
@@ -55,19 +77,18 @@ const TabNavigator = () => {
         })}
       />
    
-      <Tab.Screen
+   
+
+<Tab.Screen
         name="Messages"
-        component={MessagesScreen}
+        component={MessagesStackNavigator} // Updated to use stack navigator
         options={{
-          tabBarIcon: ({color, size}) => (
-            <Ionicons
-              name="chatbox-ellipses-outline"
-              color={color}
-              size={size}
-            />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="chatbox-ellipses-outline" color={color} size={size} /> 
           ),
         }}
       />
+
       <Tab.Screen
         name="Favorite"
         component={FavoriteScreen}
