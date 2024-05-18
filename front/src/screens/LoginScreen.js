@@ -7,7 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import LoginSVG from '../assets/images/log.svg';
@@ -23,7 +23,7 @@ const LoginScreen = ({navigation}) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
-  const {login, setIsLoading, signInOrSignUpWithGoogle} = useContext(AuthContext);
+  const {login, setIsLoading, signInOrSignUpWithGoogle,userInfo} = useContext(AuthContext);
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
@@ -34,7 +34,9 @@ const LoginScreen = ({navigation}) => {
     }
   
     try {
-      const resp = await login(email, password);
+      let FCMtoken = await AsyncStorage.getItem('fcm_token')
+      //console.log("fcmtoken ici "+FCMtoken)
+      const resp = await login(email, password,FCMtoken);
   
       // Vérifiez si l'authentification est réussie
       if (resp.success) {

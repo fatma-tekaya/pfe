@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const axios = require('axios');
 const bcrypt = require("bcrypt");
 const cloudinary = require("../helper/imageUpload");
 const nodemailer = require("nodemailer");
@@ -33,10 +34,9 @@ const sendVerificationCode = async (toEmail, verificationCode) => {
     console.error("Erreur lors de l'envoi du code de vérification :", error);
   }
 };
-
-// Fonction de creation d'utilisateurq
+//fonction cree user 
 exports.createUser = async (req, res) => {
-  const { fullname, email, password,confirmPassword } = req.body;
+  const { fullname, email, password, confirmPassword,FCMtoken } = req.body;
 
   // Vérification des erreurs de validation
   const errors = validationResult(req);
@@ -63,20 +63,36 @@ exports.createUser = async (req, res) => {
     // Hachage du mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Enregistrement de l'utilisateur dans la base de données avec verified = false
-    const newUser = new User({
-      fullname,
-      email,
-      password: hashedPassword, // Mot de passe haché
-      verified: false,
-      verificationCode, // Utilisation du nouveau nom du champ
+    // Création du canal dans ThingSpeak
+    const thingspeakResponse = await axios.post('https://api.thingspeak.com/channels.json', {
+      api_key: '9Q84GLMDN0DIJLRR',
+      name: 'signevitaux',
+      field1: 'température',
+      field2: 'rythmeCardiaque',
+      field3: 'spo2'
     });
 
-    await newUser.save();
+    // Vérification de la réponse de ThingSpeak
+    if (thingspeakResponse.status === 200) {
+      const Info = thingspeakResponse.data; // Récupérer l'ID du canal à partir de la réponse
+      
+      // Enregistrement de l'utilisateur dans la base de données avec l'ID du canal
+      const newUser = new User({
+        fullname,
+        email,
+        password: hashedPassword,
+        verified: false,
+        verificationCode,
+        channelInfo:Info, 
+        FCMtoken:FCMtoken
+      });
+    
+      await newUser.save();
 
-    res
-      .status(200)
-      .json({ success: true, message: `Verification code sent to ${email}` });
+      res.status(200).json({ success: true, message: `User created. Verification code sent to ${email}` });
+    } else {
+      res.status(500).json({ success: false, message: "Error creating ThingSpeak channel" });
+    }
   } catch (error) {
     console.error("Error while creating user:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -121,7 +137,7 @@ exports.confirmEmailAndRegisterUser = async (req, res) => {
 
 // Contrôleur pour connecter un utilisateur
 exports.userSignIn = async (req, res) => {
-  const { email, password } = req.body; // Extraction des données du corps de la requête
+  const { email, password ,FCMtoken} = req.body; // Extraction des données du corps de la requête
   try {
     const user = await User.findOne({ email }); // Recherche de l'utilisateur dans la base de données
     if (!user) {
@@ -131,7 +147,7 @@ exports.userSignIn = async (req, res) => {
         message: "User not found with the given email!",
       });
     }
-    if(!user.verified){
+    if (!user.verified) {
       console.log('User is not verified Yet!')
       return res.json({
         success: false,
@@ -153,7 +169,11 @@ exports.userSignIn = async (req, res) => {
 
     // Ajout du nouveau token à l'array tokens de l'utilisateur
     user.tokens.push({ token });
-
+    //fcm token 
+    if(!!FCMtoken){
+      user.FCMtoken=FCMtoken
+      //user.save()
+   }
     // Sauvegarde de l'utilisateur avec le nouveau token
     await user.save();
     console.log("user signed in successfully")
@@ -164,6 +184,8 @@ exports.userSignIn = async (req, res) => {
         email: user.email,
         location: user.location,
         birthdate: user.birthdate,
+        channelInfo:user.channelInfo,
+        FCMtoken:user.FCMtoken,
         gender: user.gender,
         height: user.height,
         weight: user.weight,
@@ -219,7 +241,7 @@ exports.signInWithGoogle = async (req, res) => {
       fullname: name,
       email: email,
       avatar: photo ? photo : "",
-      verified:true,
+      verified: true,
       // Stockez l'identifiant Google dans un champ différent
       googleToken: idToken,
       // Ajoutez d'autres champs si nécessaire
@@ -283,14 +305,14 @@ exports.uploadProfile = async (req, res) => {
       .status(401)
       .json({ success: false, message: 'unauthorized access!' }); // Si l'utilisateur n'est pas authentifié, renvoyer un message d'erreur
 
-  const { fullname , birthdate, location, gender, height, weight } = req.body;
+  const { fullname, birthdate, location, gender, height, weight } = req.body;
   const avatar = req.file ? req.file.path : null; // Si une nouvelle image est fournie, utilisez-la, sinon, laissez-la nulle
 
   try {
     // Construction de l'objet de mise à jour en fonction des champs fournis
     const updateFields = {};
     if (fullname) updateFields.fullname = fullname;
-    
+
     if (birthdate) updateFields.birthdate = birthdate;
     if (location) updateFields.location = location;
     if (gender) updateFields.gender = gender;
@@ -310,7 +332,7 @@ exports.uploadProfile = async (req, res) => {
     // Mise à jour de l'utilisateur dans la base de données si des champs à mettre à jour sont fournis
     if (Object.keys(updateFields).length > 0) {
       let updatedUser;
-    {
+      {
         // Si l'utilisateur n'est pas connecté avec Google, mettez simplement à jour son profil
         updatedUser = await User.findByIdAndUpdate(
           user._id,
@@ -451,7 +473,7 @@ exports.resetPassword = async (req, res) => {
 
     // Vérifier si l'utilisateur existe
     if (!user) {
-      console.log("Invalid verification code" )
+      console.log("Invalid verification code")
       return res
         .status(404)
         .json({ success: false, message: "Invalid verification code" });
@@ -487,7 +509,7 @@ exports.resetPassword = async (req, res) => {
     user.password = hashedPassword;
     user.verifUserCode = null; // Effacer le code de vérification après réinitialisation
     await user.save();
-    console.log("Password reset successfully" )
+    console.log("Password reset successfully")
     // Répondre avec un message de succès
     res.json({ success: true, message: "Password reset successfully" });
   } catch (error) {

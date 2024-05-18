@@ -8,7 +8,7 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import InputField from '../components/InputField';
 import {AuthContext} from '../context/AuthContext';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -50,9 +50,10 @@ const RegisterScreen = () => {
     }
     try {
       setIsLoading(true)
-
+      
+      let FCMtoken = await AsyncStorage.getItem('fcm_token')
      
-        await signup(fullname, email, password,confirmPassword).then(userInfo => {
+        await signup(fullname, email, password,confirmPassword,FCMtoken).then(userInfo => {
           if (userInfo && userInfo.success) {
            setIsLoading(false)
            navigation.navigate('Confirmation', {email}); // Navigate to Confirmation screen after successful signup

@@ -14,13 +14,14 @@ export const AuthProvider = ({children}) => {
   const [userInfo, setUserInfo] = useState(null);
 
 
-  const signup = async (fullname, email, password,confirmPassword) => {
+  const signup = async (fullname, email, password,confirmPassword,FCMtoken) => {
     try {
       const response = await axios.post(`${BASE_URL}/create-user`, {
         fullname,
         email,
         password,
         confirmPassword,
+        FCMtoken
       });
 
       console.log('Response from API:', response.data); // Log response for debugging
@@ -64,18 +65,19 @@ export const AuthProvider = ({children}) => {
     setIsLoading(false);
   };
 
-  const login = async (email, password) => {
+  const login = async (email, password,FCMtoken) => {
     setIsLoading(true);
-  
+   
     try {
       const response = await axios.post(`${BASE_URL}/sign-in`, {
         email,
         password,
+        FCMtoken
       });
   
-      const userInfo = response.data;
-      console.log(userInfo);
-  
+      const userInfo = response.data; 
+      
+      
       setUserInfo(userInfo);
       setUserToken(userInfo.token);
   
@@ -244,9 +246,9 @@ export const AuthProvider = ({children}) => {
     isLoggedIn();
   }, []);
   
-  if (isLoading) {
-    return <CustomLoader />;
-  }
+   if (isLoading) {
+     return <CustomLoader />;
+   }
 
 
   return (
@@ -256,7 +258,6 @@ export const AuthProvider = ({children}) => {
         logout,
         signup,
         forgotPassword,
-        
         resetPasssword,
         signInOrSignUpWithGoogle,
         isLoading,
