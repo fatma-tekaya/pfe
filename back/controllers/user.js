@@ -381,34 +381,28 @@ exports.uploadPicture = async (req, res) => {
   const { user } = req; // Get the user from the request
 
   if (!user) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized access!" });
+    return res.status(401).json({ success: false, message: "Unauthorized access!" });
   }
 
-  const picture = req.file ? req.file.path : null; // Get the uploaded picture
+  const picture = req.file ? req.file.path : null;
+  const label = req.body.label; // Recevoir la prédiction du label
 
   try {
     if (picture) {
-      // Add the picture path to the user's captures array
-      user.captures.push(picture);
-
-      // Save the updated user document
+      // Ajouter le chemin de l'image et le label à l'utilisateur
+      user.captures.push({ path: picture, label: label });
       await user.save();
 
-      res
-        .status(200)
-        .json({ success: true, message: "Picture uploaded successfully" });
+      res.status(200).json({ success: true, message: "Picture and label saved successfully" });
     } else {
       res.status(400).json({ success: false, message: "No picture provided" });
     }
   } catch (error) {
-    console.error("Error uploading picture:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Server error, try again later" });
+    console.error("Error uploading picture and saving label:", error);
+    res.status(500).json({ success: false, message: "Server error, try again later" });
   }
 };
+
 
 //Fonction pour générer un code de vérification aléatoire
 const generateVerificationCode = () => {

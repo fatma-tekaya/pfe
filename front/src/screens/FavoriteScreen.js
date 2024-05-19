@@ -1,89 +1,165 @@
-import React, { useState } from 'react';
-import { View, Button, Text } from 'react-native';
-import { RNCamera } from 'react-native-camera';
+import React, { useState, useContext } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import ImagePicker from 'react-native-image-crop-picker';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext'; // Assurez-vous que le chemin est correct
+import { BASE_URL ,FLASK_API_URL} from '../config'; // Assurez-vous que le chemin est correct
 
 const FavoriteScreen = () => {
-  const [prediction, setPrediction] = useState('');
-  const [faceBox, setFaceBox] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const { userToken , setIsLoading} = useContext(AuthContext);
+  const [base64Image, setBase64Image] = useState(null);
 
-  const takePicture = async (camera) => {
-    if (camera) {
-      try {
-        const options = { quality: 0.5, base64: true };
-        const data = await camera.takePictureAsync(options);
+  const pickImageFromLibrary = () => {
+    ImagePicker.openPicker({
+        width: 300,
+        height: 400,
+        cropping: true,
+        includeBase64: true  // Include this line to get base64 image data
+    }).then(image => {
+        setSelectedImage(image.path);
+        setBase64Image(image.data);  // Store the base64 representation of the image
+    });
+};
 
-        // Création d'un objet FormData pour envoyer l'image
-        const formData = new FormData();
-        formData.append('image', {
-          uri: data.uri,
-          type: 'image/jpeg',
-          name: 'image.jpg',
-        });
+const takePhotoFromCamera = () => {
+    ImagePicker.openCamera({
+        width: 300,
+        height: 400,
+        cropping: true,
+        includeBase64: true  // Include this line to get base64 image data
+    }).then(image => {
+        setSelectedImage(image.path);
+        setBase64Image(image.data);  // Store the base64 representation of the image
+    });
+};
 
-        // Envoi de l'image capturée au serveur Flask
-        const response = await axios.post('http://192.168.215.176:8080/predict', formData);
-        console.log(response.data);
-        setPrediction(response.data.predictions);
-      } catch (error) {
-        console.error('Error:', error);
-        // Gérer l'erreur ici (par exemple, afficher un message d'erreur à l'utilisateur)
+
+const uploadImage = async () => {
+  if (!selectedImage || !base64Image) {
+    alert('Please select an image first!');
+    return;
+  }
+
+  setIsLoading(true); // Activate loading indicator
+  try {
+    const predictionResponse = await axios.post(`${FLASK_API_URL}/predict`, {
+      image: base64Image // Use the base64 image directly from the state
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken}`
       }
-    }
-  };
+    });
 
-  const handleFacesDetected = ({ faces }) => {
-    if (faces.length > 0) {
-      const face = faces[0];
-      const { bounds } = face;
-      setFaceBox({
-        width: bounds.size.width,
-        height: bounds.size.height,
-        x: bounds.origin.x,
-        y: bounds.origin.y,
+    if (predictionResponse.data && predictionResponse.data.predicted_class) {
+      alert(`Prediction: ${predictionResponse.data.predicted_class}`);
+
+      // Prepare the form data to send the image file for storage
+      const formData = new FormData();
+      formData.append('picture', {
+        uri: selectedImage,
+        type: 'image/jpeg',
+        name: 'upload.jpg'
       });
+      formData.append('label', predictionResponse.data.predicted_class);
+
+      // Send the image and label to Node.js server for storage
+      const uploadResponse = await axios.put(`${BASE_URL}/upload-picture`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+
+      if (uploadResponse.data && uploadResponse.data.success) {
+        alert('Image and prediction saved successfully!');
+      } else {
+        alert('Failed to save the image and prediction.');
+      }
     } else {
-      setFaceBox(null);
+      alert('Failed to get a valid prediction from the server.');
     }
-  };
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    alert('Upload failed!');
+  } finally {
+    setIsLoading(false); // Deactivate loading indicator
+  }
+};
+
+  
+  
+  
 
   return (
-    <View style={{ flex: 1 }}>
-      <RNCamera
-        style={{ flex: 1 }}
-        type={RNCamera.Constants.Type.front} // Utilisez "back" pour la caméra arrière
-        flashMode={RNCamera.Constants.FlashMode.off}
-        captureAudio={false}
-        onFacesDetected={handleFacesDetected}
-        faceDetectionClassifications={RNCamera.Constants.FaceDetection.Classifications.all}
-        faceDetectionLandmarks={RNCamera.Constants.FaceDetection.Landmarks.all}
-        faceDetectionMode={RNCamera.Constants.FaceDetection.Mode.fast}
-      >
-        {faceBox && (
-          <View
-            style={{
-              position: 'absolute',
-              borderWidth: 2,
-              borderColor: 'red',
-              left: faceBox.x,
-              top: faceBox.y,
-              width: faceBox.width,
-              height: faceBox.height,
-            }}
-          />
-        )}
-      </RNCamera>
-      <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-        <Button title="Prendre une photo" onPress={takePicture} />
-      </View>
-      {prediction ? (
-        <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
-          <Text>Prédiction : {prediction}</Text>
-        </View>
-      ) : null}
+    <View style={styles.container}>
+      <Text style={styles.title}>Analyze Your Skin</Text>
+      <Text style={styles.instructions}>Select an image to analyze potential skin diseases.</Text>
 
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity style={styles.button} onPress={pickImageFromLibrary}>
+          <Text style={styles.buttonText}>Choose Photo</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={takePhotoFromCamera}>
+          <Text style={styles.buttonText}>Take Photo</Text>
+        </TouchableOpacity>
+      </View>
+
+      {selectedImage && (
+        <View>
+          <Image source={{ uri: selectedImage }} style={styles.imagePreview} />
+          <TouchableOpacity style={styles.button} onPress={uploadImage}>
+            <Text style={styles.buttonText}>Upload Photo</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f4f4f4',
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  instructions: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: '#0f3f61',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  imagePreview: {
+    width: 300,
+    height: 400,
+    marginTop: 20,
+    borderRadius: 10,
+  },
+});
 
 export default FavoriteScreen;

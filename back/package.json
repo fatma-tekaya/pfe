@@ -11,6 +11,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.10.0",
     "@img/sharp-win32-x64": "^0.33.2",
+    "axios": "^1.7.0",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.0.3",
     "colors": "^1.4.0",

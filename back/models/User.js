@@ -1,6 +1,19 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+
+// Définir le sous-schéma pour les captures
+const captureSchema = new Schema({
+  path: {
+      type: String,
+      required: true
+  },
+  label: {
+      type: String,
+      required: true
+  }
+});
+
 const userSchema = new mongoose.Schema({
   fullname: {
     type: String,
@@ -51,7 +64,7 @@ verificationCode: {
     type: String,
     default: null,
   },
-  captures: [{ type: String }],
+  captures: [captureSchema], 
   conversations: [{ type: Schema.Types.ObjectId, ref: 'Conversation' }],
 
 //  roles:{
