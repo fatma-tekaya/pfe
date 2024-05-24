@@ -259,7 +259,7 @@ export const AuthProvider = ({children}) => {
   
       setUserInfo(updatedUserInfo); // Mettre à jour les données utilisateur dans le contexte
       await AsyncStorage.setItem('userInfo', JSON.stringify(updatedUserInfo)); // Stocker les données utilisateur mises à jour dans AsyncStorage
-  
+      alert('Profile updated successfully')
       console.log('Profile updated successfully:', data);
     } catch (error) {
       console.error('Error updating profile:', error);

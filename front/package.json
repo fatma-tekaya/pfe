@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.23.1",
+    "@react-native-community/geolocation": "^3.2.1",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-firebase/app": "^19.1.1",
     "@react-native-firebase/auth": "^19.1.1",
@@ -26,6 +27,7 @@
     "react-native": "0.73.6",
     "react-native-date-picker": "^5.0.0",
     "react-native-fbsdk-next": "^12.1.4",
+    "react-native-geolocation-service": "^5.3.1",
     "react-native-gesture-handler": "^2.16.1",
     "react-native-image-crop-picker": "^0.40.3",
     "react-native-image-picker": "^7.1.2",
@@ -38,7 +40,6 @@
     "react-native-unimodules": "^0.14.10",
     "react-native-vector-icons": "^10.0.3",
     "react-native-view-shot": "^3.8.0",
-    "react-native-vision-camera": "^4.0.4",
     "socket.io-client": "^4.7.5"
   },
   "devDependencies": {

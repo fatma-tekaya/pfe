@@ -12,26 +12,35 @@ import MessagesScreen from '../screens/ConversationScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ConversationsListScreen from '../screens/ConversationsListScreen';
 import ConversationScreen from '../screens/ConversationScreen';
+import SkinDetails from '../screens/SkinDetails';
+import HistoryScreen from '../screens/HistoryScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-
-
 const MessagesStack = createNativeStackNavigator();
+const FavoriteStack =createNativeStackNavigator();
+const FavoriteStackNavigator = () =>(
+  <FavoriteStack.Navigator>
+    <FavoriteStack.Screen name="Favorite" component={FavoriteScreen} 
+     options={{headerShown: false, title: 'Conversations'}}/>
+     <FavoriteStack.Screen name="History" component={HistoryScreen} 
+     options={{headerShown: true, title: 'History'}}/>
+    <FavoriteStack.Screen name="Anomaly Info" component={SkinDetails}/>
+  </FavoriteStack.Navigator>
+);
 const MessagesStackNavigator = () => (
   <MessagesStack.Navigator>
     <MessagesStack.Screen
       name="ConversationsList"
       component={ConversationsListScreen}
-      options={{ headerShown: true, title: 'Conversations' }}
+      options={{headerShown: true, title: 'Conversations'}}
     />
     <MessagesStack.Screen
       name="Conversation"
       component={ConversationScreen}
-      options={({ route }) => ({ title: route.params.conversationTitle })}
+      options={({route}) => ({title: route.params.conversationTitle})}
     />
-    
   </MessagesStack.Navigator>
 );
 
@@ -76,29 +85,31 @@ const TabNavigator = () => {
           ),
         })}
       />
-   
-   
 
-<Tab.Screen
+      <Tab.Screen
         name="Messages"
         component={MessagesStackNavigator} // Updated to use stack navigator
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbox-ellipses-outline" color={color} size={size} /> 
+          tabBarIcon: ({color, size}) => (
+            <Ionicons
+              name="chatbox-ellipses-outline"
+              color={color}
+              size={size}
+            />
           ),
         }}
       />
 
       <Tab.Screen
-        name="Favorite"
-        component={FavoriteScreen}
+        name="Favorite1"
+        component={FavoriteStackNavigator}
         options={{
           tabBarIcon: ({color, size}) => (
             <Feather name="camera" color={color} size={size} />
           ),
         }}
       />
-         <Tab.Screen
+      <Tab.Screen
         name="Notif"
         component={NotifScreen}
         options={{
@@ -109,7 +120,7 @@ const TabNavigator = () => {
           ),
         }}
       />
-       <Tab.Screen
+      <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
