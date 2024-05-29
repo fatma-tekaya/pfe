@@ -1,47 +1,36 @@
-import React, { useEffect,useState } from 'react';
-import { View ,  Text} from 'react-native';
-import { LineChart } from "react-native-chart-kit";
-import { Dimensions } from "react-native";
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import CircularProgress from 'react-native-circular-progress-indicator';
 
-// Heart rate Component
-const HeartRateComp = ({data}) => {
+const HeartRateComp = ({ data }) => {
+    const maxHeartRate = 200; // Adjust the max heart rate as needed
+
     return (
-        <View style={{ marginBottom: 30 }}>
-        
-            <LineChart
-                data={{
-                    labels: data.labels,
-                    datasets: [{ data: data.datasets[0].data }]
-                   
-                }}
-                width={Dimensions.get("window").width * 0.9}
-                height={220}
-                yAxisSuffix=" bpm" 
-                chartConfig={{
-                    backgroundColor: "#ffffff",
-                    backgroundGradientFrom: "#ffffff",
-                    backgroundGradientTo: "#ffffff",
-                    decimalPlaces: 0, // Pas besoin de décimales pour les battements par minute
-                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Couleur du texte
-                    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Couleur des étiquettes
-                    style: {
-                        borderRadius: 16,
-                    },
-                    propsForDots: {
-                        r: "6",
-                        strokeWidth: "2",
-                        stroke: "#ffa726"
-                    }
-                }}
-                bezier
-                style={{
-                    marginVertical: 8,
-                    borderRadius: 16
-                }}
+        <View style={styles.container}>
+            <CircularProgress
+                value={data}
+                radius={75}
+                maxValue={maxHeartRate}
+                textColor="#FF6347"
+                activeStrokeColor="#FF6347"
+                inActiveStrokeColor="#e0e0e0"
+                inActiveStrokeOpacity={0.5}
+                textStyle={{ fontSize: 30, fontWeight: 'bold' }}
+                duration={1000}
+                title={'BPM'}
+                titleColor="#555"
+                titleStyle={{ fontSize: 16 }}
             />
-            
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 30
+    },
+});
 
 export default HeartRateComp;

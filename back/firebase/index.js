@@ -3,6 +3,9 @@ const serviceAccount = require('./serviceAccountKey.json');
 
 firebase.initializeApp({
   credential: firebase.credential.cert(serviceAccount),
+  databaseURL: "https://smart-watch-e7244-default-rtdb.firebaseio.com/"
 });
 
-module.exports={firebase}
+const db = firebase.database();
+module.exports = db;
+

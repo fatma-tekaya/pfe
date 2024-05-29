@@ -7,11 +7,11 @@ const SpoComp = ({ data }) => {
 
     return (
         <View style={{ marginBottom: 15 }}>
-            
+
             <CircularProgress
                 value={data}
                 valueSuffix={'%'}
-                radius={120}
+                radius={80}
                 activeStrokeColor={'#2465FD'}
                 activeStrokeSecondaryColor={'#C25AFF'}
                 dashedStrokeConfig={{

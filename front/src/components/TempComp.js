@@ -17,10 +17,10 @@ const TempComp = ({ data }) => {
 
     return (
         <View >
-            
+
             <CircularProgress
                 value={data}
-                radius={120}
+                radius={80}
                 maxValue={45}
                 activeStrokeColor={'#796EFF'}
                 progressValueStyle={{ fontWeight: '100', color: 'black' }}

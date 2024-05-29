@@ -9,8 +9,13 @@ const {
   uploadPicture,
   forgotPassword,
   resetPassword,
-  confirmEmailAndRegisterUser
+  confirmEmailAndRegisterUser,
+  saveFCMToken,
 } = require("../controllers/user");
+const {
+  updatevitalsigns,
+  getVitals
+} = require("../controllers/vitaux");
 const { isAuth } = require("../middelwares/auth");
 const {
   validateUserSignUp,
@@ -35,7 +40,7 @@ const fileFilter = (req, file, cb) => {
 // Create multer instance with defined storage and file filter
 const uploads = multer({ storage, fileFilter });
 
-router.post("/create-user", validateUserSignUp,userVlidation, createUser);
+router.post("/create-user", validateUserSignUp, userVlidation, createUser);
 router.post("/verify-email", confirmEmailAndRegisterUser);
 router.post("/sign-in", validateUserSignIn, userVlidation, userSignIn);
 router.post("/sign-out", isAuth, signOut);
@@ -44,5 +49,12 @@ router.put("/upload-profile", isAuth, uploads.single("profile"), uploadProfile);
 router.put("/upload-picture", isAuth, uploads.single("picture"), uploadPicture);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
+router.post('/save-token', saveFCMToken);
+router.post('/updatesigns', updatevitalsigns);
+router.get('/getVitals', getVitals);
+
+
+
+
 
 module.exports = router;

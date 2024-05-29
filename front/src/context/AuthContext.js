@@ -1,27 +1,26 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, {createContext, useState, useEffect} from 'react';
-import {BASE_URL} from '../config';
+import React, { createContext, useState, useEffect } from 'react';
+import { BASE_URL } from '../config';
 import axios from 'axios';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {FormData} from "formdata-node";
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { FormData } from "formdata-node";
 import CustomLoader from "../components/CustomLoader";
 
 export const AuthContext = createContext();
 
-export const AuthProvider = ({children}) => {
+export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userToken, setUserToken] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
 
 
-  const signup = async (fullname, email, password,confirmPassword,FCMtoken) => {
+  const signup = async (fullname, email, password, confirmPassword) => {
     try {
       const response = await axios.post(`${BASE_URL}/create-user`, {
         fullname,
         email,
         password,
         confirmPassword,
-        FCMtoken
       });
 
       console.log('Response from API:', response.data); // Log response for debugging
@@ -65,28 +64,27 @@ export const AuthProvider = ({children}) => {
     setIsLoading(false);
   };
 
-  const login = async (email, password,FCMtoken) => {
+  const login = async (email, password) => {
     setIsLoading(true);
-   
+
     try {
       const response = await axios.post(`${BASE_URL}/sign-in`, {
         email,
-        password,
-        FCMtoken
+        password
       });
-  
-      const userInfo = response.data; 
-      
-      
+
+      const userInfo = response.data;
+
+
       setUserInfo(userInfo);
       setUserToken(userInfo.token);
-  
+
       console.log('User Token:' + userInfo.token);
       AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
       AsyncStorage.setItem('userToken', userInfo.token);
-  
+
       setIsLoading(false); // Mettre isLoading à false une fois la requête terminée avec succès
-  
+
       return userInfo;
     } catch (error) {
       console.error('Error during login:', error);
@@ -94,13 +92,13 @@ export const AuthProvider = ({children}) => {
       throw error; // Lancer une erreur avec le message d'erreur du serveur en cas d'échec
     }
   };
-  
-  
+
+
 
   const forgotPassword = async email => {
     setIsLoading(true);
     try {
-      const resp = await axios.post(`${BASE_URL}/forgot-password`, {email});
+      const resp = await axios.post(`${BASE_URL}/forgot-password`, { email });
       console.log('Reset password email sent successfully');
       setIsLoading(false);
       return resp.data;
@@ -112,11 +110,11 @@ export const AuthProvider = ({children}) => {
       throw error;
     }
   };
-  
-  const resetPasssword = async (code ,newPassword)=>{
+
+  const resetPasssword = async (code, newPassword) => {
     setIsLoading(true);
     try {
-      const resp = await axios.post(`${BASE_URL}/reset-password`, {code ,newPassword});
+      const resp = await axios.post(`${BASE_URL}/reset-password`, { code, newPassword });
       console.log(' password Reset successfully');
       setIsLoading(false);
       return resp.data;
@@ -128,7 +126,7 @@ export const AuthProvider = ({children}) => {
     }
   };
 
-  
+
   const logout = async () => {
     setIsLoading(true);
     try {
@@ -145,11 +143,11 @@ export const AuthProvider = ({children}) => {
       //   },
       // });
       // if (resp.data.success) {
-        // Déconnexion réussie
-        setUserToken(null);
-        AsyncStorage.removeItem('userInfo');
-        AsyncStorage.removeItem('userToken');
-        console.log('Logged out successfully');
+      // Déconnexion réussie
+      setUserToken(null);
+      AsyncStorage.removeItem('userInfo');
+      AsyncStorage.removeItem('userToken');
+      console.log('Logged out successfully');
       // } else {
       //   // Gestion des erreurs côté frontend si la déconnexion a échoué
       //   console.error('Logout failed:', resp.data.message);
@@ -204,7 +202,7 @@ export const AuthProvider = ({children}) => {
         idToken: idToken,
         user: user,
       });
- 
+
       const { data } = response;
       const userToken = data.token;
       const userInfo = {
@@ -215,16 +213,16 @@ export const AuthProvider = ({children}) => {
           avatar: user.photo, // Update photo field with avatar
         },
       };
-  console.log(userInfo)
- 
+      console.log(userInfo)
+
       setUserInfo(userInfo);
       setUserToken(userToken);
-  
-      
-      AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
-     console.log("userInfo",userInfo)
 
-      
+
+      AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+      console.log("userInfo", userInfo)
+
+
       // Store user information in AsyncStorage
       AsyncStorage.setItem('userToken', userToken);
 
@@ -245,10 +243,10 @@ export const AuthProvider = ({children}) => {
   useEffect(() => {
     isLoggedIn();
   }, []);
-  
-   if (isLoading) {
-     return <CustomLoader />;
-   }
+
+  if (isLoading) {
+    return <CustomLoader />;
+  }
 
 
   return (

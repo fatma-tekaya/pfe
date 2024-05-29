@@ -5,8 +5,9 @@ import {
   ImageBackground,
   TextInput,
   TouchableOpacity,
+  Alert
 } from 'react-native';
-import React, { useState, useContext ,useEffect} from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Feather from 'react-native-vector-icons/Feather';
 import Carousel from 'react-native-snap-carousel';
@@ -19,6 +20,9 @@ import { AuthContext } from '../context/AuthContext';
 import Entypo from 'react-native-vector-icons/Entypo';
 import SigneVitauxScreen from '../screens/SigneVitauxScreen';
 import socketServices from "../utils/socketService";
+import { requestUserPermission, getToken, saveTokenToServer } from '../utils/FirebaseMessagingService';
+import messaging from '@react-native-firebase/messaging';
+
 const HomeScreen = ({ navigation }) => {
   const [swipeTab, setSwipeTab] = useState(1);
   const { userInfo } = useContext(AuthContext);
@@ -29,7 +33,32 @@ const HomeScreen = ({ navigation }) => {
     setSwipeTab(value)
   }
   useEffect(() => {
-    socketServices.initialzeSocekt()
+    requestUserPermission();
+    const userEmail = userInfo.user.email;
+    getToken(userEmail);
+
+    //lorsque nouveau message FCM est reçu en premier plan
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('A new FCM message arrived!', JSON.stringify(remoteMessage));
+      const { title, body } = remoteMessage.notification;
+      Alert.alert(
+        title || 'Nouvelle notification',
+        body || 'Vous avez reçu une nouvelle notification.',
+        [{ text: 'OK' }]
+      );
+    });
+
+    //traiter les messages FCM en arrière-plan
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
+      console.log('Message handled in the background!', JSON.stringify(remoteMessage));
+    });
+
+    // Écouter les mises à jour du token
+    messaging().onTokenRefresh(token => {
+      console.log('FCM Token refreshed:', token);
+      saveTokenToServer(token, userId);
+    });
+    return unsubscribe;
   }, [])
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -127,6 +156,7 @@ const HomeScreen = ({ navigation }) => {
         </View>
         {swipeTab === 1 && (
           <View>
+
             <SigneVitauxScreen />
           </View>
         )}

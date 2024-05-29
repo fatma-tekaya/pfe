@@ -4,6 +4,7 @@ const axios = require('axios');
 const bcrypt = require("bcrypt");
 const cloudinary = require("../helper/imageUpload");
 const nodemailer = require("nodemailer");
+const db = require('../firebase/index');
 //const asyncHandler = require("express-async-handler");
 const { validationResult } = require("express-validator");
 
@@ -34,11 +35,11 @@ const sendVerificationCode = async (toEmail, verificationCode) => {
     console.error("Erreur lors de l'envoi du code de vérification :", error);
   }
 };
-//fonction cree user 
+//create User
 exports.createUser = async (req, res) => {
-  const { fullname, email, password, confirmPassword,FCMtoken } = req.body;
+  const { fullname, email, password, confirmPassword } = req.body;
 
-  // Vérification des erreurs de validation
+  // Validation check
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log("err", errors.array());
@@ -54,45 +55,42 @@ exports.createUser = async (req, res) => {
       });
     }
 
-    // Génération d'un code de vérification
+    // Generate verification code
     const verificationCode = Math.floor(100000 + Math.random() * 900000);
 
-    // Envoi du code de vérification par e-mail
+    // Send verification code via email
     await sendVerificationCode(email, verificationCode);
 
-    // Hachage du mot de passe
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Création du canal dans ThingSpeak
-    const thingspeakResponse = await axios.post('https://api.thingspeak.com/channels.json', {
-      api_key: '9Q84GLMDN0DIJLRR',
-      name: 'signevitaux',
-      field1: 'température',
-      field2: 'rythmeCardiaque',
-      field3: 'spo2'
+    // Create a new user in MongoDB
+    const newUser = new User({
+      fullname,
+      email,
+      password: hashedPassword,
+      verified: false,
+      verificationCode,
+      
     });
 
-    // Vérification de la réponse de ThingSpeak
-    if (thingspeakResponse.status === 200) {
-      const Info = thingspeakResponse.data; // Récupérer l'ID du canal à partir de la réponse
-      
-      // Enregistrement de l'utilisateur dans la base de données avec l'ID du canal
-      const newUser = new User({
-        fullname,
-        email,
-        password: hashedPassword,
-        verified: false,
-        verificationCode,
-        channelInfo:Info, 
-        FCMtoken:FCMtoken
-      });
-    
-      await newUser.save();
+    await newUser.save();
 
-      res.status(200).json({ success: true, message: `User created. Verification code sent to ${email}` });
-    } else {
-      res.status(500).json({ success: false, message: "Error creating ThingSpeak channel" });
-    }
+    // Create a corresponding entry in Firebase Realtime Database
+    const userId = newUser._id.toString();
+    const userRef = db.ref('users').child(userId);
+
+    await userRef.set({
+      fullname,
+      email,
+      vitals: {
+        temp: 0,
+        heartRate: 0,
+        spo2: 0
+      }
+    });
+
+    res.status(200).json({ success: true, message: `User created. Verification code sent to ${email}` });
   } catch (error) {
     console.error("Error while creating user:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -137,7 +135,7 @@ exports.confirmEmailAndRegisterUser = async (req, res) => {
 
 // Contrôleur pour connecter un utilisateur
 exports.userSignIn = async (req, res) => {
-  const { email, password ,FCMtoken} = req.body; // Extraction des données du corps de la requête
+  const { email, password } = req.body; // Extraction des données du corps de la requête
   try {
     const user = await User.findOne({ email }); // Recherche de l'utilisateur dans la base de données
     if (!user) {
@@ -169,11 +167,7 @@ exports.userSignIn = async (req, res) => {
 
     // Ajout du nouveau token à l'array tokens de l'utilisateur
     user.tokens.push({ token });
-    //fcm token 
-    if(!!FCMtoken){
-      user.FCMtoken=FCMtoken
-      //user.save()
-   }
+
     // Sauvegarde de l'utilisateur avec le nouveau token
     await user.save();
     console.log("user signed in successfully")
@@ -184,8 +178,8 @@ exports.userSignIn = async (req, res) => {
         email: user.email,
         location: user.location,
         birthdate: user.birthdate,
-        channelInfo:user.channelInfo,
-        FCMtoken:user.FCMtoken,
+        channelInfo: user.channelInfo,
+        FCMtoken: user.FCMtoken,
         gender: user.gender,
         height: user.height,
         weight: user.weight,
@@ -517,5 +511,26 @@ exports.resetPassword = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Error resetting password" });
+  }
+};
+
+
+// Fonction pour enregistrer le token FCM
+exports.saveFCMToken = async (req, res) => {
+  const { token, email } = req.body;
+
+  try {
+    // Trouver l'utilisateur et mettre à jour le FCMtoken
+    const user = await User.findOneAndUpdate({ email: email }, { FCMtoken: token }, { new: true });
+
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    console.log('Token enregistré avec succès');
+    res.status(200).send('Token enregistré avec succès');
+  } catch (error) {
+    console.error('Erreur lors de l\'enregistrement du token', error);
+    res.status(500).send('Erreur lors de l\'enregistrement du token');
   }
 };
