@@ -7,5 +7,6 @@ firebase.initializeApp({
 });
 
 const db = firebase.database();
-module.exports = db;
+const firestore = firebase.firestore();
+module.exports = {db,firebase,firestore};
 

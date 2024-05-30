@@ -1,4 +1,4 @@
-const db = require('../firebase/index');
+const {db} = require('../firebase/index');
 const express = require('express');
 
 //  update vital signs

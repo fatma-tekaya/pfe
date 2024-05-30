@@ -1,4 +1,4 @@
-import React from 'react';
+import React , { useState, useEffect, useContext }from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import NotifScreen from '../screens/NotifScreen';
 import FavoriteScreen from '../screens/FavoriteScreen';
@@ -10,10 +10,13 @@ import SignDetailsScreen from '../screens/SignDetailsScreen';
 import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
 import MessagesScreen from '../screens/MessagesScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-
+import { AuthContext } from '../context/AuthContext';
+import database from '@react-native-firebase/database';
+import firestore from '@react-native-firebase/firestore';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const HomeStack = () => {
+  
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -32,6 +35,51 @@ const HomeStack = () => {
   );
 };
 const TabNavigator = () => {
+  const { userInfo } = useContext(AuthContext);
+  const [unseenCount, setUnseenCount] = useState(0);
+
+  useEffect(() => {
+    let unsubscribe = null;
+
+    const fetchNotifications = (userId) => {
+      unsubscribe = firestore()
+        .collection('notifications')
+        .where('userId', '==', userId)
+        .where('seen', '==', false)
+        .onSnapshot(snapshot => {
+          setUnseenCount(snapshot.size);
+        });
+    };
+
+    const fetchUserId = async () => {
+      try {
+        const snapshot = await database()
+          .ref('users')
+          .orderByChild('email')
+          .equalTo(userInfo.user.email)
+          .once('value');
+
+        if (snapshot.exists()) {
+          const userId = Object.keys(snapshot.val())[0];
+          fetchNotifications(userId);
+        } else {
+          console.error('No user found with the provided email.');
+        }
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+      }
+    };
+
+    if (userInfo.user.email) {
+      fetchUserId();
+    }
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [userInfo]);
   return (
     <Tab.Navigator
       screenOptions={{
@@ -79,15 +127,15 @@ const TabNavigator = () => {
       />
          <Tab.Screen
         name="Notif"
-        component={NotifScreen}
         options={{
-          tabBarBadge: 3,
+          tabBarBadge: unseenCount > 0 ? unseenCount : null,
           tabBarBadgeStyle: {backgroundColor: 'yellow'},
           tabBarIcon: ({color, size}) => (
             <Ionicons name="notifications-outline" color={color} size={size} />
           ),
         }}
-      />
+      >{props => <NotifScreen {...props} setUnseenCount={setUnseenCount} />}
+      </Tab.Screen>
        <Tab.Screen
         name="Profile"
         component={ProfileScreen}

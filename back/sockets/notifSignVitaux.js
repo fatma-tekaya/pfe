@@ -1,11 +1,11 @@
 const axios = require('axios');
-const db = require('../firebase/index'); // Ensure this is correctly pointing to your Firebase config
+const {db,firestore,firebase } = require('../firebase/index'); // Ensure this is correctly pointing to your Firebase config
 const User = require("../models/User");
-
+//const firestore = firebase.firestore();
 // Function to send notifications via FCM
-const sendNotification = async (userToken, message) => {
+const sendNotification = async (userToken, message,userId) => {
     const serverKey = process.env.FCM_SERVER_KEY;
-
+    console.log("sendnotif here",userId)
     if (!serverKey) {
         console.error('FCM Server Key is not defined');
         return;
@@ -29,6 +29,15 @@ const sendNotification = async (userToken, message) => {
                 },
             });
             console.log('Notification envoyée avec succès');
+            // Save the notification to Firestore
+            await firestore.collection('notifications').add({
+                userId,
+                message,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                seen: false,
+            });
+            console.log('Notification saved to Firestore');
+            
         } catch (error) {
             console.error('Erreur lors de l\'envoi de la notification:', error);
         }
@@ -61,12 +70,12 @@ const startListening = () => {
         const userData = snapshot.val();
         const vitals = userData.vitals;
         const email = userData.email; // Assuming email is stored in Firebase
-
+        console.log("startlisten here",userId)
         if (vitals) {
             // Get prediction from Flask API
             const prediction = await processPredictions(vitals);
-            
-            
+
+
             if (prediction && prediction.length > 0) {
                 // Send notification only if an anomaly is detected
                 if (prediction[0] === "Abnormal") {
@@ -77,7 +86,7 @@ const startListening = () => {
                     try {
                         const user = await User.findOne({ email });
                         if (user && user.FCMtoken) {
-                            await sendNotification(user.FCMtoken, message);
+                            await sendNotification(user.FCMtoken, message,userId);
                         } else {
                             console.log('User not found in MongoDB or FCM token is missing');
                         }
@@ -96,8 +105,8 @@ const startListening = () => {
 // Function to process predictions
 const processPredictions = async (vitals) => {
     try {
-         // Map input vitals to the expected feature names
-         const formattedVitals = {
+        // Map input vitals to the expected feature names
+        const formattedVitals = {
             " HR (BPM)": vitals.heartRate,
             " SpO2 (%)": vitals.spo2,
             "TEMP (*C)": vitals.temp
