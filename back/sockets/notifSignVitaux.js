@@ -5,7 +5,7 @@ const User = require("../models/User");
 // Function to send notifications via FCM
 const sendNotification = async (userToken, message,userId) => {
     const serverKey = process.env.FCM_SERVER_KEY;
-    console.log("sendnotif here",userId)
+   
     if (!serverKey) {
         console.error('FCM Server Key is not defined');
         return;
@@ -69,8 +69,8 @@ const startListening = () => {
         const userId = snapshot.key;
         const userData = snapshot.val();
         const vitals = userData.vitals;
-        const email = userData.email; // Assuming email is stored in Firebase
-        console.log("startlisten here",userId)
+        const email = userData.email; 
+        
         if (vitals) {
             // Get prediction from Flask API
             const prediction = await processPredictions(vitals);

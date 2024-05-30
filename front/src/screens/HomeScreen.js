@@ -37,16 +37,7 @@ const HomeScreen = ({ navigation }) => {
     const userEmail = userInfo.user.email;
     getToken(userEmail);
 
-    //lorsque nouveau message FCM est reçu en premier plan
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log('A new FCM message arrived!', JSON.stringify(remoteMessage));
-      const { title, body } = remoteMessage.notification;
-      Alert.alert(
-        title || 'Nouvelle notification',
-        body || 'Vous avez reçu une nouvelle notification.',
-        [{ text: 'OK' }]
-      );
-    });
+    
 
     //traiter les messages FCM en arrière-plan
     messaging().setBackgroundMessageHandler(async remoteMessage => {
@@ -58,7 +49,7 @@ const HomeScreen = ({ navigation }) => {
       console.log('FCM Token refreshed:', token);
       saveTokenToServer(token, userId);
     });
-    return unsubscribe;
+   
   }, [])
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
