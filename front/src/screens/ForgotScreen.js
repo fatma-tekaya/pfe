@@ -6,27 +6,21 @@ import CustomButton from '../components/CustomButton';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 
-const ForgotScreen = ({navigation}) => {
+const ForgotScreen = () => {
  
-  const { forgotPassword } = useContext(AuthContext);
+  const { forgotPassword  } = useContext(AuthContext);
   const [email, setEmail] = useState(null);
+  const navigation = useNavigation();
 
   const navigateToCodeScreen = async () => {
     try {
-      // Appel de la fonction forgotPassword pour envoyer le code de réinitialisation
-      const response = await forgotPassword(email);
+      const resp = await forgotPassword(email, navigation);
       
-      // Si la réinitialisation du mot de passe est réussie et redirectTo est défini sur 'Code'
-      if (response.success) {
-        console.log('navigationn', {email})
-        navigation.navigate('Code',{email});
-      } else {
-        // Gérer d'autres cas si nécessaire
-        console.log("La redirection vers 'CodeScreen' n'est pas définie.");
-      }
+        console.log(resp.data)
+       
+      
     } catch (error) {
-      console.error('Erreur lors de l\'envoi de l\'e-mail de réinitialisation du mot de passe :', error);
-      // Gérer l'erreur (par exemple, afficher un message d'erreur à l'utilisateur)
+      console.error('Forgot password error:', error);
     }
   };
 

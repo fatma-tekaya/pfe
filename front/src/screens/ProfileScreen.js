@@ -119,16 +119,50 @@ const ProfileScreen = () => {
     });
   };
 
+  useEffect(() => {
+    if (userInfo.user) {
+      setFullname(userInfo.user.fullname || userInfo.user.name || '');
+      setEmail(userInfo.user.email || '');
+      setGender(userInfo.user.gender || null);
+      setHeight(userInfo.user.height || '');
+      setWeight(userInfo.user.weight || '');
+      setLocation(userInfo.user.location || '');
+      if (userInfo.user.birthdate) {
+        setDate(new Date(userInfo.user.birthdate));
+        setDobLabel(new Date(userInfo.user.birthdate).toDateString());
+      }
+      // Assuming you have some logic to determine if there's an image or not
+      // For instance, if there's an image URL in userInfo.user.avatar, you might set it like this:
+      setImage(userInfo.user.avatar || userInfo.user.photo || null);
+    }
+  }, [userInfo]);
   const getUpdatedData = () => {
-    const updatedData = {
-      fullname,
-      email,
-      location,
-      gender,
-      height,
-      weight,
-      avatar: image,
-    };
+    const updatedData = {};
+
+    if (fullname) {
+      updatedData.fullname = fullname;
+    }
+    if (email) {
+      updatedData.email = email;
+    }
+    if (location) {
+      updatedData.location = location;
+    }
+    if (gender) {
+      updatedData.gender = gender;
+    }
+    if (height) {
+      updatedData.height = height;
+    }
+    if (weight) {
+      updatedData.weight = weight;
+    }
+    if (date) updatedData.birthdate = date.toISOString(); // Assurez-vous de formater correctement la date
+    if (image) {
+      updatedData.profile = image;
+    } else {
+      updatedData.profile = ''; // Suppression de l'avatar si aucune image n'est fournie
+    }
 
     return updatedData;
   };
@@ -176,7 +210,7 @@ const ProfileScreen = () => {
 
             <TouchableOpacity
               style={{
-                backgroundColor: '#2F4F4F',
+                backgroundColor: '#0f3f61',
                 paddingVertical: 10,
                 paddingHorizontal: 20,
                 borderRadius: 10,
@@ -189,7 +223,7 @@ const ProfileScreen = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={{
-                backgroundColor: '#2F4F4F',
+                backgroundColor: '#0f3f61',
                 paddingVertical: 10,
                 paddingHorizontal: 20,
                 borderRadius: 10,
@@ -279,7 +313,7 @@ const ProfileScreen = () => {
             <View style={{flexDirection: 'row', marginLeft: 8}}>
               <TouchableOpacity
                 style={{
-                  backgroundColor: gender === 'Male' ? '#2F4F4F' : '#ccc',
+                  backgroundColor: gender === 'Male' ? '#0f3f61' : '#ccc',
                   paddingVertical: 8,
                   paddingHorizontal: 18,
                   borderRadius: 10,
@@ -290,7 +324,7 @@ const ProfileScreen = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
-                  backgroundColor: gender === 'Female' ? '#2F4F4F' : '#ccc',
+                  backgroundColor: gender === 'Female' ? '#0f3f61' : '#ccc',
                   paddingVertical: 8,
                   paddingHorizontal: 18,
                   borderRadius: 10,

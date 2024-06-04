@@ -11,28 +11,18 @@ const ConfirmationSentScreen = ({navigation,route }) => {
   const { email } = route.params;
   const {confirm } = useContext(AuthContext);
   const handleConfirm = async () => {
+    if (!verificationCode) {
+      alert('Please enter the verification code!');
+      return;
+    }
     try {
-      if (!verificationCode) {
-        alert('Please enter the verification code!');
-        return;
-      }
-      
-      // Appel de la fonction de confirmation avec la méthode POST
-      const response = await confirm(verificationCode);
-      
-      // Vérification de la réponse du backend
-      if (response!== undefined && response !== null) {
-        console.log('User verified!');
-        navigation.navigate('Success', { email });
-      } else {
-        alert('Invalid code!');
-      }
+      await confirm(verificationCode, email, navigation);
     } catch (error) {
       console.error(error);
       alert('Error confirming verification code!');
     }
   };
-
+  
   return (
     <SafeAreaView style={{ flex: 1, justifyContent: 'center' }}>
       <View style={{ paddingHorizontal: 25 }}>
