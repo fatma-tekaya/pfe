@@ -1,61 +1,72 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { BASE_URL } from '../config';
-import axios from 'axios';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator,Alert } from 'react-native';
-import { AuthContext } from '../context/AuthContext';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { BASE_URL } from '../config'; // Base URL for API requests, imported from a config file.
+import axios from 'axios'; // Axios for HTTP requests.
+import { AuthContext } from '../context/AuthContext'; // Context to provide authentication data.
+import Ionicons from 'react-native-vector-icons/Ionicons'; // Icon package for UI elements.
 
+// Component to display the list of conversations.
 const ConversationsListScreen = ({ navigation }) => {
-    const [conversations, setConversations] = useState([]);
-    const { userToken, isLoading, setIsLoading } = useContext(AuthContext);
+    const [conversations, setConversations] = useState([]); // State to hold list of conversations.
+    const { userToken, isLoading, setIsLoading } = useContext(AuthContext); // Auth context that holds the user's token and loading state.
 
+    // Effect hook to fetch conversations when the component mounts.
     useEffect(() => {
         fetchConversations();
     }, []);
 
+    // Asynchronously fetches conversations from the server.
     const fetchConversations = async () => {
-        setIsLoading(true);
+        setIsLoading(true); // Set loading state to true during the fetch.
         try {
             const response = await axios.get(`${BASE_URL}/getConversations`, {
-                headers: { 'Authorization': `Bearer ${userToken}` }
+                headers: { 'Authorization': `Bearer ${userToken}` } // Include auth token in header.
             });
-            setIsLoading(false);
-            setConversations(response.data.conversations);
+            setIsLoading(false); // Set loading to false on success.
+            setConversations(response.data.conversations); // Update state with fetched conversations.
         } catch (error) {
-            setIsLoading(false);
-            console.error('Failed to fetch conversations:', error);
+            setIsLoading(false); // Set loading to false on error.
+            console.error('Failed to fetch conversations:', error); // Log error.
         }
     };
 
+    // Handles creation of a new conversation.
     const handleCreateNewChat = async () => {
-        setIsLoading(true);
+        setIsLoading(true); // Set loading state to true during the operation.
         try {
             const response = await axios.post(`${BASE_URL}/handleMessage`, { message: "New conversation started." }, {
-                headers: { 'Authorization': `Bearer ${userToken}` }
+                headers: { 'Authorization': `Bearer ${userToken}` } // Include auth token in header.
             });
             const newConversationId = response.data.conversationId;
-            setIsLoading(false);
-            navigation.navigate('Conversation', { conversationId: newConversationId });
+            const newConversation = {
+                conversationId: newConversationId,
+                title: 'Current Conversation', // or any title you want to set
+                lastMessage: 'Tap to continue...'
+            };
+            setIsLoading(false); // Set loading to false on success.
+            setConversations([newConversation, ...conversations]); // Add new conversation to the top of the list
+            navigation.navigate('Conversation', { conversationId: newConversationId }); // Navigate to the new conversation screen.
         } catch (error) {
-            setIsLoading(false);
-            console.error('Failed to create new chat:', error);
+            setIsLoading(false); // Set loading to false on error.
+            console.error('Failed to create new chat:', error); // Log error.
         }
     };
 
+    // Function to handle the deletion of a conversation.
     const deleteConversation = async (conversationId) => {
         Alert.alert("Delete Conversation", "Are you sure you want to delete this conversation?", [
             { text: "Cancel", style: "cancel" },
             { text: "Delete", onPress: async () => {
-                setIsLoading(true);
+                setIsLoading(true); // Set loading state to true during the deletion.
                 try {
                     await axios.delete(`${BASE_URL}/deleteConversation/${conversationId}`, {
-                        headers: { 'Authorization': `Bearer ${userToken}` }
+                        headers: { 'Authorization': `Bearer ${userToken}` } // Include auth token in header.
                     });
-                    setIsLoading(false);
-                    fetchConversations(); // Refresh the list after deletion
+                    setIsLoading(false); // Set loading to false on success.
+                    fetchConversations(); // Refresh the list after deletion.
                 } catch (error) {
-                    setIsLoading(false);
-                    console.error('Failed to delete the conversation:', error);
+                    setIsLoading(false); // Set loading to false on error.
+                    console.error('Failed to delete the conversation:', error); // Log error.
                 }
             }}
         ]);
@@ -75,19 +86,22 @@ const ConversationsListScreen = ({ navigation }) => {
             >
                 <View style={styles.itemContent}>
                     <Text style={styles.title}>{item.title}</Text>
-                    <Text style={{ color: 'black' }}>{item.lastMessage}</Text>
+                    <Text
+                        style={styles.lastMessage}
+                        numberOfLines={2}  // Limit text to one line
+                        ellipsizeMode="tail"  // Add "..." at the end if the text is too long
+                    >
+                        {item.lastMessage}
+                    </Text>
                 </View>
                 <TouchableOpacity onPress={() => deleteConversation(conversationId)}>
-                    <Ionicons name="trash-bin" size={44} color="red" />
+                    <Ionicons name="trash-bin" size={35} color="red" />
                 </TouchableOpacity>
             </TouchableOpacity>
         );
     };
 
-    if (isLoading) {
-        return <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />;
-    }
-
+    // Main return of the component, displaying the list of conversations.
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -127,6 +141,11 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 30,
+    },emptyText: {
+        fontSize: 16,
+        color: '#888',
+        textAlign: 'center',
+        marginTop: 20,
     },
     addButtonText: {
         color: '#fff',
@@ -136,7 +155,6 @@ const styles = StyleSheet.create({
     },
     item: {
         backgroundColor: '#f8f8f8',
-        paddingVertical: 15,
         paddingHorizontal: 20,
         marginVertical: 8,
         marginHorizontal: 16,
@@ -147,31 +165,26 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.22,
         shadowRadius: 2.22,
         minHeight: 80,
+        height: 100, // Fixed height as specified in the first style set
+        flexDirection: 'row',
+        alignItems: 'center',  // Align items vertically in the center
+        justifyContent: 'space-between',  // Space between text and delete icon
     },
     title: {
         fontSize: 18,
         fontWeight: 'bold',
         color: '#333',
+        marginTop:10
     },
     lastMessage: {
         fontSize: 14,
         color: '#666',
-        marginTop: 4,
-    },
-    loader: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    emptyText: {
-        fontSize: 16,
-        color: '#888',
-        textAlign: 'center',
-        marginTop: 20,
+        flex: 1,  // Allow text to fill the available space
+        marginRight: 10,  // Space before the delete icon
     },
     itemContent: {
-        flex: 1, // Ajout pour aligner le texte et l'icône de suppression
+        flex: 1,  // Allow content to fill available horizontal space
     },
 });
 
-export default ConversationsListScreen;
+export default ConversationsListScreen; // Export the component for use in other parts of the app.

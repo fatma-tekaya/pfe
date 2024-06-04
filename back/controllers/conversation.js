@@ -3,6 +3,8 @@ const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@googl
 const API_KEY = process.env.API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 const User = require("../models/User");
+const Patient = require("../models/Patient"); 
+
 
 // Function to generate initial history
 const generateInitialHistory = () => {
@@ -30,7 +32,7 @@ exports.handleMessage = async (req, res) => {
   try {
     const { message } = req.body;
     const userId = req.user._id;
-    const user = await User.findById(userId);
+    const user = await Patient.findById(userId);
     const fullname = user.fullname;
     const conversationId = req.params.conversationId;
 

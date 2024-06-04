@@ -1,12 +1,12 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const Patient = require("../models/Patient"); // Importer le modèle Patient
 const bcrypt = require("bcrypt");
 const cloudinary = require("../helper/imageUpload");
 const nodemailer = require("nodemailer");
-//const asyncHandler = require("express-async-handler");
 const { validationResult } = require("express-validator");
 require('dotenv').config();
-//Fonction  pour envoyer un mail de confirmation de user
+
+// Fonction pour envoyer un mail de confirmation de user
 const sendVerificationCode = async (toEmail, verificationCode) => {
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -33,7 +33,7 @@ const sendVerificationCode = async (toEmail, verificationCode) => {
   }
 };
 
-// Fonction de creation d'utilisateurq
+// Fonction de creation d'utilisateur
 exports.createUser = async (req, res) => {
   const { fullname, email, password, confirmPassword } = req.body;
 
@@ -45,7 +45,7 @@ exports.createUser = async (req, res) => {
   }
 
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await Patient.findOne({ email });
     if (existingUser) {
       return res.json({
         success: false,
@@ -63,12 +63,13 @@ exports.createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Enregistrement de l'utilisateur dans la base de données avec verified = false
-    const newUser = new User({
+    const newUser = new Patient({
       fullname,
       email,
       password: hashedPassword, // Mot de passe haché
       verified: false,
       verificationCode, // Utilisation du nouveau nom du champ
+      roles: ['patient'], // Assigner le rôle patient
     });
 
     await newUser.save();
@@ -82,13 +83,13 @@ exports.createUser = async (req, res) => {
   }
 };
 
-// Fonction  pour envoyer le code de vérification
+// Fonction pour envoyer le code de vérification
 exports.confirmEmailAndRegisterUser = async (req, res) => {
   const { verificationCode } = req.body;
 
   try {
     // Recherche de l'utilisateur dans la base de données en utilisant le code de vérification
-    const user = await User.findOne({ verificationCode });
+    const user = await Patient.findOne({ verificationCode });
 
     if (!user) {
       console.log("User not found");
@@ -148,7 +149,7 @@ exports.refresh = async (req, res) => {
     const newRefreshToken = generateRefreshToken(decodedUser);
 
     // Mettre à jour le refreshToken de l'utilisateur dans la base de données
-    const user = await User.findOneAndUpdate(
+    const user = await Patient.findOneAndUpdate(
       { refreshToken },
       { refreshToken: newRefreshToken }
     );
@@ -162,7 +163,6 @@ exports.refresh = async (req, res) => {
     res.status(200).json({
       token: newToken,
       refreshToken: newRefreshToken,
-     
     });
   } catch (error) {
     console.error("Error while refreshing token:", error);
@@ -174,7 +174,7 @@ exports.refresh = async (req, res) => {
 exports.userSignIn = async (req, res) => {
   const { email, password } = req.body; // Extraction des données du corps de la requête
   try {
-    const user = await User.findOne({ email }); // Recherche de l'utilisateur dans la base de données
+    const user = await Patient.findOne({ email }); // Recherche de l'utilisateur dans la base de données
     if (!user) {
       console.log("User not found with the given email!");
       return res.json({
@@ -198,9 +198,8 @@ exports.userSignIn = async (req, res) => {
       });
     }
 
-    const token = generateAccessToken(user)
-    const refreshToken = generateRefreshToken(user)
-   
+    const token = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
     // Sauvegarde de l'utilisateur avec le nouveau token
     await user.save();
@@ -219,12 +218,10 @@ exports.userSignIn = async (req, res) => {
       },
       token,
       refreshToken,
-    }); 
-    
+    });
+
     user.refreshToken = refreshToken;
     await user.save();
-    
-// Réponse JSON avec les informations utilisateur et le token
   } catch (error) {
     console.error("Error while signing in:", error);
     res.status(500).json({ success: false, message: "Internal server error" }); // Gestion des erreurs
@@ -236,7 +233,7 @@ exports.signInWithGoogle = async (req, res) => {
   const { email, name, photo, idToken, gender, birthdate, weight, height, location } = req.body.user;
 
   try {
-    let user = await User.findOne({ email });
+    let user = await Patient.findOne({ email });
     console.log("User found: ", user);
 
     if (user) {
@@ -252,7 +249,7 @@ exports.signInWithGoogle = async (req, res) => {
       await user.save();
     } else {
       // Création d'un nouvel utilisateur si non trouvé
-      user = new User({
+      user = new Patient({
         fullname: name,
         email,
         avatar: photo || "",
@@ -262,7 +259,8 @@ exports.signInWithGoogle = async (req, res) => {
         birthdate: birthdate,
         weight: weight,
         height: height,
-        location: location
+        location: location,
+        roles: ['patient'], // Assigner le rôle patient
       });
       await user.save();
     }
@@ -288,8 +286,8 @@ exports.signInWithGoogle = async (req, res) => {
         birthdate: user.birthdate,
         weight: user.weight,
         height: user.height,
-        location: user.location
-      }
+        location: user.location,
+      },
     });
   } catch (error) {
     console.error("Error signing in with Google:", error);
@@ -297,29 +295,7 @@ exports.signInWithGoogle = async (req, res) => {
   }
 };
 
-
-// Contrôleur pour déconnecter l'utilisateur
-// exports.signOut = async (req, res) => {
-//   if (req.headers && req.headers.authorization) {
-//     const token = req.headers.authorization.split(" ")[1]; // Extraction du token à partir des en-têtes de la requête
-//     if (!token) {
-//       return res
-//         .status(401)
-//         .json({ success: false, message: "Authorization fail!" }); // Si aucun token n'est fourni, renvoyer un message d'erreur
-//     }
-
-//     const tokens = req.user.tokens; // Récupération des tokens de l'utilisateur depuis la requête
-
-//     const newTokens = tokens.filter((t) => t.token !== token); // Filtrage des tokens pour exclure celui qui est utilisé pour la déconnexion
-
-//     // Mise à jour des tokens de l'utilisateur dans la base de données
-//     await User.findByIdAndUpdate(req.user._id, { tokens: newTokens });
-//     res.json({ success: true, message: "Sign out successfully!" }); // Réponse indiquant le succès de la déconnexion
-//     console.log("logged out ");
-//   }
-// };
-
-//Fonction pour update  user profile
+// Fonction pour update user profile
 exports.uploadProfile = async (req, res) => {
   const { user } = req; // Récupération de l'utilisateur depuis la requête
   if (!user)
@@ -334,7 +310,6 @@ exports.uploadProfile = async (req, res) => {
     // Construction de l'objet de mise à jour en fonction des champs fournis
     const updateFields = {};
     if (fullname) updateFields.fullname = fullname;
-
     if (birthdate) updateFields.birthdate = birthdate;
     if (location) updateFields.location = location;
     if (gender) updateFields.gender = gender;
@@ -356,7 +331,7 @@ exports.uploadProfile = async (req, res) => {
       let updatedUser;
 
       // Si l'utilisateur n'est pas connecté avec Google, mettez simplement à jour son profil
-      updatedUser = await User.findByIdAndUpdate(user._id, updateFields, {
+      updatedUser = await Patient.findByIdAndUpdate(user._id, updateFields, {
         new: true,
       });
 
@@ -403,8 +378,7 @@ exports.uploadPicture = async (req, res) => {
   }
 };
 
-
-//Fonction pour générer un code de vérification aléatoire
+// Fonction pour générer un code de vérification aléatoire
 const generateVerificationCode = () => {
   return Math.floor(100000 + Math.random() * 900000); // Génère un nombre aléatoire à 6 chiffres
 };
@@ -439,7 +413,7 @@ const sendResetPasswordEmail = async (email, verifUserCode) => {
   }
 };
 
-//Fonction pour  vérifier si le code de vérification
+// Fonction pour vérifier si le code de vérification
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -448,7 +422,7 @@ exports.forgotPassword = async (req, res) => {
     const verifUserCode = generateVerificationCode();
 
     // Mettre à jour le code de vérification dans la base de données
-    const user = await User.findOneAndUpdate(
+    const user = await Patient.findOneAndUpdate(
       { email },
       { verifUserCode },
       { new: true }
@@ -482,7 +456,7 @@ exports.resetPassword = async (req, res) => {
 
   try {
     // Récupérer l'e-mail de l'utilisateur à partir du code de vérification
-    const user = await User.findOne({ verifUserCode: code });
+    const user = await Patient.findOne({ verifUserCode: code });
 
     // Vérifier si l'utilisateur existe
     if (!user) {
