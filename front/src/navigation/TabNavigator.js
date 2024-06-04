@@ -15,6 +15,8 @@ import ConversationScreen from '../screens/ConversationScreen';
 import SkinDetails from '../screens/SkinDetails';
 import HistoryScreen from '../screens/HistoryScreen';
 
+
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -23,7 +25,7 @@ const FavoriteStack =createNativeStackNavigator();
 const FavoriteStackNavigator = () =>(
   <FavoriteStack.Navigator>
     <FavoriteStack.Screen name="Favorite" component={FavoriteScreen} 
-     options={{headerShown: false, title: 'Conversations'}}/>
+     options={{headerShown: true, title: 'Skin Anomalies'}}/>
      <FavoriteStack.Screen name="History" component={HistoryScreen} 
      options={{headerShown: true, title: 'History'}}/>
     <FavoriteStack.Screen name="Anomaly Info" component={SkinDetails}/>
@@ -41,6 +43,7 @@ const MessagesStackNavigator = () => (
       component={ConversationScreen}
       options={({route}) => ({title: route.params.conversationTitle})}
     />
+   
   </MessagesStack.Navigator>
 );
 

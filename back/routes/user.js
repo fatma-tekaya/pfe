@@ -18,7 +18,7 @@ const {
   userVlidation,
   validateUserSignIn,
 } = require("../middelwares/validation/user");
-
+const checkRole = require('../middelwares/role');
 const multer = require("multer");
 
 // Define multer storage configuration
@@ -49,8 +49,8 @@ router.post("/sign-in", validateUserSignIn, userVlidation, userSignIn);
 router.post("/refresh" ,isAuth, refresh)
 //router.post("/sign-out", isAuth, signOut);
 router.post("/google-signin", signInWithGoogle);
-router.put("/upload-profile", isAuth, uploads.single("profile"), uploadProfile);
-router.put("/upload-picture", isAuth, uploads.single("picture"), uploadPicture);
+router.put("/upload-profile", isAuth,checkRole('patient'), uploads.single("profile"), uploadProfile);
+router.put("/upload-picture", isAuth,checkRole('patient'), uploads.single("picture"), uploadPicture);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 

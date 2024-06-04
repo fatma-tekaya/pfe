@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const chatController = require('../controllers/conversation.js'); // Make sure the path to your controller file is correct
 const { isAuth } = require("../middelwares/auth");
-
+const checkRole = require('../middelwares/role');
 
 router.post('/handleMessage/:conversationId?', isAuth, chatController.handleMessage); // Check if chatController.startConversation is correctly exported from the controller file
 router.delete('/deleteConversation/:conversationId',isAuth , chatController.deleteConversation);
