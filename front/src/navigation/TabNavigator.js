@@ -8,11 +8,42 @@ import HomeScreen from '../screens/HomeScreen';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import SignDetailsScreen from '../screens/SignDetailsScreen';
 import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
-import MessagesScreen from '../screens/MessagesScreen';
+import MessagesScreen from '../screens/ConversationScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import ConversationsListScreen from '../screens/ConversationsListScreen';
+import ConversationScreen from '../screens/ConversationScreen';
+import SkinDetails from '../screens/SkinDetails';
+import HistoryScreen from '../screens/HistoryScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+
+const MessagesStack = createNativeStackNavigator();
+const FavoriteStack =createNativeStackNavigator();
+const FavoriteStackNavigator = () =>(
+  <FavoriteStack.Navigator>
+    <FavoriteStack.Screen name="Favorite" component={FavoriteScreen} 
+     options={{headerShown: false, title: 'Conversations'}}/>
+     <FavoriteStack.Screen name="History" component={HistoryScreen} 
+     options={{headerShown: true, title: 'History'}}/>
+    <FavoriteStack.Screen name="Anomaly Info" component={SkinDetails}/>
+  </FavoriteStack.Navigator>
+);
+const MessagesStackNavigator = () => (
+  <MessagesStack.Navigator>
+    <MessagesStack.Screen
+      name="ConversationsList"
+      component={ConversationsListScreen}
+      options={{headerShown: true, title: 'Conversations'}}
+    />
+    <MessagesStack.Screen
+      name="Conversation"
+      component={ConversationScreen}
+      options={({route}) => ({title: route.params.conversationTitle})}
+    />
+  </MessagesStack.Navigator>
+);
+
 const HomeStack = () => {
   return (
     <Stack.Navigator>
@@ -37,7 +68,7 @@ const TabNavigator = () => {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: {backgroundColor: '#2F4F4F'},
+        tabBarStyle: {backgroundColor: '#0f3f61'},
         tabBarInactiveTintColor: '#fff',
         tabBarActiveTintColor: 'yellow',
       }}>
@@ -47,17 +78,17 @@ const TabNavigator = () => {
         options={({route}) => ({
           tabBarStyle: {
             display: getTabBarVisibility(route),
-            backgroundColor: '#2F4F4F',
+            backgroundColor: '#0f3f61',
           },
           tabBarIcon: ({color, size}) => (
             <Ionicons name="home-outline" color={color} size={size} />
           ),
         })}
       />
-   
+
       <Tab.Screen
         name="Messages"
-        component={MessagesScreen}
+        component={MessagesStackNavigator} // Updated to use stack navigator
         options={{
           tabBarIcon: ({color, size}) => (
             <Ionicons
@@ -68,16 +99,17 @@ const TabNavigator = () => {
           ),
         }}
       />
+
       <Tab.Screen
-        name="Favorite"
-        component={FavoriteScreen}
+        name="Favorite1"
+        component={FavoriteStackNavigator}
         options={{
           tabBarIcon: ({color, size}) => (
             <Feather name="camera" color={color} size={size} />
           ),
         }}
       />
-         <Tab.Screen
+      <Tab.Screen
         name="Notif"
         component={NotifScreen}
         options={{
@@ -88,7 +120,7 @@ const TabNavigator = () => {
           ),
         }}
       />
-       <Tab.Screen
+      <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{

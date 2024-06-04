@@ -8,7 +8,7 @@ import CustomLoader from '../components/CustomLoader';
 const AppNav = () => {
   const { isLoading, userToken } = useContext(AuthContext);
   
-
+  
   // Render navigation stack based on userToken
   return (
     <>

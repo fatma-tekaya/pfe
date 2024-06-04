@@ -13,10 +13,18 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {AuthContext} from '../context/AuthContext';
+import CustomLoader from './CustomLoader'
 
 const CustomDrawer = props => {
   const {logout,setIsLoading} = useContext(AuthContext);
   const {userInfo} = useContext(AuthContext);
+  if (!userInfo) {
+    return <CustomLoader />; // or some other placeholder content until userInfo is loaded
+  }
+  
+  // Now safe to use userInfo
+  console.log(userInfo.user);
+  
   return (
     <View style={{flex: 1}}>
       <DrawerContentScrollView

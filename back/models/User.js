@@ -1,9 +1,27 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+
+// Définir le sous-schéma pour les captures
+const captureSchema = new Schema({
+  path: {
+      type: String,
+      required: true
+  },
+  label: {
+      type: String,
+      required: true
+  }
+});
 
 const userSchema = new mongoose.Schema({
   fullname: {
     type: String,
     required: true,
+  },
+  refreshToken: {
+    type: String,
+    default: null,
   },
   email: {
     type: String,
@@ -42,9 +60,18 @@ verifUserCode : {
 verificationCode: {
     type: Number,
   },
-  avatar: String,
-  captures: [{ type: String }],
-  tokens: [{ type: Object }],
+  avatar: {
+    type: String,
+    default: null,
+  },
+  captures: [captureSchema], 
+  conversations: [{ type: Schema.Types.ObjectId, ref: 'Conversation' }],
+
+//  roles:{
+//   type:[String],
+//   enum:["user","admin","doctor"],
+//   default:["user"],
+//  }
  
 });
 //userSchema.index({ googleId: 1 }, { unique: true, sparse: true });

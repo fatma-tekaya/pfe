@@ -9,7 +9,8 @@ const {
   uploadPicture,
   forgotPassword,
   resetPassword,
-  confirmEmailAndRegisterUser
+  confirmEmailAndRegisterUser,
+  refresh
 } = require("../controllers/user");
 const { isAuth } = require("../middelwares/auth");
 const {
@@ -21,7 +22,14 @@ const {
 const multer = require("multer");
 
 // Define multer storage configuration
-const storage = multer.diskStorage({});
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Répertoire temporaire pour stocker les fichiers
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname); // Nommer le fichier de manière unique
+  },
+});
 
 // Define multer file filter
 const fileFilter = (req, file, cb) => {
@@ -38,7 +46,8 @@ const uploads = multer({ storage, fileFilter });
 router.post("/create-user", validateUserSignUp,userVlidation, createUser);
 router.post("/verify-email", confirmEmailAndRegisterUser);
 router.post("/sign-in", validateUserSignIn, userVlidation, userSignIn);
-router.post("/sign-out", isAuth, signOut);
+router.post("/refresh" ,isAuth, refresh)
+//router.post("/sign-out", isAuth, signOut);
 router.post("/google-signin", signInWithGoogle);
 router.put("/upload-profile", isAuth, uploads.single("profile"), uploadProfile);
 router.put("/upload-picture", isAuth, uploads.single("picture"), uploadPicture);

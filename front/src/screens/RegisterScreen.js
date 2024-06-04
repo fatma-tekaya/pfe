@@ -22,24 +22,23 @@ import CustomButton from '../components/CustomButton';
 import {useNavigation} from '@react-navigation/native';
 import {useDrawerProgress} from '@react-navigation/drawer';
 
-const RegisterScreen = () => {
+const RegisterScreen = ({navigation}) => {
   const [fullname, setFullname] = useState(null);
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
   const [confirmPassword, setConfirmPassword] = useState(null);
-  const navigation = useNavigation()
+ // const navigation = useNavigation()
 /*  const [data, setData] = useState({
     fullname: null,
     email: null,
     password: null,
     confirmPassword: null,
   }); */
-  const {signup, setIsLoading, signInWithGoogle} = useContext(AuthContext);
+  const {signup, signInOrSignUpWithGoogle} = useContext(AuthContext);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [passwordVisible1, setPasswordVisible1] = useState(false);
 
   const handleSignup = async () => {
-
     if (!fullname || !email || !password || !confirmPassword) {
       alert('Please fill in all fields');
       return;
@@ -49,23 +48,12 @@ const RegisterScreen = () => {
       return;
     }
     try {
-      setIsLoading(true)
-
-     
-        await signup(fullname, email, password,confirmPassword).then(userInfo => {
-          if (userInfo && userInfo.success) {
-           setIsLoading(false)
-           navigation.navigate('Confirmation', {email}); // Navigate to Confirmation screen after successful signup
-           // alert(`Confirmation email sent successfully to ${email}`);
-         } else {
-           throw new Error('Signup failed'); // Throw an error if signup was not successful
-         } 
-       });
-      
+      await signup(fullname, email, password, confirmPassword, navigation);
     } catch (error) {
-      alert(error.message); // Display user-friendly error message
+      alert(error.message);
     }
   };
+  
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -108,7 +96,7 @@ const RegisterScreen = () => {
           }}>
           <TouchableOpacity
             onPress={() => {
-              signInWithGoogle();
+              signInOrSignUpWithGoogle();
             }}
             style={{
               flexDirection: 'row', // Permet d'aligner l'icône et le texte horizontalement

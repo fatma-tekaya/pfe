@@ -17,11 +17,18 @@ import CustomSwitch from '../components/CustomSwitch';
 import ListItem from '../components/ListItem';
 import { AuthContext } from '../context/AuthContext';
 import Entypo from 'react-native-vector-icons/Entypo';
-
+import CustomLoader from '../components/CustomLoader';
 
 const HomeScreen = ({navigation}) => {
   const [swipeTab , setSwipeTab]= useState(1);
   const {userInfo}= useContext(AuthContext) ;
+  if (!userInfo) {
+    return <CustomLoader />; // or some other placeholder content until userInfo is loaded
+  }
+  
+  // Now safe to use userInfo
+  console.log(userInfo.user);
+  
   const renderBanner = ({item, index}) => {
     return <BannerSlider data={item} />;
   };
