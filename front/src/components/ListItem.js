@@ -23,7 +23,7 @@ export default function ListItem({photo, title, subTitle , onPress }) {
           numberOfLines={1}
             style={{
               color: '#333',
-              fontFamily: 'Roboto-Medium',
+              fontFamily: 'Outfit-Medium',
               fontSize: 12,
               //textTransform: 'uppercase',
             }}>
@@ -32,7 +32,7 @@ export default function ListItem({photo, title, subTitle , onPress }) {
         </View>
       </View>
       <TouchableOpacity onPress={onPress} style={{
-        backgroundColor:'#777',
+        backgroundColor:'#cccccc',
         padding:12,
         width:70,
         borderRadius:10,
@@ -40,7 +40,7 @@ export default function ListItem({photo, title, subTitle , onPress }) {
         <Text style={{
             color:'#fff',
             textAlign:'center',
-            fontFamily:'Roboto-Medium',
+            fontFamily:'Outfit-Medium',
             fontSize:14,
         }}>
         Details

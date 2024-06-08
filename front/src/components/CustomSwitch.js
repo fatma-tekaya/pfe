@@ -1,5 +1,6 @@
 import {View, Text, TouchableOpacity} from 'react-native';
 import React, {useState} from 'react';
+import { colors } from '../styles/colors';
 
 export default function CustomSwitch({
   selectionMode,
@@ -29,7 +30,7 @@ export default function CustomSwitch({
         onPress={() => updateSwitchData(1)}
         style={{
           flex: 1,
-          backgroundColor: getSelectionMode == 1 ? '#2F4F4F' : '#e4e4e4',
+          backgroundColor: getSelectionMode == 1 ? colors.bleu_bleu : '#e4e4e4',
           borderRadius: 10,
           justifyContent: 'center',
           alignItems: 'center',
@@ -37,8 +38,8 @@ export default function CustomSwitch({
         <Text
           style={{
             color: getSelectionMode == 1 ? 'white' : '#2F4F4F',
-            fontSize: 14,
-            fontFamily: 'Roboto-Medium',
+            fontSize: 15,
+            fontFamily: 'Outfit-Medium',
           }}>
           {option1}
         </Text>
@@ -48,7 +49,7 @@ export default function CustomSwitch({
         onPress={() => updateSwitchData(2)}
         style={{
           flex: 1,
-          backgroundColor: getSelectionMode == 2 ? '#2F4F4F' : '#e4e4e4',
+          backgroundColor: getSelectionMode == 2 ? colors.bleu_bleu : '#e4e4e4',
           borderRadius: 10,
           justifyContent: 'center',
           alignItems: 'center',
@@ -56,8 +57,8 @@ export default function CustomSwitch({
         <Text
           style={{
             color: getSelectionMode == 2 ? 'white' : '#2F4F4F',
-            fontSize: 14,
-            fontFamily: 'Roboto-Medium',
+            fontSize: 15,
+            fontFamily: 'Outfit-Medium',
           }}>
           {option2}
         </Text>

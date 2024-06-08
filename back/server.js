@@ -1,24 +1,34 @@
 const http = require('http');
 const express = require('express');
 const { startListening } = require('./sockets/notifSignVitaux');
- require('dotenv').config();
+require('dotenv').config();
+const path = require('path');
 require('./config/db');
-
-const { Server } = require('socket.io');
-//const chatSocket = require('./src/socekts/chatSocket');
-const app = express();
-const errorHandler = require('./middelwares/errorHandler');
+//const errorHandler =require('./middelwares/errorHandler');
 const cors = require('cors');
 
 
-
 const userRouter = require('./routes/user');
-app.use(cors());
+const chatRouter = require('./routes/conversation');
+const skinRouter = require('./routes/skin');
+const adminRouter =require('./routes/admin');
+
+const app = express();
+
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(userRouter);
 //app.use(errorHandler);
-//chatSocket(io)
-//cronJob.checkVitalSignsAndNotify();
+app.use(chatRouter);
+app.use(skinRouter)
+app.use(adminRouter)
+
+
+// const bcrypt = require('bcrypt');
+// bcrypt.hash('admin123456', 10, function(err, hash) {
+//   console.log(hash); // Affiche le mot de passe haché
+// });
+
 app.listen(5000, () => {
   console.log('port is listening');
   startListening(); 

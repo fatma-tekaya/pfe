@@ -3,11 +3,12 @@ import HomeScreen from '../screens/HomeScreen';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import ProfileScreen from '../screens/ProfileScreen';
 import MomentsScreen from '../screens/MomentsScreen';
-import MessagesScreen from '../screens/MessagesScreen';
+
 import SettingsScreen from '../screens/SettingsScreen';
 import CustomDrawer from '../components/CustomDrawer';
 import  Ionicons  from 'react-native-vector-icons/Ionicons';
 import TabNavigator from './TabNavigator';
+import { colors } from '../styles/colors';
 
 const Drawer = createDrawerNavigator();
 
@@ -17,12 +18,12 @@ const AuthStack = () => {
     drawerContent={props => <CustomDrawer {...props} />}
     screenOptions={{
       headerShown: false,
-      drawerActiveBackgroundColor: '#2F4F4F',
-      drawerActiveTintColor: '#fff',
+      drawerActiveBackgroundColor: colors.gray_fonce,
+      drawerActiveTintColor: colors.blue_fonce,
       drawerInactiveTintColor: '#333',
       drawerLabelStyle: {
         marginLeft: -25,
-        fontFamily: 'Roboto-Medium',
+        fontFamily: 'Outfit-Medium',
         fontSize: 15,
       },
     }}>

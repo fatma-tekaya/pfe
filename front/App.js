@@ -1,21 +1,16 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { AuthProvider } from './src/context/AuthContext';
 import AppNav from './src/navigation/AppNav';
-import { requestUserPermission,getToken } from './src/utils/FirebaseMessagingService';
+import Toast from 'react-native-toast-message';
+import { NavigationContainer } from '@react-navigation/native';
 function App() {
-
-  useEffect(() => {
-    
-    // requestUserPermission();
-    // getToken();
-  }, [])
   return (
-
     <AuthProvider>
-      <AppNav />
+       <NavigationContainer>
+        <AppNav />
+      </NavigationContainer>
+      <Toast/>
     </AuthProvider>
-
   );
 }
-
 export default App;

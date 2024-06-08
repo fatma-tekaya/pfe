@@ -1,15 +1,13 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
-const axios = require('axios');
+const Patient = require("../models/Patient"); // Importer le modèle Patient
+const { db } = require('../firebase/index');
 const bcrypt = require("bcrypt");
 const cloudinary = require("../helper/imageUpload");
 const nodemailer = require("nodemailer");
-const db = require('../firebase/index');
-//const asyncHandler = require("express-async-handler");
 const { validationResult } = require("express-validator");
+require('dotenv').config();
 
-
-//Fonction  pour envoyer un mail de confirmation de user
+// Fonction pour envoyer un mail de confirmation de user
 const sendVerificationCode = async (toEmail, verificationCode) => {
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -35,11 +33,14 @@ const sendVerificationCode = async (toEmail, verificationCode) => {
     console.error("Erreur lors de l'envoi du code de vérification :", error);
   }
 };
-//create User
+
+
+// Fonction de creation d'utilisateur
 exports.createUser = async (req, res) => {
   const { fullname, email, password, confirmPassword } = req.body;
 
-  // Validation check
+
+  // Vérification des erreurs de validation
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log("err", errors.array());
@@ -47,7 +48,7 @@ exports.createUser = async (req, res) => {
   }
 
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await Patient.findOne({ email });
     if (existingUser) {
       return res.json({
         success: false,
@@ -55,30 +56,32 @@ exports.createUser = async (req, res) => {
       });
     }
 
-    // Generate verification code
+    // Génération d'un code de vérification
     const verificationCode = Math.floor(100000 + Math.random() * 900000);
 
-    // Send verification code via email
+    // Envoi du code de vérification par e-mail
     await sendVerificationCode(email, verificationCode);
 
-    // Hash the password
+    // Hachage du mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new user in MongoDB
-    const newUser = new User({
+
+    // Enregistrement de l'utilisateur dans la base de données avec verified = false
+    const newUser = new Patient({
       fullname,
       email,
-      password: hashedPassword,
+      password: hashedPassword, // Mot de passe haché
       verified: false,
-      verificationCode,
-      
-    });
+      verificationCode, // Utilisation du nouveau nom du champ
+      roles: ['patient'], // Assigner le rôle patient
 
-    await newUser.save();
+    })
+
+
 
     // Create a corresponding entry in Firebase Realtime Database
     const userId = newUser._id.toString();
-    const userRef = db.ref('users').child(userId);
+    const userRef = db.ref('patients').child(userId);
 
     await userRef.set({
       fullname,
@@ -89,6 +92,7 @@ exports.createUser = async (req, res) => {
         spo2: 0
       }
     });
+    await newUser.save();
 
     res.status(200).json({ success: true, message: `User created. Verification code sent to ${email}` });
   } catch (error) {
@@ -97,13 +101,13 @@ exports.createUser = async (req, res) => {
   }
 };
 
-// Fonction  pour envoyer le code de vérification
+// Fonction pour envoyer le code de vérification
 exports.confirmEmailAndRegisterUser = async (req, res) => {
   const { verificationCode } = req.body;
 
   try {
     // Recherche de l'utilisateur dans la base de données en utilisant le code de vérification
-    const user = await User.findOne({ verificationCode });
+    const user = await Patient.findOne({ verificationCode });
 
     if (!user) {
       console.log("User not found");
@@ -126,9 +130,60 @@ exports.confirmEmailAndRegisterUser = async (req, res) => {
     await user.save();
     console.log("User verified successfully");
     // Répondre avec un message de succès
-    res.status(200).json({ success: true, message: "User verified successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "User verified successfully" });
   } catch (error) {
     console.error("Error verifying email:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+const generateAccessToken = (user) => {
+  return jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
+};
+
+const generateRefreshToken = (user) => {
+  return jwt.sign({ userId: user._id }, process.env.REFRESH_SECRET);
+};
+
+exports.refresh = async (req, res) => {
+  // Prendre le refresh token de l'utilisateur depuis la requête
+  const refreshToken = req.body.token;
+
+  // Vérifier si aucun token n'est fourni
+  if (!refreshToken) {
+    return res.status(401).json("You are not authenticated!");
+  }
+
+  try {
+    // Vérifier si le token est valide
+    const decodedUser = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+
+    // Si le token est valide, générer un nouveau token d'accès
+    const newToken = generateAccessToken(decodedUser);
+    const newRefreshToken = generateRefreshToken(decodedUser);
+
+    // Mettre à jour le refreshToken de l'utilisateur dans la base de données
+    const user = await Patient.findOneAndUpdate(
+      { refreshToken },
+      { refreshToken: newRefreshToken }
+    );
+
+    // Vérifier si l'utilisateur est trouvé et mettre à jour le refreshToken
+    if (!user) {
+      return res.status(403).json("Refresh token is not valid!");
+    }
+
+    // Répondre avec les nouveaux tokens
+    res.status(200).json({
+      token: newToken,
+      refreshToken: newRefreshToken,
+    });
+  } catch (error) {
+    console.error("Error while refreshing token:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -137,16 +192,16 @@ exports.confirmEmailAndRegisterUser = async (req, res) => {
 exports.userSignIn = async (req, res) => {
   const { email, password } = req.body; // Extraction des données du corps de la requête
   try {
-    const user = await User.findOne({ email }); // Recherche de l'utilisateur dans la base de données
+    const user = await Patient.findOne({ email }); // Recherche de l'utilisateur dans la base de données
     if (!user) {
-      console.log("User not found with the given email!")
+      console.log("User not found with the given email!");
       return res.json({
         success: false,
         message: "User not found with the given email!",
       });
     }
     if (!user.verified) {
-      console.log('User is not verified Yet!')
+      console.log("User is not verified Yet!");
       return res.json({
         success: false,
         message: "User is not verified Yet!",
@@ -154,23 +209,19 @@ exports.userSignIn = async (req, res) => {
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      console.log("Email/password does not match!")
+      console.log("Password is incorrect!");
       return res.json({
         success: false,
-        message: "Email/password does not match!",
+        message: "Password is incorrect!",
       });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    }); // Création d'un token JWT pour l'authentification de l'utilisateur
-
-    // Ajout du nouveau token à l'array tokens de l'utilisateur
-    user.tokens.push({ token });
+    const token = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
     // Sauvegarde de l'utilisateur avec le nouveau token
     await user.save();
-    console.log("user signed in successfully")
+    console.log("user signed in successfully");
     res.json({
       success: true,
       user: {
@@ -178,126 +229,96 @@ exports.userSignIn = async (req, res) => {
         email: user.email,
         location: user.location,
         birthdate: user.birthdate,
-        channelInfo: user.channelInfo,
-        FCMtoken: user.FCMtoken,
         gender: user.gender,
         height: user.height,
         weight: user.weight,
         avatar: user.avatar ? user.avatar : "",
       },
       token,
-    }); // Réponse JSON avec les informations utilisateur et le token
+      refreshToken,
+    });
+
+    user.refreshToken = refreshToken;
+    await user.save();
   } catch (error) {
     console.error("Error while signing in:", error);
     res.status(500).json({ success: false, message: "Internal server error" }); // Gestion des erreurs
   }
 };
-
-// Controller pour la connexion via Google
 exports.signInWithGoogle = async (req, res) => {
-  const { email, name, photo, idToken } = req.body.user;
+  console.log("User here ", req.body.user);
+  const { email, name, photo, idToken, gender, birthdate, weight, height, location } = req.body.user;
 
   try {
-    let user = null;
-    // Vérifiez si l'utilisateur existe déjà dans la base de données en utilisant son email
-    if (email) {
-      user = await User.findOne({ email });
-    }
+    let user = await Patient.findOne({ email });
+    console.log("User found: ", user);
 
     if (user) {
-      // Utilisateur existant : mettez à jour ses informations avec celles fournies par Google
+      // Mise à jour de l'utilisateur existant avec les informations potentiellement nouvelles
       user.fullname = name;
-      user.avatar = photo ? photo : user.avatar; // Mettez à jour la photo uniquement si une nouvelle photo est fournie
-
-      // Mise à jour d'autres champs si nécessaire
-
-      // Générez ou récupérez le token JWT pour l'utilisateur existant
-      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "1d",
-      });
-
-      // Ajoutez le nouveau token à la liste des tokens de l'utilisateur existant
-      user.tokens.push({ token });
-
-      // Enregistrez les modifications de l'utilisateur
+      user.avatar = photo || user.avatar;
+      user.googleToken = idToken;
+      user.gender = gender || user.gender; // Mettre à jour seulement si fourni
+      user.birthdate = birthdate || user.birthdate;
+      user.weight = weight || user.weight;
+      user.height = height || user.height;
+      user.location = location || user.location;
       await user.save();
-
-      console.log("User signed in successfully");
-
-      // Répondez avec un message de succès et le token
-      return res
-        .status(200)
-        .json({ success: true, message: "User signed in successfully", token });
+    } else {
+      // Création d'un nouvel utilisateur si non trouvé
+      user = new Patient({
+        fullname: name,
+        email,
+        avatar: photo || "",
+        verified: true,
+        googleToken: idToken,
+        gender: gender, // Ajoutez ces champs comme propriétés du nouvel utilisateur
+        birthdate: birthdate,
+        weight: weight,
+        height: height,
+        location: location,
+        roles: ['patient'], // Assigner le rôle patient
+      });
+      await user.save();
     }
 
-    // Si l'utilisateur n'existe pas, créez un nouvel utilisateur en utilisant les informations fournies par Google
-    const newUser = new User({
-      fullname: name,
-      email: email,
-      avatar: photo ? photo : "",
-      verified: true,
-      // Stockez l'identifiant Google dans un champ différent
-      googleToken: idToken,
-      // Ajoutez d'autres champs si nécessaire
+    // Génération des tokens
+    const token = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    // Retour des informations de l'utilisateur et des tokens
+    console.log("User signed in successfully: ", user.fullname);
+    res.status(user ? 200 : 201).json({
+      success: true,
+      message: "User signed in successfully",
+      token,
+      refreshToken,
+      user: {
+        _id: user._id,
+        fullname: user.fullname,
+        email: user.email,
+        avatar: user.avatar,
+        verified: true,
+        gender: user.gender,
+        birthdate: user.birthdate,
+        weight: user.weight,
+        height: user.height,
+        location: user.location,
+      },
     });
-
-    // Générez un token JWT pour l'authentification de l'utilisateur
-    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
-
-    // Ajoutez le nouveau token à la liste des tokens du nouvel utilisateur
-    newUser.tokens.push({ token });
-
-    // Enregistrez le nouvel utilisateur dans la base de données
-    await newUser.save();
-
-    console.log("User registered and signed in successfully");
-
-    // Répondez avec un message de succès et le token
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "User registered and signed in successfully",
-        token,
-      });
   } catch (error) {
     console.error("Error signing in with Google:", error);
-    // Gérez les erreurs internes du serveur
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
-
-// Contrôleur pour déconnecter l'utilisateur
-exports.signOut = async (req, res) => {
-  if (req.headers && req.headers.authorization) {
-    const token = req.headers.authorization.split(" ")[1]; // Extraction du token à partir des en-têtes de la requête
-    if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Authorization fail!" }); // Si aucun token n'est fourni, renvoyer un message d'erreur
-    }
-
-    const tokens = req.user.tokens; // Récupération des tokens de l'utilisateur depuis la requête
-
-    const newTokens = tokens.filter((t) => t.token !== token); // Filtrage des tokens pour exclure celui qui est utilisé pour la déconnexion
-
-    // Mise à jour des tokens de l'utilisateur dans la base de données
-    await User.findByIdAndUpdate(req.user._id, { tokens: newTokens });
-    res.json({ success: true, message: "Sign out successfully!" }); // Réponse indiquant le succès de la déconnexion
-    console.log("logged out ");
-  }
-};
-
-//Fonction pour update  user profile
+// Fonction pour update user profile
 exports.uploadProfile = async (req, res) => {
   const { user } = req; // Récupération de l'utilisateur depuis la requête
   if (!user)
     return res
       .status(401)
-      .json({ success: false, message: 'unauthorized access!' }); // Si l'utilisateur n'est pas authentifié, renvoyer un message d'erreur
+      .json({ success: false, message: "unauthorized access!" }); // Si l'utilisateur n'est pas authentifié, renvoyer un message d'erreur
 
   const { fullname, birthdate, location, gender, height, weight } = req.body;
   const avatar = req.file ? req.file.path : null; // Si une nouvelle image est fournie, utilisez-la, sinon, laissez-la nulle
@@ -306,7 +327,6 @@ exports.uploadProfile = async (req, res) => {
     // Construction de l'objet de mise à jour en fonction des champs fournis
     const updateFields = {};
     if (fullname) updateFields.fullname = fullname;
-
     if (birthdate) updateFields.birthdate = birthdate;
     if (location) updateFields.location = location;
     if (gender) updateFields.gender = gender;
@@ -318,7 +338,7 @@ exports.uploadProfile = async (req, res) => {
         public_id: `${user._id}_profile`,
         width: 500,
         height: 500,
-        crop: 'fill',
+        crop: "fill",
       });
       updateFields.avatar = result.url; // Mettre à jour l'avatar avec l'URL de l'image téléchargée
     }
@@ -326,66 +346,58 @@ exports.uploadProfile = async (req, res) => {
     // Mise à jour de l'utilisateur dans la base de données si des champs à mettre à jour sont fournis
     if (Object.keys(updateFields).length > 0) {
       let updatedUser;
-      {
-        // Si l'utilisateur n'est pas connecté avec Google, mettez simplement à jour son profil
-        updatedUser = await User.findByIdAndUpdate(
-          user._id,
-          updateFields,
-          { new: true }
-        );
-      }
+
+      // Si l'utilisateur n'est pas connecté avec Google, mettez simplement à jour son profil
+      updatedUser = await Patient.findByIdAndUpdate(user._id, updateFields, {
+        new: true,
+      });
+
+
       console.log("updated Successfuly!");
       res.status(200).json({ success: true, user: updatedUser }); // Réponse indiquant le succès de la mise à jour du profil
     } else {
-      console.log("No fields provided for update")
+      console.log("No fields provided for update");
       res
         .status(400)
-        .json({ success: false, message: 'No fields provided for update' }); // Si aucun champ à mettre à jour n'est fourni dans la requête, renvoyer un message d'erreur
+        .json({ success: false, message: "No fields provided for update" }); // Si aucun champ à mettre à jour n'est fourni dans la requête, renvoyer un message d'erreur
     }
   } catch (error) {
     res
       .status(500)
-      .json({ success: false, message: 'server error, try after some time' }); // En cas d'erreur lors de la mise à jour du profil, renvoyer un message d'erreur
-    console.log('Error while updating profile', error.message); // Affichage de l'erreur dans la console
+      .json({ success: false, message: "server error, try after some time" }); // En cas d'erreur lors de la mise à jour du profil, renvoyer un message d'erreur
+    console.log("Error while updating profile", error.message); // Affichage de l'erreur dans la console
   }
 };
-
 
 // Fonction for uploading additional pictures
 exports.uploadPicture = async (req, res) => {
   const { user } = req; // Get the user from the request
 
   if (!user) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized access!" });
+    return res.status(401).json({ success: false, message: "Unauthorized access!" });
   }
 
-  const picture = req.file ? req.file.path : null; // Get the uploaded picture
+  const picture = req.file ? req.file.path : null;
+  const label = req.body.label; // Recevoir la prédiction du label
 
   try {
     if (picture) {
-      // Add the picture path to the user's captures array
-      user.captures.push(picture);
-
-      // Save the updated user document
+      // Ajouter le chemin de l'image et le label à l'utilisateur
+      user.captures.push({ path: picture, label: label });
       await user.save();
 
-      res
-        .status(200)
-        .json({ success: true, message: "Picture uploaded successfully" });
+      res.status(200).json({ success: true, message: "Picture and label saved successfully" });
     } else {
       res.status(400).json({ success: false, message: "No picture provided" });
     }
   } catch (error) {
-    console.error("Error uploading picture:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Server error, try again later" });
+    console.error("Error uploading picture and saving label:", error);
+    res.status(500).json({ success: false, message: "Server error, try again later" });
   }
 };
 
-//Fonction pour générer un code de vérification aléatoire
+
+// Fonction pour générer un code de vérification aléatoire
 const generateVerificationCode = () => {
   return Math.floor(100000 + Math.random() * 900000); // Génère un nombre aléatoire à 6 chiffres
 };
@@ -420,7 +432,7 @@ const sendResetPasswordEmail = async (email, verifUserCode) => {
   }
 };
 
-//Fonction pour  vérifier si le code de vérification
+// Fonction pour vérifier si le code de vérification
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -429,14 +441,14 @@ exports.forgotPassword = async (req, res) => {
     const verifUserCode = generateVerificationCode();
 
     // Mettre à jour le code de vérification dans la base de données
-    const user = await User.findOneAndUpdate(
+    const user = await Patient.findOneAndUpdate(
       { email },
       { verifUserCode },
       { new: true }
     );
 
     if (!user) {
-      console.log("User not found")
+      console.log("User not found");
       return res
         .status(200)
         .json({ success: false, message: "User not found" });
@@ -444,7 +456,7 @@ exports.forgotPassword = async (req, res) => {
 
     // Envoyer l'e-mail de réinitialisation de mot de passe avec le code de vérification
     await sendResetPasswordEmail(email, verifUserCode);
-    console.log("Reset password email sent successfully")
+    console.log("Reset password email sent successfully");
     res.json({
       success: true,
       message: "Reset password email sent successfully",
@@ -463,11 +475,12 @@ exports.resetPassword = async (req, res) => {
 
   try {
     // Récupérer l'e-mail de l'utilisateur à partir du code de vérification
-    const user = await User.findOne({ verifUserCode: code });
+    const user = await Patient.findOne({ verifUserCode: code });
 
     // Vérifier si l'utilisateur existe
     if (!user) {
-      console.log("Invalid verification code")
+      console.log("Invalid verification code");
+
       return res
         .status(404)
         .json({ success: false, message: "Invalid verification code" });
@@ -476,24 +489,20 @@ exports.resetPassword = async (req, res) => {
     // Comparer le nouveau mot de passe avec l'ancien
     const passwordMatch = await bcrypt.compare(newPassword, user.password);
     if (passwordMatch) {
-      console.log("New password must be different from the old one")
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "New password must be different from the old one",
-        });
+      console.log("New password must be different from the old one");
+      return res.status(400).json({
+        success: false,
+        message: "New password must be different from the old one",
+      });
     }
 
     // Vérifier la longueur du nouveau mot de passe
     if (newPassword.length < 8 || newPassword.length > 20) {
-      console.log("Password must be 8 to 20 characters long")
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Password must be 8 to 20 characters long",
-        });
+      console.log("Password must be 8 to 20 characters long");
+      return res.status(400).json({
+        success: false,
+        message: "Password must be 8 to 20 characters long",
+      });
     }
 
     // Hacher le nouveau mot de passe
@@ -513,15 +522,13 @@ exports.resetPassword = async (req, res) => {
       .json({ success: false, message: "Error resetting password" });
   }
 };
-
-
 // Fonction pour enregistrer le token FCM
 exports.saveFCMToken = async (req, res) => {
   const { token, email } = req.body;
 
   try {
     // Trouver l'utilisateur et mettre à jour le FCMtoken
-    const user = await User.findOneAndUpdate({ email: email }, { FCMtoken: token }, { new: true });
+    const user = await Patient.findOneAndUpdate({ email: email }, { FCMtoken: token }, { new: true });
 
     if (!user) {
       return res.status(404).send('User not found');

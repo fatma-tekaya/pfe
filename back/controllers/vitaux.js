@@ -7,12 +7,12 @@ exports.updatevitalsigns = async (req, res) => {
 
     try {
         // Find user by email
-        const userRef = db.ref('users');
+        const userRef = db.ref('patients');
         const snapshot = await userRef.orderByChild('email').equalTo(email).once('value');
 
         if (snapshot.exists()) {
             const userId = Object.keys(snapshot.val())[0]; // Get the user ID
-            const userVitalsRef = db.ref('users').child(userId).child('vitals');
+            const userVitalsRef = db.ref('patients').child(userId).child('vitals');
 
             await userVitalsRef.update({
                 temp,
@@ -38,12 +38,12 @@ exports.getVitals = async (req, res) => {
     const { email } = req.body;
     try {
         // Find user by email
-        const userRef = db.ref('users');
+        const userRef = db.ref('patients');
         const snapshot = await userRef.orderByChild('email').equalTo(email).once('value');
 
         if (snapshot.exists()) {
             const userId = Object.keys(snapshot.val())[0]; // Get the user ID
-            const userVitalsRef = db.ref('users').child(userId).child('vitals');
+            const userVitalsRef = db.ref('patients').child(userId).child('vitals');
 
             const vitalsSnapshot = await userVitalsRef.once('value');
             if (vitalsSnapshot.exists()) {

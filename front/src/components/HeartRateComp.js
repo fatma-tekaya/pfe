@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import CircularProgress from 'react-native-circular-progress-indicator';
+import { colors } from '../styles/colors';
 
 const HeartRateComp = ({ data }) => {
-    const maxHeartRate = 200; // Adjust the max heart rate as needed
+    const maxHeartRate = 200; // Ajustez la fréquence cardiaque maximale selon les besoins
 
     return (
         <View style={styles.container}>
@@ -14,12 +15,12 @@ const HeartRateComp = ({ data }) => {
                 textColor="#FF6347"
                 activeStrokeColor="#FF6347"
                 inActiveStrokeColor="#e0e0e0"
-                inActiveStrokeOpacity={0.5}
-                textStyle={{ fontSize: 30, fontWeight: 'bold' }}
-                duration={1000}
+                inActiveStrokeOpacity={0.2}
+                textStyle={styles.textStyle}
+                duration={1500}
                 title={'BPM'}
-                titleColor="#555"
-                titleStyle={{ fontSize: 16 }}
+                titleStyle={styles.titleStyle}
+                progressValueColor="#FF6347"
             />
         </View>
     );
@@ -29,7 +30,17 @@ const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 30
+        marginBottom: 30,
+    },
+    textStyle: {
+        fontSize: 30,
+        fontWeight: 'bold',
+    },
+    titleStyle: {
+        fontFamily: 'Outfit-Regular',
+        fontWeight: '200',
+        color: colors.blue_fonce,
+        fontSize: 20,
     },
 });
 

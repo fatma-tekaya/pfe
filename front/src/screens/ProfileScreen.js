@@ -1,31 +1,33 @@
+import React, { useState, useContext, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   Image,
-  Button,
   SafeAreaView,
   ScrollView,
+  StyleSheet
 } from 'react-native';
-import {BASE_URL} from '../config';
-import React, {useState, useContext, useEffect} from 'react';
 import DatePicker from 'react-native-date-picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import ImagePicker from 'react-native-image-crop-picker';
-import {AuthContext} from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
 import CustomButton from '../components/CustomButton';
 import InputField from '../components/InputField';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Entypo from 'react-native-vector-icons/Entypo';
+import { colors } from '../styles/colors';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 const ProfileScreen = () => {
-  const {userToken} = useContext(AuthContext);
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [dobLabel, setDobLabel] = useState('Date of Birth');
-  const {userInfo} = useContext(AuthContext);
+  const { userInfo, updateUserProfile } = useContext(AuthContext);
   const [image, setImage] = useState(null);
   const [fullname, setFullname] = useState('');
   const [email, setEmail] = useState('');
@@ -33,51 +35,6 @@ const ProfileScreen = () => {
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [location, setLocation] = useState('');
-
-  const updateUserProfile = async updatedData => {
-    try {
-      const formData = new FormData();
-
-      // Append each field to the FormData object
-      for (const key in updatedData) {
-        formData.append(key, updatedData[key]);
-      }
-
-      // Append the image file to the FormData object
-      if (updatedData.avatar) {
-        formData.append('profile', {
-          // Change 'avatar' to 'profile'
-          uri: updatedData.avatar,
-          type: 'image/jpeg', // Adjust the type if necessary
-          name: 'avatar.jpg', // Adjust the filename if necessary
-        });
-      }
-
-      // Send the request
-      const response = await fetch(`${BASE_URL}/upload-profile`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `jwt ${userToken}`,
-          'Content-Type': 'multipart/form-data', // Set the content type to multipart/form-data
-        },
-        body: formData,
-      });
-
-      // Check if the request was successful (status code in the range 200-299)
-      if (!response.ok) {
-        throw new Error('Failed to update profile');
-      }
-
-      // Handle the response data
-      const data = await response.text(); // Assuming the response is text/plain
-      console.log('Profile updated successfully:', data);
-
-      // Handle the response if needed
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      // Gérer les erreurs ici
-    }
-  };
 
   useEffect(() => {
     if (userInfo.user) {
@@ -91,7 +48,7 @@ const ProfileScreen = () => {
         setDate(new Date(userInfo.user.birthdate));
         setDobLabel(new Date(userInfo.user.birthdate).toDateString());
       }
-      setImage(userInfo.user.avatar  || null);
+      setImage(userInfo.user.avatar || userInfo.user.photo || null);
     }
   }, [userInfo]);
 
@@ -102,7 +59,6 @@ const ProfileScreen = () => {
       cropping: true,
       compressImageQuality: 0.7,
     }).then(image => {
-      console.log(image);
       setImage(image.path);
     });
   };
@@ -114,7 +70,6 @@ const ProfileScreen = () => {
       cropping: true,
       compressImageQuality: 0.7,
     }).then(image => {
-      console.log(image);
       setImage(image.path);
     });
   };
@@ -127,109 +82,58 @@ const ProfileScreen = () => {
       gender,
       height,
       weight,
-      avatar: image,
+      birthdate: date.toISOString(),
+      profile: image || ''
     };
-
     return updatedData;
   };
 
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <ScrollView contentContainerStyle={{flexGrow: 1}}>
-        <View style={{flex: 1, paddingHorizontal: 25}}>
-          <View
-            style={{alignItems: 'center', marginTop: 20, marginVertical: 20}}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={styles.container}>
+          <View style={styles.profileSection}>
             {image || userInfo.user.avatar ? (
-              <View style={{position: 'relative'}}>
-                {image && (
-                  <View style={{position: 'relative'}}>
-                    <Image
-                      source={{uri: image}}
-                      style={{height: 100, width: 100, borderRadius: 50}}
-                    />
-                    <TouchableOpacity
-                      style={{position: 'absolute', top: 0, right: 0}}
-                      onPress={() => setImage(null)}>
-                      <MaterialIcons name="cancel" size={24} color="black" />
-                    </TouchableOpacity>
-                  </View>
-                )}
-                {/* {userInfo.user.avatar && !image && (
-                  <>
-                    <Image
-                      source={{uri: userInfo.user.avatar}}
-                      style={{height: 100, width: 100, borderRadius: 50}}
-                    />
-                    <TouchableOpacity
-                      style={{position: 'absolute', top: 0, right: 0}}
-                      onPress={() => {
-                      
-                      }}>
-                      <MaterialIcons name="cancel" size={24} color="black" /> 
-                    </TouchableOpacity>
-                  </>
-                )} */}
+              <View style={styles.imageContainer}>
+                <Image
+                  source={{ uri: image || userInfo.user.avatar }}
+                  style={styles.profileImage}
+                />
               </View>
             ) : (
               <MaterialIcons name="photo-camera" size={100} color="#2F4F4F" />
             )}
-
             <TouchableOpacity
-              style={{
-                backgroundColor: '#2F4F4F',
-                paddingVertical: 10,
-                paddingHorizontal: 20,
-                borderRadius: 10,
-                marginTop: 10,
-              }}
-              onPress={takePhotoFromCamera}>
-              <Text style={{color: '#fff', fontWeight: '700'}}>
-                Prendre une photo
-              </Text>
+              style={styles.photoButton}
+              onPress={takePhotoFromCamera}
+            >
+              <Text style={styles.photoButtonText}>Take Photo</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={{
-                backgroundColor: '#2F4F4F',
-                paddingVertical: 10,
-                paddingHorizontal: 20,
-                borderRadius: 10,
-                marginTop: 10,
-              }}
-              onPress={choosePhotoFromLibrary}>
-              <Text style={{color: '#fff', fontWeight: '700'}}>
-                Choisir une photo
-              </Text>
+              style={styles.photoButton}
+              onPress={choosePhotoFromLibrary}
+            >
+              <Text style={styles.photoButtonText}>Choose Photo</Text>
             </TouchableOpacity>
           </View>
 
           <InputField
-            label={'Full Name'}
+            label="Full Name"
             value={fullname}
-            onChangeText={text => setFullname(text)}
+            onChangeText={setFullname}
             icon={<Ionicons name="person-outline" size={20} color="#666" />}
           />
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              borderBottomColor: '#ccc',
-              borderBottomWidth: 1,
-              paddingBottom: 8,
-              marginBottom: 25,
-            }}>
+          <View style={styles.datePickerContainer}>
             <Ionicons name="calendar-outline" size={20} color="#666" />
-            <TouchableOpacity
-              onPress={() => setOpen(true)}
-              style={{marginLeft: 5}}>
-              <Text style={{color: '#666'}}>{dobLabel}</Text>
+            <TouchableOpacity onPress={() => setOpen(true)}>
+              <Text style={styles.dateText}>{dobLabel}</Text>
             </TouchableOpacity>
           </View>
-
           <DatePicker
             modal
             open={open}
             date={date}
-            mode={'date'}
+            mode="date"
             maximumDate={new Date('2005-01-01')}
             minimumDate={new Date('1980-01-01')}
             onConfirm={date => {
@@ -237,99 +141,153 @@ const ProfileScreen = () => {
               setDate(date);
               setDobLabel(date.toDateString());
             }}
-            onCancel={() => {
-              setOpen(false);
-            }}
+            onCancel={() => setOpen(false)}
           />
           <InputField
-            label={'Email'}
+            label="Email"
             value={email}
-            onChangeText={text => setEmail(text)}
-            icon={
-              <MaterialIcons name="alternate-email" size={20} color="#666" />
-            }
+            onChangeText={setEmail}
+            icon={<AntDesign name="mail" size={20} color="#666" />}
             keyboardType="email-address"
           />
           <InputField
-            label={'Location'}
+            label="Location"
             value={location}
-            onChangeText={text => setLocation(text)}
-            icon={<Entypo name="location" size={20} color="#666" />}
+            onChangeText={setLocation}
+            icon={<EvilIcons name="location" size={25} color="#666" />}
           />
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 20,
-              borderBottomColor: '#ccc',
-              borderBottomWidth: 1,
-              paddingBottom: 8,
-              marginBottom: 25,
-            }}>
-            <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
-              <MaterialCommunityIcons
-                name="gender-male-female"
-                size={25}
-                color="#666"
-              />
-              <Text style={{marginLeft: 5, fontSize: 16, color: '#666'}}>
-                Gender
-              </Text>
+          <View style={styles.genderContainer}>
+            <View style={styles.genderLabel}>
+              <FontAwesome name="transgender" size={25} color="#666" />
+              <Text style={styles.genderText}>Gender</Text>
             </View>
-            <View style={{flexDirection: 'row', marginLeft: 8}}>
+            <View style={styles.genderButtons}>
               <TouchableOpacity
-                style={{
-                  backgroundColor: gender === 'Male' ? '#2F4F4F' : '#ccc',
-                  paddingVertical: 8,
-                  paddingHorizontal: 18,
-                  borderRadius: 10,
-                  marginRight: 10,
-                }}
-                onPress={() => setGender('Male')}>
-                <Text style={{color: '#fff'}}>Male</Text>
+                style={[styles.genderButton, gender === 'Male' && styles.selectedGenderButton]}
+                onPress={() => setGender('Male')}
+              >
+                <Text style={styles.genderButtonText}>Male</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{
-                  backgroundColor: gender === 'Female' ? '#2F4F4F' : '#ccc',
-                  paddingVertical: 8,
-                  paddingHorizontal: 18,
-                  borderRadius: 10,
-                }}
-                onPress={() => setGender('Female')}>
-                <Text style={{color: '#fff'}}>Female</Text>
+                style={[styles.genderButton, gender === 'Female' && styles.selectedGenderButton]}
+                onPress={() => setGender('Female')}
+              >
+                <Text style={styles.genderButtonText}>Female</Text>
               </TouchableOpacity>
             </View>
           </View>
-
           <InputField
-            label={'Height (cm)'}
-            keyboardType={'numeric'}
+            label="Height (cm)"
+            keyboardType="numeric"
             value={height !== null ? height.toString() : ''}
-            onChangeText={text => setHeight(text)}
-            icon={
-              <MaterialCommunityIcons
-                name="human-male-height-variant"
-                size={20}
-                color="#666"
-              />
-            }
+            onChangeText={setHeight}
+            icon={<MaterialCommunityIcons name="human-male-height-variant" size={20} color="#666" />}
           />
           <InputField
-            label={'Weight (kg)'}
-            keyboardType={'numeric'}
+            label="Weight (kg)"
+            keyboardType="numeric"
             value={weight !== null ? weight.toString() : ''}
-            onChangeText={text => setWeight(text)}
+            onChangeText={setWeight}
             icon={<FontAwesome6 name="weight-scale" size={20} color="#666" />}
           />
-
-          <CustomButton
-            label={'Update'}
-            onPress={() => updateUserProfile(getUpdatedData())}
-          />
+           <TouchableOpacity
+              style={styles.updatebutton}
+              onPress={() => updateUserProfile(getUpdatedData())}
+            >
+              <Text style={styles.photoButtonText}>Update</Text>
+            </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 25,
+  },
+  profileSection: {
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  imageContainer: {
+    position: 'relative',
+  },
+  profileImage: {
+    height: 100,
+    width: 100,
+    borderRadius: 50,
+  },
+  photoButton: {
+    backgroundColor: colors.bleu_bleu,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  photoButtonText: {
+    color: '#fff',
+    fontFamily: 'Outfit-Regular',
+  },
+  datePickerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+    paddingBottom: 8,
+    marginBottom: 25,
+  },
+  dateText: {
+    color: '#666',
+    marginLeft: 5,
+  },
+  genderContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+    paddingBottom: 8,
+    marginBottom: 25,
+  },
+  genderLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  genderText: {
+    marginLeft: 5,
+    fontSize: 16,
+    color: '#666',
+  },
+  genderButtons: {
+    flexDirection: 'row',
+    marginLeft: 8,
+  },
+  genderButton: {
+    backgroundColor: '#dde4e8',
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderRadius: 10,
+    marginRight: 10,
+  },
+  selectedGenderButton: {
+    backgroundColor: '#67859b',
+  },
+  genderButtonText: {
+    color: '#fff',
+  },
+  updatebutton:{
+    backgroundColor: colors.bleu_bleu,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginTop: 10,
+    alignItems:'center',
+    marginBottom:30
+  }
+});
 
 export default ProfileScreen;

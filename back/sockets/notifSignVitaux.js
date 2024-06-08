@@ -1,6 +1,6 @@
 const axios = require('axios');
 const {db,firestore,firebase } = require('../firebase/index'); // Ensure this is correctly pointing to your Firebase config
-const User = require("../models/User");
+const Patient = require("../models/Patient");
 //const firestore = firebase.firestore();
 // Function to send notifications via FCM
 const sendNotification = async (userToken, message,userId) => {
@@ -65,7 +65,7 @@ const checkVitalSign = (sign) => {
 
 // Listen for changes in vital signs
 const startListening = () => {
-    db.ref('users').on('child_changed', async (snapshot) => {
+    db.ref('patients').on('child_changed', async (snapshot) => {
         const userId = snapshot.key;
         const userData = snapshot.val();
         const vitals = userData.vitals;
@@ -84,11 +84,11 @@ const startListening = () => {
                     const message = `Valeur anormale détectée dans les signes vitaux: ${abnormalVitals.join(', ')}`;
                     // Query MongoDB for the user's FCM token
                     try {
-                        const user = await User.findOne({ email });
+                        const user = await Patient.findOne({ email });
                         if (user && user.FCMtoken) {
                             await sendNotification(user.FCMtoken, message,userId);
                         } else {
-                            console.log('User not found in MongoDB or FCM token is missing');
+                            console.log('Patient not found in MongoDB or FCM token is missing');
                         }
                     } catch (error) {
                         console.error('Error querying MongoDB:', error);

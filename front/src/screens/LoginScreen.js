@@ -1,83 +1,100 @@
-import React, {useContext, useState} from 'react';
+import React, { useContext, useState } from 'react';
 import {
   SafeAreaView,
   View,
   Text,
   Image,
-  TextInput,
   TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import LoginSVG from '../assets/images/log.svg';
 import GoogleSVG from '../assets/images/misc/google.svg';
-import FacebookSVG from '../assets/images/misc/facebook.svg';
-import TwitterSVG from '../assets/images/misc/twitter.svg';
-import {LoginButton} from 'react-native-fbsdk-next';
 import CustomButton from '../components/CustomButton';
 import InputField from '../components/InputField';
-import {AuthContext} from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
+import { colors } from '../styles/colors';
+import { globalStyles } from '../styles/globalStyles';
+import Toast from 'react-native-toast-message';
 
-const LoginScreen = ({navigation}) => {
+const LoginScreen = ({ navigation }) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
-  const {login, setIsLoading, signInOrSignUpWithGoogle,userInfo} = useContext(AuthContext);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const { login, setIsLoading, signInOrSignUpWithGoogle, userInfo } = useContext(AuthContext);
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
+  const validateInputs = () => {
+    let valid = true;
+    if (!email.includes('@gmail.com')) {
+      setEmailError('Email must be in the format xxxxxx@gmail.com');
+      valid = false;
+    } else {
+      setEmailError('');
+    }
+    if (password.length < 8) {
+      setPasswordError('Password must be at least 8 characters');
+      valid = false;
+    } else {
+      setPasswordError('');
+    }
+
+    return valid;
+  };
   const handleSignIn = async () => {
     if (!email || !password) {
-      alert('Please fill in all fields');
+      Toast.show({
+        type: 'error',
+        text1: 'Missing fields',
+        text2: 'Please complete all fields.',
+        text1Style: { fontSize: 14 },
+        text2Style: { fontSize: 14 }
+      });
       return;
     }
-  
+    if (!validateInputs()) {
+      return;
+    }
     try {
       let FCMtoken = await AsyncStorage.getItem('fcm_token')
-      //console.log("fcmtoken ici "+FCMtoken)
-      const resp = await login(email, password,FCMtoken);
-  
+      const resp = await login(email, password, FCMtoken);
       // Vérifiez si l'authentification est réussie
       if (resp.success) {
         // L'authentification a réussi, naviguez vers la page d'accueil
         console.log("User authenticated!");
       } else {
         // L'authentification a échoué, affichez un message d'erreur à l'utilisateur
-        alert(userInfo.message);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: userInfo.message,
+          text1Style: { fontSize: 14 },
+          text2Style: { fontSize: 14 }
+        });
       }
     } catch (error) {
-      // Affichez un message d'erreur générique en cas d'erreur
-      alert("Error signing in. Please try again later.");
-      console.error(error);
+      Toast.show({
+        type: 'info',
+        text1: 'Error sign in',
+        text2: 'Please try again later.',
+        text1Style: { fontSize: 14 },
+        text2Style: { fontSize: 14 }
+      });
     }
   };
-  
-  
-
   return (
-    <SafeAreaView style={{flex: 1, justifyContent: 'center'}}>
-      <View style={{paddingHorizontal: 25}}>
-        <View style={{alignItems: 'center'}}>
-          {/* <LoginSVG
-            height={220}
-            width={220}
-            style={{transform: [{rotate: '-5deg'}]}}
-          /> */}
-          <Image source={require('../assets/images/logosans.png')}/>
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center' }}>
+      <View style={{ paddingHorizontal: 25 }}>
+        <View style={globalStyles.container}>
+          <Image style={globalStyles.image} source={require('../assets/images/logovff-sarr.png')} />
         </View>
-
         <Text
-          style={{
-            fontFamily: 'Roboto-Medium',
-            fontSize: 28,
-            fontWeight: '500',
-            color: '#4a6475',
-            marginBottom: 30,
-          }}>
+          style={globalStyles.texttitle }>
           Login
         </Text>
-
         <InputField
           label={'Email'}
           value={email}
@@ -86,13 +103,15 @@ const LoginScreen = ({navigation}) => {
               name="alternate-email"
               size={20}
               color="#666"
-              style={{marginRight: 5}}
+              style={{ marginRight: 5 }}
             />
           }
+
           keyboardType="email-address"
           onChangeText={text => setEmail(text)}
         />
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        {emailError ? <Text style={globalStyles.errorText}>{emailError}</Text> : null}
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <InputField
             label={'Password'}
             value={password}
@@ -101,7 +120,7 @@ const LoginScreen = ({navigation}) => {
                 name="lock-closed-outline"
                 size={20}
                 color="#666"
-                style={{marginRight: 5}}
+                style={{ marginRight: 5 }}
               />
             }
             inputType={passwordVisible ? 'text' : 'password'}
@@ -109,7 +128,7 @@ const LoginScreen = ({navigation}) => {
           />
           <TouchableOpacity
             onPress={togglePasswordVisibility}
-            style={{position: 'absolute', right: 10, top: 10}}>
+            style={{ position: 'absolute', right: 10, top: 10 }}>
             <Ionicons
               name={passwordVisible ? 'eye-outline' : 'eye-off-outline'}
               size={20}
@@ -117,60 +136,50 @@ const LoginScreen = ({navigation}) => {
             />
           </TouchableOpacity>
         </View>
+        {passwordError ? <Text style={globalStyles.errorText}>{passwordError}</Text> : null}
         <TouchableOpacity
           onPress={() => {
             navigation.navigate('Forgot');
           }}>
           <Text
-            style={{color: '#0f3f61', fontWeight: '700', textAlign: 'center', marginBottom:10}}>
+            style={{ color: colors.blue_fonce, fontFamily: 'Outfit-Medium', textAlign: 'right', marginBottom: 20 }}>
             {' '}
-            Forgot Password?
+            Forgot Password ?
           </Text>
         </TouchableOpacity>
         <CustomButton
           label={'Login'}
           onPress={handleSignIn}
         />
-
-        <Text style={{textAlign: 'center', color: '#666', marginBottom: 30}}>
+        <Text style={{ textAlign: 'center',fontFamily: 'Outfit-Medium',color: '#666', marginBottom: 10 }}>
           Or, login with ...
         </Text>
-
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center', // Alignez les éléments verticalement au centre
-            marginBottom: 30,
+            marginBottom: 10,
           }}>
           <TouchableOpacity
             onPress={() => {
               signInOrSignUpWithGoogle();
             }}
-            style={{
-              flexDirection: 'row', // Permet d'aligner l'icône et le texte horizontalement
-              alignItems: 'center', // Alignez les éléments verticalement au centre
-              borderColor: '#ddd',
-              backgroundColor:'lightgrey',
-              borderWidth: 2,
-              borderRadius: 10,
-              marginHorizontal: 75,
-              paddingHorizontal: 10, // Ajustez selon votre besoin
-              paddingVertical: 10,
-            }}>
+            style={globalStyles.buttonContainer}
+          >
             <GoogleSVG height={24} width={24} />
-            <Text style={{marginLeft: 10 , color:'black'}}>Se connecter avec Gmail</Text>
+            <Text style={globalStyles.buttonText}>login with gmail</Text>
           </TouchableOpacity>
         </View>
-
         <View
           style={{
             flexDirection: 'row',
             justifyContent: 'center',
             marginBottom: 30,
+            marginTop: 20
           }}>
-          <Text style={{color: '#666'}}>New to the app?</Text>
+          <Text style={{ color: '#666' ,fontFamily: 'Outfit-Medium'}}>New to the app ?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={{color: '#0f3f61', fontWeight: '700'}}> Register</Text>
+            <Text style={{ color: '#0f3f61', fontWeight: '700',fontFamily: 'Outfit-Medium' }}> Register</Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -18,14 +18,16 @@ import CustomSwitch from '../components/CustomSwitch';
 import ListItem from '../components/ListItem';
 import { AuthContext } from '../context/AuthContext';
 import Entypo from 'react-native-vector-icons/Entypo';
-import SigneVitauxScreen from '../screens/SigneVitauxScreen';
-import socketServices from "../utils/socketService";
+import CustomLoader from '../components/CustomLoader'; import SigneVitauxScreen from '../screens/SigneVitauxScreen';
 import { requestUserPermission, getToken, saveTokenToServer } from '../utils/FirebaseMessagingService';
 import messaging from '@react-native-firebase/messaging';
-
+import { colors } from '../styles/colors'
 const HomeScreen = ({ navigation }) => {
   const [swipeTab, setSwipeTab] = useState(1);
   const { userInfo } = useContext(AuthContext);
+  if (!userInfo) {
+    return <CustomLoader />;
+  }
   const renderBanner = ({ item, index }) => {
     return <BannerSlider data={item} />;
   };
@@ -36,20 +38,15 @@ const HomeScreen = ({ navigation }) => {
     requestUserPermission();
     const userEmail = userInfo.user.email;
     getToken(userEmail);
-
-    
-
     //traiter les messages FCM en arrière-plan
     messaging().setBackgroundMessageHandler(async remoteMessage => {
       console.log('Message handled in the background!', JSON.stringify(remoteMessage));
     });
-
     // Écouter les mises à jour du token
     messaging().onTokenRefresh(token => {
       console.log('FCM Token refreshed:', token);
       saveTokenToServer(token, userId);
     });
-   
   }, [])
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -61,24 +58,29 @@ const HomeScreen = ({ navigation }) => {
             marginBottom: 20,
             marginTop: 5,
           }}>
-          <TouchableOpacity onPress={() => navigation.openDrawer()}>
-            < Entypo name='menu' color='black' size={30} style={{ width: 50, height: 50, marginTop: 4 }} />
-          </TouchableOpacity>
-          <Text
+          <View
             style={{
-              color: 'black',
-              fontSize: 20,
-              fontFamily: 'Roboto-Medium',
-              marginTop: 5,
-              marginLeft: -160
+              flexDirection: 'row',
             }}>
-            Hello {userInfo.user.fullname}
-          </Text>
+            <TouchableOpacity onPress={() => navigation.openDrawer()}>
+              <Entypo name='menu' color='black' size={30} style={{ width: 50, height: 50, marginTop: 4 }} />
+            </TouchableOpacity>
+            <Text
+              style={{
+                color: 'black',
+                fontSize: 21,
+                fontFamily: 'Outfit-Medium',
+                marginTop: 5,
+
+              }}>
+              Hello {userInfo.user.fullname}
+            </Text>
+          </View>
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <ImageBackground
               source={
-                userInfo.user.avatar
-                  ? { uri: userInfo.user.avatar }
+                userInfo.user.avatar || userInfo.user.photo
+                  ? { uri: userInfo.user.avatar || userInfo.user.photo }
                   : require('../assets/images/user-profile.jpg')
               }
               style={{ width: 50, height: 50, marginTop: -3 }}
@@ -93,7 +95,7 @@ const HomeScreen = ({ navigation }) => {
             borderWidth: 1,
             borderRadius: 8,
             paddingHorizontal: 8,
-            paddingVertical: 2,
+            marginBottom: 20
           }}>
           <Feather
             name="search"
@@ -107,21 +109,6 @@ const HomeScreen = ({ navigation }) => {
             placeholder="Search"
           />
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginVertical: 15,
-          }}>
-          <Text
-            style={{ color: 'black', fontSize: 18, fontFamily: 'Roboto-Medium' }}>
-            Upcoming Features
-          </Text>
-          <TouchableOpacity onPress={() => { }}>
-            <Text style={{ color: '#0aada8' }}>See all</Text>
-          </TouchableOpacity>
-        </View>
-
         <Carousel
           ref={c => {
             this._carousel = c;
@@ -131,12 +118,10 @@ const HomeScreen = ({ navigation }) => {
           sliderWidth={windowWidth - 40}
           itemWidth={300}
           loop={true}
-
         />
 
         <View style={{
           marginVertical: 20,
-
         }}>
           <CustomSwitch
             selectionMode={1}
@@ -147,20 +132,9 @@ const HomeScreen = ({ navigation }) => {
         </View>
         {swipeTab === 1 && (
           <View>
-
             <SigneVitauxScreen />
           </View>
         )}
-        {/* {swipeTab == 1 &&
-        tipsAndAdvices.map(item =>(
-          <ListItem key={item.id}
-          photo={item.poster} 
-          title={item.title} 
-          subTitle={item.subtitle}
-          onPress={()=>navigation.navigate('SignDetails',
-          {title:item.subtitle , id:item.id})}
-          />
-        )) } */}
         <View style={{ marginBottom: 20 }}>
           {swipeTab == 2 && tipsAndAdvices.map(item => (
             <ListItem key={item.id}
@@ -169,7 +143,6 @@ const HomeScreen = ({ navigation }) => {
               subTitle={item.subtitle}
               onPress={() => navigation.navigate('SignDetails',
                 { title: item.subtitle, id: item.id })} />
-
           ))}
         </View>
       </ScrollView>

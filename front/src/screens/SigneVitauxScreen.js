@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator,StyleSheet } from 'react-native';
 import React, { useState, useEffect, useContext } from 'react';
 import HeartRateComp from '../components/HeartRateComp';
 import TempComp from '../components/TempComp';
@@ -13,15 +13,13 @@ const SigneVitauxScreen = () => {
     const [spoData, setSpoData] = useState(null);
     const [loading, setLoading] = useState(true);
     const userEmail = userInfo.user.email;
+
     const sanitizeEmail = (email) => {
         return email.replace(/[.#$[\]]/g, "_");
     };
-
-
-
     useEffect(() => {
         const fetchUserByEmail = async (email) => {
-            const usersRef = database.ref('users');
+            const usersRef = database.ref('patients');
             const query = usersRef.orderByChild('email').equalTo(email);
             const snapshot = await query.once('value');
             if (snapshot.exists()) {
@@ -36,7 +34,7 @@ const SigneVitauxScreen = () => {
             try {
                 const userId = await fetchUserByEmail(userEmail);
                 if (userId) {
-                    const vitalSignsRef = database.ref(`users/${userId}/vitals`);
+                    const vitalSignsRef = database.ref(`patients/${userId}/vitals`);
                     vitalSignsRef.on('value', (snapshot) => {
                         const data = snapshot.val();
                         if (data) {
@@ -61,73 +59,82 @@ const SigneVitauxScreen = () => {
         fetchDataFromFirebase();
     }, [userEmail]);
     return (
-        <View>
+        <View style={styles.container}>
             {loading ? (
-                <View style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                }}>
-                    <Text style={{
-                        alignSelf: 'center',
-                        fontFamily: 'Outfit-Regular',
-                        fontSize: 20,
-                        color: '#0f3f61',
-                        marginBottom: 30
-                    }}>Recupération des données</Text>
+                <View style={styles.loadingContainer}>
+                    <Text style={styles.loadingText}>Récupération des données</Text>
                     <ActivityIndicator size="large" color="#5db7ba" />
                 </View>
             ) : (
-                (tempData !== null && spoData !== null && hrData !== null) ? (
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{
-                            alignSelf: 'flex-start',
-                            fontFamily: 'Outfit-Medium',
-                            fontSize: 25,
-                            color: '#0f3f61',
-                            marginTop: 10,
-                            marginBottom: 30
-                        }}>Température</Text>
-                        <TempComp data={tempData} />
+                (tempData !== 0 && spoData !== 0 && hrData !== 0) ? (
+                    <View style={styles.dataContainer}>
+                        <View style={styles.dataSection}>
+                            <Text style={styles.sectionTitle}>Temperature</Text>
+                            <TempComp data={tempData} />
+                        </View>
 
-                        <Text style={{
-                            alignSelf: 'flex-start',
-                            fontFamily: 'Outfit-Medium',
-                            fontSize: 25,
-                            color: '#0f3f61',
-                            marginVertical: 30
-                        }}>Taux d'oxygéne </Text>
-                        <SpoComp data={spoData} />
+                        <View style={styles.dataSection}>
+                            <Text style={styles.sectionTitle}>Oxygen rate</Text>
+                            <SpoComp data={spoData} />
+                        </View>
 
-                        <Text style={{
-                            alignSelf: 'flex-start',
-                            fontFamily: 'Outfit-Medium',
-                            fontSize: 25,
-                            color: '#0f3f61',
-                            marginVertical: 30,
-
-                        }}>Fréquence cardiaque </Text>
-                        <HeartRateComp data={hrData} />
+                        <View style={styles.dataSection}>
+                            <Text style={styles.sectionTitle}>Cardiac frequency</Text>
+                            <HeartRateComp data={hrData} />
+                        </View>
                     </View>
                 ) : (
-                    <View style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        marginTop: '10%'
-                    }}>
-                        <Text style={{
-                            alignSelf: 'center',
-                            fontFamily: 'Outfit-Regular',
-                            fontSize: 20,
-                            color: '#0f3f61',
-                            marginBottom: 30
-                        }}>Recupération des données</Text>
-                        <ActivityIndicator size="large" color="#5db7ba" />
+                    <View style={styles.noDataContainer}>
+                        <Text style={styles.noDataText}>Brancher votre montre</Text>
                     </View>
                 )
             )}
         </View>
     );
 };
-
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 20,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        alignSelf: 'center',
+        fontFamily: 'Outfit-Regular',
+        fontSize: 20,
+        color: '#0f3f61',
+        marginBottom: 30,
+    },
+    dataContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    dataSection: {
+        alignSelf: 'stretch',
+        marginBottom: 30,
+    },
+    sectionTitle: {
+        fontFamily: 'Outfit-Medium',
+        fontSize: 25,
+        color: '#0f3f61',
+        marginBottom: 20,
+    },
+    noDataContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    noDataText: {
+        alignSelf: 'center',
+        fontFamily: 'Outfit-Regular',
+        fontSize: 20,
+        color: '#0f3f61',
+        marginBottom: 30,
+    },
+});
 export default SigneVitauxScreen;

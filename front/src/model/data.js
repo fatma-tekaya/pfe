@@ -61,9 +61,9 @@ export const tipsAndAdvices = [
 
     ],
     title: '°C',
-    subtitle: 'Température humain',
-    marge: 'Entre 36° - 37,5°',
-    details: 'Il est essentiel de surveiller votre température corporelle pour détecter tout signe d\'inconfort ou de maladie. Cette section vous guidera sur la façon de prendre correctement votre température et vous fournira des conseils sur la signification des différentes lectures. Comprendre les valeurs normales de température corporelle est crucial pour évaluer votre état de santé. En général, la température corporelle normale se situe autour de 36,5 à 37,5 degrés Celsius (ou 97,7 à 99,5 degrés Fahrenheit). Une température au-dessus de cette plage peut indiquer de la fièvre, qui est généralement définie comme une température corporelle supérieure à 38 degrés Celsius (ou 100,4 degrés Fahrenheit). À l\'inverse, une température corporelle inférieure à la plage normale peut signaler de l\'hypothermie, qui survient lorsque le corps perd plus de chaleur qu\'il n\'en produit, souvent en raison d\'une exposition prolongée au froid. Comprendre ces valeurs vous aidera à interpréter correctement vos mesures de température et à prendre les mesures appropriées pour maintenir votre bien-être.',
+    subtitle: 'Human temperature',
+    marge: 'Between 36° - 37,5°',
+    details: 'It is essential to monitor your body temperature for any signs of discomfort or illness. This section will guide you on how to take your temperature correctly and provide you with tips on what the different readings mean. Understanding normal body temperature values ​​is crucial to assessing your health. In general, normal body temperature is around 36.5 to 37.5 degrees Celsius (or 97.7 to 99.5 degrees Fahrenheit). A temperature above this range may indicate fever, which is generally defined as a body temperature above 38 degrees Celsius (or 100.4 degrees Fahrenheit). Conversely, a body temperature below the normal range can signal hypothermia, which occurs when the body loses more heat than it produces, often due to prolonged exposure cold. Understanding these values ​​will help you correctly interpret your temperature measurements and take appropriate action to maintain your well-being.',
     advices: [
       "Repose-toi: Assure-toi de te reposer suffisamment. Ton corps a besoin de repos pour combattre l'infection.",
       "Hydratation : Bois beaucoup de liquides, comme de l'eau, du jus de fruits, ou des tisanes. Cela aide à maintenir ton corps hydraté et à réguler la température corporelle.",
@@ -92,7 +92,7 @@ export const tipsAndAdvices = [
       'Surveille ta tension régulièrement: Prends l\'habitude de vérifier ta pression artérielle régulièrement, surtout si tu as des antécédents familiaux d\'hypertension ou si tu présentes d\'autres facteurs de risque.'
 
     ],
-    subtitle: 'Tension artérielle',
+    subtitle: 'Blood pressure',
     id: '2',
   },
   {
@@ -111,7 +111,7 @@ export const tipsAndAdvices = [
       , 'Surveiller régulièrement son rythme cardiaque: Il est utile de surveiller régulièrement son rythme cardiaque, en particulier si des facteurs de risque de maladies cardiovasculaires sont présents ou si des symptômes inhabituels sont ressentis.'
     ],
     title: 'bpm',
-    subtitle: 'Rythme cardiaque',
+    subtitle: 'Heartbeat',
     id: '3',
   },
   {
@@ -130,7 +130,7 @@ export const tipsAndAdvices = [
       'Hydrater la peau: Utilisez une crème hydratante adaptée à votre type de peau pour maintenir une barrière cutanée saine et prévenir la sécheresse.',
       'Protéger la peau du soleil: Utilisez un écran solaire à large spectre avec un FPS d\'au moins 30, même par temps nuageux. Portez des vêtements protecteurs et un chapeau lorsque vous êtes exposé au soleil.'],
     title: 'Different Types',
-    subtitle: 'Maladies de la peau',
+    subtitle: 'Skin diseases',
     id: '4',
   },
   {
@@ -166,7 +166,7 @@ export const tipsAndAdvices = [
   'Pratiquez une bonne posture: Adoptez une posture correcte lorsque vous êtes assis ou debout pour éviter les tensions musculaires qui peuvent déclencher des maux de tête.'
   ],
     title: 'Symptoms',
-    subtitle: 'Mal de tête',
+    subtitle: 'Headache',
     id: '6',
   },
 ];

@@ -47,7 +47,7 @@ const NotifScreen = ({ setUnseenCount }) => {
     const fetchUserId = async () => {
       try {
         const snapshot = await database()
-          .ref('users')
+          .ref('patients')
           .orderByChild('email')
           .equalTo(userInfo.user.email)
           .once('value');

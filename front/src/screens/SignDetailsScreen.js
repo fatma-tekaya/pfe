@@ -14,7 +14,7 @@ const SignDetailsScreen = ({ navigation, route }) => {
   const closeImageModal = () => {
     setSelectedImage(null);
   };
- 
+
   return (
 
     <View>
@@ -108,7 +108,7 @@ const SignDetailsScreen = ({ navigation, route }) => {
                   source={image}
                   style={{
                     width: '40%',
-                    height:'50%',
+                    height: '50%',
                     aspectRatio: 1,
                     flex: 1,
                     borderRadius: 15,
@@ -135,8 +135,6 @@ const SignDetailsScreen = ({ navigation, route }) => {
             fontSize: 18
           }}>Voir Plus</Text>
         </TouchableOpacity>
-
-
       </ScrollView >
     </View >
 
@@ -176,7 +174,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
   },
-  
+
   imageContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -202,7 +200,7 @@ const styles = StyleSheet.create({
   },
   modalImage: {
     width: '100%',
-    height:'60%',
+    height: '60%',
     aspectRatio: 1,
     borderRadius: 15,
   },
