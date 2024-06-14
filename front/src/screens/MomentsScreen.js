@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
+
 const specialties = [
   { name: 'Dentiste', icon: 'tooth' },
   { name: 'Gynécologue', icon: 'person-pregnant' },
@@ -19,37 +20,29 @@ const specialties = [
   { name: 'Rhumatologue', icon: 'wheelchair' },
   { name: 'Neurologue', icon: 'brain' },
   { name: 'Pneumologue', icon: 'lungs' },
-
   { name: 'Nutritionniste', icon: 'apple-whole' },
   { name: 'Pédopsychiatre', icon: 'head-side-virus' },
   { name: 'Diabétologue', icon: 'droplet' },
-  { name: 'Néphrologue', icon: 'kidney' },
+  { name: 'Néphrologue', icon: 'stethoscope' },
 ];
-const MomentsScreen = () => {
 
+const MomentsScreen = ({ navigation }) => {
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Icon name="arrow-left" size={24} color="#000" />
-        <Text style={styles.headerText}>Spécialités</Text>
-      </View>
-      <View style={styles.searchSection}>
-        <Icon name="search" size={20} color="#aaa" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Trouver un médecin..."
-        />
-      </View>
-
+    <ScrollView style={styles.container}>      
       <View style={styles.specialtiesContainer}>
         {specialties.map((specialty, index) => (
-          <TouchableOpacity key={index} style={styles.specialtyButton}>
-            <Icon name={specialty.icon} size={30} color="#000" />
+          <TouchableOpacity
+            key={index}
+            style={styles.specialtyButton}
+            onPress={() => navigation.navigate('Doctors List', { specialty: specialty.name })}
+          >
+            <View style={styles.iconContainer}>
+              <Icon name={specialty.icon} size={30} color="#4A90E2" />
+            </View>
             <Text style={styles.specialtyLabel}>{specialty.name}</Text>
           </TouchableOpacity>
         ))}
       </View>
-
     </ScrollView>
   );
 };
@@ -61,48 +54,42 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginVertical: 20,
   },
   headerText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    marginLeft: 10,
-  },
-  searchSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f1f1f1',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 20,
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    fontFamily:'Outfit-Regular',
+    textAlign: 'center',
   },
   specialtiesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    marginTop:20
   },
   specialtyButton: {
     width: '30%',
     alignItems: 'center',
     marginBottom: 20,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  iconContainer: {
+    backgroundColor: '#E1F5FE',
+    borderRadius: 50,
+    padding: 10,
+    marginBottom: 10,
   },
   specialtyLabel: {
-    marginTop: 10,
     fontSize: 14,
     textAlign: 'center',
+    color: '#333',
   },
   allSpecialtiesButton: {
     alignItems: 'center',
@@ -114,4 +101,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MomentsScreen
+export default MomentsScreen;

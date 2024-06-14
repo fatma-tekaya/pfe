@@ -85,7 +85,7 @@ const SigneVitauxScreen = () => {
                     </View>
                 ) : (
                     <View style={styles.noDataContainer}>
-                        <Text style={styles.noDataText}>Brancher votre montre</Text>
+                        <Text style={styles.noDataText}>Connect your watch</Text>
                     </View>
                 )
             )}

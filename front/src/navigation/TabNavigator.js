@@ -32,6 +32,7 @@ const FavoriteStackNavigator = () => (
           fontSize: 20
         }
       }} />
+      
     <FavoriteStack.Screen name="History" component={HistoryScreen}
       options={{
         headerShown: true, title: 'History', headerTitleStyle: {
@@ -67,6 +68,8 @@ const MessagesStackNavigator = () => (
 
   </MessagesStack.Navigator>
 );
+
+
 
 const HomeStack = () => {
   return (

@@ -51,13 +51,13 @@ const checkVitalSign = (sign) => {
     const alerts = [];
 
     if (sign.heartRate > 100) {
-        alerts.push(`Fréquence cardiaque élevée détectée à ${sign.heartRate} bpm`);
+        alerts.push(`High heart rate detected at ${sign.heartRate} bpm`);
     }
     if (sign.spo2 < 95) {
-        alerts.push(`Niveau de SPO2 bas détecté à ${sign.spo2}%`);
+        alerts.push(`Low SPO2 level detected at${sign.spo2}%`);
     }
     if (sign.temp > 37.5) {
-        alerts.push(`Température élevée détectée à ${sign.temp}°C`);
+        alerts.push(`High temperature detected at${sign.temp}°C`);
     }
 
     return alerts;
@@ -81,7 +81,7 @@ const startListening = () => {
                 if (prediction[0] === "Abnormal") {
 
                     const abnormalVitals = checkVitalSign(vitals);
-                    const message = `Valeur anormale détectée dans les signes vitaux: ${abnormalVitals.join(', ')}`;
+                    const message = `Abnormal value detected in vital signs: ${abnormalVitals.join(', ')}`;
                     // Query MongoDB for the user's FCM token
                     try {
                         const user = await Patient.findOne({ email });

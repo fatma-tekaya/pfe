@@ -65,7 +65,6 @@ exports.userSignIn = async (req, res) => {
                 message: "User not found with the given email!"
             });
         }
-
         // Vérifiez si l'utilisateur a le rôle d'administrateur
         if (!user.roles.includes('admin')) {
             return res.status(403).json({

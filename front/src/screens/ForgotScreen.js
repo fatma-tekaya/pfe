@@ -39,7 +39,7 @@ const ForgotScreen = () => {
         <InputField
           label={'E-mail'}
           value={email}
-          icon={<MaterialIcons name="alternate-email" size={20} color="#666" style={{ marginRight: 5,marginTop:5 }} />}
+          icon={<MaterialIcons name="alternate-email" size={20} color="#666" style={{ marginRight: 5, marginTop: 5 }} />}
           keyboardType="email-address"
           onChangeText={text => setEmail(text)}
         />
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     color: colors.blue_fonce, // Couleur de texte cohérente avec le thème
     fontSize: 20,
     marginBottom: 20,
-    fontWeight: 'bold',
+    fontFamily: 'Outfit-Regular',
     textAlign: 'left', // Centrer le texte d'en-tête
   },
   inputField: {
