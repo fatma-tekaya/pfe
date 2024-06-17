@@ -1,3 +1,3 @@
 node_modules
 .env
-/firebase/serviceAccountKey.json
+back/firebase/serviceAccountKey.json
