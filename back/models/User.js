@@ -106,7 +106,13 @@ const userSchema = new Schema({
   },
   password: {
     type: String,
+    required: function() { return this.authMethod === 'local'; },
+  },
+  authMethod: {
+    type: String,
     required: true,
+    enum: ['local', 'google'],
+    default: 'local'
   },
   roles: {
     type: [String],

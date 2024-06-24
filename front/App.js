@@ -6,10 +6,10 @@ import { NavigationContainer } from '@react-navigation/native';
 function App() {
   return (
     <AuthProvider>
-       <NavigationContainer>
+      
         <AppNav />
-      </NavigationContainer>
-      <Toast/>
+    
+    
     </AuthProvider>
   );
 }

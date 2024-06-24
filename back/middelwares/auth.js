@@ -27,9 +27,25 @@ exports.isAuth = async (req, res, next) => {
         });
       }
 
-      res.res.json({ success: false, message: 'Internal server error!' }); // En cas d'autres erreurs, renvoyer une réponse d'erreur interne du serveur
+      res.json({ success: false, message: 'Internal server error!' }); // En cas d'autres erreurs, renvoyer une réponse d'erreur interne du serveur
     }
   } else {
     res.json({ success: false, message: 'unauthorized access!' }); // Si aucun token n'est trouvé dans les en-têtes d'autorisation, renvoyer une réponse indiquant un accès non autorisé
+  }
+};
+exports.verifyRefreshToken = (req, res, next) => {
+  const { token: refreshToken } = req.body;
+
+  if (!refreshToken) {
+      return res.status(401).json({ success: false, message: "Refresh token required" });
+  }
+
+  try {
+      // Verify the refresh token
+      const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+      req.user = decoded; // Optionally attach user details to the request
+      next();
+  } catch (error) {
+      res.status(403).json({ success: false, message: "Invalid refresh token" });
   }
 };

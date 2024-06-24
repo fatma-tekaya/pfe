@@ -1,6 +1,6 @@
 const http = require('http');
 const express = require('express');
-const { startListening } = require('./sockets/notifSignVitaux');
+const { startListening } = require('./controllers/notifSignVitaux');
 require('dotenv').config();
 const path = require('path');
 require('./config/db');

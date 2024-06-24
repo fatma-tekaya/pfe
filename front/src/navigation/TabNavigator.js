@@ -93,45 +93,42 @@ const TabNavigator = () => {
   const { userInfo } = useContext(AuthContext);
   const [unseenCount, setUnseenCount] = useState(0);
 
+  
   useEffect(() => {
-    let unsubscribe = null;
-
-    const fetchNotifications = (userId) => {
-      unsubscribe = firestore()
-        .collection('notifications')
-        .where('userId', '==', userId)
-        .where('seen', '==', false)
-        .onSnapshot(snapshot => {
-          setUnseenCount(snapshot.size);
-        });
-    };
+    let unsubscribe = null; // Définir ici pour assurer la portée dans le nettoyage
 
     const fetchUserId = async () => {
-      try {
-        const snapshot = await database()
-          .ref('patients')
-          .orderByChild('email')
-          .equalTo(userInfo.user.email)
-          .once('value');
+      if (userInfo && userInfo.user && userInfo.user.email) {
+        try {
+          const snapshot = await database()
+            .ref('patients')
+            .orderByChild('email')
+            .equalTo(userInfo.user.email)
+            .once('value');
 
-        if (snapshot.exists()) {
-          const userId = Object.keys(snapshot.val())[0];
-          fetchNotifications(userId);
-        } else {
-          console.error('No user found with the provided email.');
+          if (snapshot.exists()) {
+            const userId = Object.keys(snapshot.val())[0];
+            // Déplacer l'abonnement Firestore ici à l'intérieur de la portée de userId
+            unsubscribe = firestore()
+              .collection('notifications')
+              .where('userId', '==', userId)
+              .where('seen', '==', false)
+              .onSnapshot(snapshot => {
+                setUnseenCount(snapshot.size);
+              });
+          }
+        } catch (error) {
+          console.error('Error fetching user ID:', error);
         }
-      } catch (error) {
-        console.error('Error fetching user ID:', error);
       }
     };
-    
-    if (userInfo.user.email) {
-      fetchUserId();
-    }
 
+    fetchUserId();
+
+    // Retourner la fonction de nettoyage directement depuis useEffect
     return () => {
       if (unsubscribe) {
-        unsubscribe();
+        unsubscribe(); // Nettoyer l'abonnement lors du démontage du composant
       }
     };
   }, [userInfo]);

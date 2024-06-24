@@ -146,47 +146,53 @@ const generateAccessToken = (user) => {
 };
 
 const generateRefreshToken = (user) => {
-  return jwt.sign({ userId: user._id }, process.env.REFRESH_SECRET);
+  return jwt.sign({ userId: user._id }, process.env.REFRESH_SECRET, {
+    expiresIn: "7d",
+  });
 };
 
 exports.refresh = async (req, res) => {
-  // Prendre le refresh token de l'utilisateur depuis la requête
   const refreshToken = req.body.token;
 
-  // Vérifier si aucun token n'est fourni
   if (!refreshToken) {
-    return res.status(401).json("You are not authenticated!");
+    return res.status(401).json({ success: false, message: "No token provided" });
   }
 
   try {
-    // Vérifier si le token est valide
-    const decodedUser = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+    const user = await Patient.findById(decoded.userId);
 
-    // Si le token est valide, générer un nouveau token d'accès
-    const newToken = generateAccessToken(decodedUser);
-    const newRefreshToken = generateRefreshToken(decodedUser);
-
-    // Mettre à jour le refreshToken de l'utilisateur dans la base de données
-    const user = await Patient.findOneAndUpdate(
-      { refreshToken },
-      { refreshToken: newRefreshToken }
-    );
-
-    // Vérifier si l'utilisateur est trouvé et mettre à jour le refreshToken
     if (!user) {
-      return res.status(403).json("Refresh token is not valid!");
+      return res.status(404).json({ success: false, message: "No user found" });
     }
 
-    // Répondre avec les nouveaux tokens
+    // Vérifier si le refreshToken correspond à celui stocké dans la base de données
+    if (user.refreshToken !== refreshToken) {
+      return res.status(403).json({ success: false, message: "Invalid refresh token" });
+    }
+
+    const newToken = generateAccessToken(user);
+    const newRefreshToken = generateRefreshToken(user);
+
+    // Sauvegarder le nouveau refreshToken dans la base de données
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
     res.status(200).json({
+      success: true,
       token: newToken,
       refreshToken: newRefreshToken,
     });
   } catch (error) {
-    console.error("Error while refreshing token:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    if (error.name === 'TokenExpiredError') {
+      res.status(403).json({ success: false, message: "Refresh token expired" });
+    } else {
+      console.error("Error while refreshing token:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
   }
 };
+
 
 // Contrôleur pour connecter un utilisateur
 exports.userSignIn = async (req, res) => {
@@ -218,7 +224,7 @@ exports.userSignIn = async (req, res) => {
 
     const token = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
-
+    user.refreshToken = refreshToken;
     // Sauvegarde de l'utilisateur avec le nouveau token
     await user.save();
     console.log("user signed in successfully");
@@ -238,80 +244,94 @@ exports.userSignIn = async (req, res) => {
       refreshToken,
     });
 
-    user.refreshToken = refreshToken;
-    await user.save();
+    
   } catch (error) {
     console.error("Error while signing in:", error);
     res.status(500).json({ success: false, message: "Internal server error" }); // Gestion des erreurs
   }
 };
-exports.signInWithGoogle = async (req, res) => {
-  console.log("User here ", req.body.user);
-  const { email, name, photo, idToken, gender, birthdate, weight, height, location } = req.body.user;
 
-  try {
-    let user = await Patient.findOne({ email });
-    console.log("User found: ", user);
+// exports.signInWithGoogle = async (req, res) => {
+//   console.log("User here ", req.body.user);
+//   const { email, name, photo, idToken, gender, birthdate, weight, height, location } = req.body.user;
 
-    if (user) {
-      // Mise à jour de l'utilisateur existant avec les informations potentiellement nouvelles
-      user.fullname = name;
-      user.avatar = photo || user.avatar;
-      user.googleToken = idToken;
-      user.gender = gender || user.gender; // Mettre à jour seulement si fourni
-      user.birthdate = birthdate || user.birthdate;
-      user.weight = weight || user.weight;
-      user.height = height || user.height;
-      user.location = location || user.location;
-      await user.save();
-    } else {
-      // Création d'un nouvel utilisateur si non trouvé
-      user = new Patient({
-        fullname: name,
-        email,
-        avatar: photo || "",
-        verified: true,
-        googleToken: idToken,
-        gender: gender, // Ajoutez ces champs comme propriétés du nouvel utilisateur
-        birthdate: birthdate,
-        weight: weight,
-        height: height,
-        location: location,
-        roles: ['patient'], // Assigner le rôle patient
-      });
-      await user.save();
-    }
+//   try {
+//     let user = await Patient.findOne({ email });
+//     console.log("User found: ", user);
 
-    // Génération des tokens
-    const token = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+//     if (user) {
+//       // Mise à jour de l'utilisateur existant avec les informations potentiellement nouvelles
+//       user.fullname = name;
+//       user.avatar = photo || user.avatar;
+//       user.googleToken = idToken;
+//       user.gender = gender || user.gender; // Mettre à jour seulement si fourni
+//       user.birthdate = birthdate || user.birthdate;
+//       user.weight = weight || user.weight;
+//       user.height = height || user.height;
+//       user.location = location || user.location;
+//       user.authMethod = 'google'; 
+//       await user.save();
+//     } else {
+//       // Création d'un nouvel utilisateur si non trouvé
+//       user = new Patient({
+//         fullname: name,
+//         email,
+//         avatar: photo || "",
+//         verified: true,
+//         authMethod: 'google',
+//         googleToken: idToken,
+//         gender: gender, // Ajoutez ces champs comme propriétés du nouvel utilisateur
+//         birthdate: birthdate,
+//         weight: weight,
+//         height: height,
+//         location: location,
+//         roles: ['patient'], // Assigner le rôle patient
+//       });
+//       await user.save();
+//     }
+//       // Création de l'entrée dans Firebase Realtime Database
+//       const userId = user._id.toString();
+//       const userRef = db.ref('patients').child(userId);
+//       await userRef.set({
+//         fullname: name,
+//         email,
+//         vitals: {
+//           temp: 0,
+//           heartRate: 0,
+//           spo2: 0
+//         }
+//       });
+      
+//     // Génération des tokens
+//     const token = generateAccessToken(user);
+//     const refreshToken = generateRefreshToken(user);
 
-    // Retour des informations de l'utilisateur et des tokens
-    console.log("User signed in successfully: ", user.fullname);
-    res.status(user ? 200 : 201).json({
-      success: true,
-      message: "User signed in successfully",
-      token,
-      refreshToken,
-      user: {
-        _id: user._id,
-        fullname: user.fullname,
-        email: user.email,
-        avatar: user.avatar,
-        verified: true,
-        gender: user.gender,
-        birthdate: user.birthdate,
-        weight: user.weight,
-        height: user.height,
-        location: user.location,
-      },
-    });
-  } catch (error) {
-    console.error("Error signing in with Google:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
+//     // Retour des informations de l'utilisateur et des tokens
+//     console.log("User signed in successfully: ", user.fullname);
+//     res.status(user ? 200 : 201).json({
+//       success: true,
+//       message: "User signed in successfully",
+//       token,
+//       refreshToken,
+//       user: {
+//         _id: user._id,
+//         fullname: user.fullname,
+//         email: user.email,
+//         avatar: user.avatar,
+//         verified: true,
+//         gender: user.gender,
+//         authMethod: 'google',
+//         birthdate: user.birthdate,
+//         weight: user.weight,
+//         height: user.height,
+//         location: user.location,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Error signing in with Google:", error);
+//     res.status(500).json({ success: false, message: "Internal server error" });
+//   }
+// };
 // Fonction pour update user profile
 exports.uploadProfile = async (req, res) => {
   const { user } = req; // Récupération de l'utilisateur depuis la requête
@@ -366,6 +386,86 @@ exports.uploadProfile = async (req, res) => {
       .status(500)
       .json({ success: false, message: "server error, try after some time" }); // En cas d'erreur lors de la mise à jour du profil, renvoyer un message d'erreur
     console.log("Error while updating profile", error.message); // Affichage de l'erreur dans la console
+  }
+};
+
+exports.signInWithGoogle = async (req, res) => {
+  const { email, name, photo, idToken, gender, birthdate, weight, height, location } = req.body.user;
+  console.log("Google sign-in attempt for:", name);
+
+  try {
+    let user = await Patient.findOne({ email });
+    let isNewUser = false;
+
+    if (!user) {
+      // Aucun utilisateur existant, en créer un nouveau
+      user = new Patient({
+        fullname: name,
+        email,
+        avatar: photo || "",
+        verified: true, // Supposer que l'utilisateur Google est vérifié
+        authMethod: 'google',
+        googleToken: idToken,
+        gender,
+        birthdate,
+        weight,
+        height,
+        location,
+        roles: ['patient'],
+      });
+      isNewUser = true;
+    } else {
+      // Mise à jour des informations de l'utilisateur existant
+      user.fullname = name;
+      user.avatar = photo || user.avatar;
+      user.googleToken = idToken;
+      user.gender = gender || user.gender;
+      user.birthdate = birthdate || user.birthdate;
+      user.weight = weight || user.weight;
+      user.height = height || user.height;
+      user.location = location || user.location;
+      user.authMethod = 'google';
+    }
+
+    await user.save(); // Sauvegarder une seule fois après toutes les modifications
+
+    // Enregistrer dans Firebase si nécessaire
+    if (isNewUser) {
+      const userId = user._id.toString();
+      const userRef = db.ref('patients').child(userId);
+      await userRef.set({
+        fullname: name,
+        email,
+        vitals: { temp: 0, heartRate: 0, spo2: 0 }
+      });
+    }
+
+    const token = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    console.log("User signed in successfully with Google: ", user.fullname);
+    res.status(200).json({
+      success: true,
+      message: "User signed in successfully",
+      token,
+      refreshToken,
+      user: {
+        _id: user._id,
+        fullname: user.fullname,
+        email: user.email,
+        avatar: user.avatar,
+        verified: true,
+        gender: user.gender,
+        authMethod: 'google',
+        birthdate: user.birthdate,
+        weight: user.weight,
+        height: user.height,
+        location: user.location,
+      },
+    });
+  } catch (error) {
+    console.error("Error signing in with Google:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -522,6 +622,7 @@ exports.resetPassword = async (req, res) => {
       .json({ success: false, message: "Error resetting password" });
   }
 };
+
 // Fonction pour enregistrer le token FCM
 exports.saveFCMToken = async (req, res) => {
   const { token, email } = req.body;
@@ -529,12 +630,9 @@ exports.saveFCMToken = async (req, res) => {
   try {
     // Trouver l'utilisateur et mettre à jour le FCMtoken
     const user = await Patient.findOneAndUpdate({ email: email }, { FCMtoken: token }, { new: true });
-
     if (!user) {
       return res.status(404).send('User not found');
     }
-
-    console.log('Token enregistré avec succès');
     res.status(200).send('Token enregistré avec succès');
   } catch (error) {
     console.error('Erreur lors de l\'enregistrement du token', error);

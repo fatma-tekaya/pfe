@@ -313,56 +313,84 @@ export const AuthProvider = ({ children }) => {
       });
     }
   };
+
   if (isLoading) {
     <CustomLoader />;
   }
 
 
 
-  useEffect(() => {
-    const startTokenRefreshTimer = async () => {
-      const refreshInterval = 60 * 60 * 1000; // 30 minutes
+  const refreshAccessToken = async () => {
+    const refreshToken = await AsyncStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      console.log("No refresh token available");
+      return;
+    }
+  
+    try {
+      const response = await axios.post(`${BASE_URL}/refresh`, { token: refreshToken });
+      if (response.status === 200 && response.data.token && response.data.refreshToken) {
+        const { token: newToken, refreshToken: newRefreshToken } = response.data;
+        await AsyncStorage.setItem('userToken', newToken);
+        await AsyncStorage.setItem('refreshToken', newRefreshToken);
+        setUserToken(newToken);
+        console.log("Tokens refreshed successfully.");
+      } else {
+        // Handle different cases or log specific messages based on response
+        console.error("Failed to receive new tokens:", response.data);
+        setUserToken(null);
+        AsyncStorage.removeItem('userToken');
+        AsyncStorage.removeItem('refreshToken');
+      }
+    } catch (error) {
+      console.error('Error refreshing tokens:', error);
+      setUserToken(null);
+      AsyncStorage.removeItem('userToken');
+      AsyncStorage.removeItem('refreshToken');
+    }
+  };
+  
 
-      const timerId = setTimeout(async () => {
+// Refresh token every 12 hours
+useEffect(() => {
+    const interval = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+    const timer = setInterval(() => {
+        refreshAccessToken();
+    }, interval);
+
+    // Cleanup function to clear the timer
+    return () => clearInterval(timer);
+}, []); // Empty dependency array means this effect runs once on mount and never re-runs unless component unmounts
+
+// Load initial data on startup
+useEffect(() => {
+    const loadInitialData = async () => {
+        setIsLoading(true);
         try {
-          const refreshToken = await AsyncStorage.getItem('refreshToken');
-
-          const response = await axios.post(`${BASE_URL}/refresh`, {
-            token: refreshToken,
-          });
-
-          const { token: newToken, refreshToken: newRefreshToken } = response.data;
-
-          await AsyncStorage.setItem('userToken', newToken);
-          await AsyncStorage.setItem('refreshToken', newRefreshToken);
-
-          startTokenRefreshTimer();
+            const storedUserToken = await AsyncStorage.getItem('userToken');
+            const storedUserInfo = await AsyncStorage.getItem('userInfo');
+            if (storedUserToken && storedUserInfo) {
+                setUserToken(storedUserToken);
+                setUserInfo(JSON.parse(storedUserInfo));
+                refreshAccessToken(); // Optionally check token validity here before using it
+            }
         } catch (error) {
-          console.error('Error refreshing token:', error);
+            console.error('Error loading initial data:', error);
+            Toast.show({
+              type: 'error',
+              text1: 'Login error',
+              text2: 'Failed to load user data. Please login again.',
+              text1Style: { fontSize: 14 },
+              text2Style: { fontSize: 14 }
+            });
+            // Optionally navigate to login screen
+        } finally {
+            setIsLoading(false);
         }
-      }, refreshInterval);
-
-      return () => clearTimeout(timerId); // Nettoyer le timer lorsqu'il n'est plus nécessaire
     };
 
-    // const loadInitialData = async () => {
-    //   setIsLoading(true);
-    //   try {
-    //     const storedUserToken = await AsyncStorage.getItem('userToken');
-    //     const storedUserInfo = await AsyncStorage.getItem('userInfo');
-    //     if (storedUserToken && storedUserInfo) {
-    //       setUserToken(storedUserToken);
-    //       setUserInfo(JSON.parse(storedUserInfo));
-    //     }
-    //   } catch (error) {
-    //     console.error('Error loading initial data:', error);
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
-    // };
-
-    // loadInitialData();
-  }, []);
+    loadInitialData();
+}, []); // This effect should also only run once
 
 
 

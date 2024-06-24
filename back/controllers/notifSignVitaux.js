@@ -111,7 +111,7 @@ const processPredictions = async (vitals) => {
             " SpO2 (%)": vitals.spo2,
             "TEMP (*C)": vitals.temp
         };
-        const response = await axios.post('http://127.0.0.1:5000/predict', formattedVitals, {
+        const response = await axios.post('http://192.168.1.22:5002/predict', formattedVitals, {
             headers: {
                 'Content-Type': 'application/json'
             }

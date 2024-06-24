@@ -88,7 +88,7 @@ const NotifScreen = ({ setUnseenCount }) => {
 
   const renderItem = ({ item }) => (
     <View style={styles.notificationItem}>
-      <Text>{item.message}</Text>
+      <Text style={{color:'#888'}}>{item.message}</Text>
       <Text style={styles.timestamp}>{new Date(item.createdAt.toDate()).toLocaleString()}</Text>
       <TouchableOpacity
         style={styles.deleteButton}
@@ -102,7 +102,7 @@ const NotifScreen = ({ setUnseenCount }) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <Text>Loading notifications...</Text>
+        <Text style={{color:'black'}}>Loading notifications...</Text>
       </View>
     );
   }
@@ -121,13 +121,14 @@ const NotifScreen = ({ setUnseenCount }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16
+    padding: 16,
   },
   notificationItem: {
     backgroundColor: '#fff',
     padding: 16,
     marginBottom: 8,
     borderRadius: 8,
+    color:'#888',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

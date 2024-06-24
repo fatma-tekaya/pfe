@@ -25,29 +25,31 @@ import { colors } from '../styles/colors'
 const HomeScreen = ({ navigation }) => {
   const [swipeTab, setSwipeTab] = useState(1);
   const { userInfo } = useContext(AuthContext);
-  if (!userInfo) {
-    return <CustomLoader />;
-  }
+ 
+ 
+  useEffect(() => {
+    requestUserPermission();
+    if (userInfo && userInfo.user) {
+      const userEmail = userInfo.user.email;
+      getToken(userEmail);
+      // Handle FCM messages
+      const unsubscribe = messaging().onTokenRefresh(token => {
+        console.log('FCM Token refreshed:', token);
+        saveTokenToServer(token, userEmail);
+      });
+
+      return () => unsubscribe();
+    }
+  }, [userInfo]);  // Depend on userInfo
   const renderBanner = ({ item, index }) => {
     return <BannerSlider data={item} />;
   };
   const onSelectSwitch = (value) => {
     setSwipeTab(value)
   }
-  useEffect(() => {
-    requestUserPermission();
-    const userEmail = userInfo.user.email;
-    getToken(userEmail);
-    //traiter les messages FCM en arrière-plan
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
-      console.log('Message handled in the background!', JSON.stringify(remoteMessage));
-    });
-    // Écouter les mises à jour du token
-    messaging().onTokenRefresh(token => {
-      console.log('FCM Token refreshed:', token);
-      saveTokenToServer(token, userId);
-    });
-  }, [])
+  if (!userInfo) {
+    return <CustomLoader />;
+  }
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <ScrollView style={{ padding: 20 }}>

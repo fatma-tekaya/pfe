@@ -17,7 +17,7 @@ const {
   updatevitalsigns,
   getVitals
 } = require("../controllers/vitaux");
-const { isAuth } = require("../middelwares/auth");
+const { isAuth,verifyRefreshToken } = require("../middelwares/auth");
 const {
   validateUserSignUp,
   userVlidation,
@@ -51,7 +51,7 @@ const uploads = multer({ storage, fileFilter });
 router.post("/create-user", validateUserSignUp, userVlidation, createUser);
 router.post("/verify-email", confirmEmailAndRegisterUser);
 router.post("/sign-in", validateUserSignIn, userVlidation, userSignIn);
-router.post("/refresh" ,isAuth, refresh)
+router.post("/refresh" ,verifyRefreshToken, refresh);
 //router.post("/sign-out", isAuth, signOut);
 router.post("/google-signin", signInWithGoogle);
 router.put("/upload-profile", isAuth,checkRole('patient'), uploads.single("profile"), uploadProfile);
