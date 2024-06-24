@@ -7,6 +7,6 @@ const { isAuth } = require("../middelwares/auth");
 const checkRole = require('../middelwares/role');
 
 router.delete('/deleteCapture/:captureId',isAuth , skinController.deleteCapture);
-router.get('/getCaptures', isAuth ,skinController.getCaptures);
+router.get('/getCaptures',isAuth ,skinController.getCaptures);
 router.get('/getCapture/:captureId', isAuth ,skinController.getCapture);
 module.exports = router;
