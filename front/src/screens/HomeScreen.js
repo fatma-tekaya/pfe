@@ -32,6 +32,10 @@ const HomeScreen = ({ navigation }) => {
     if (userInfo && userInfo.user) {
       const userEmail = userInfo.user.email;
       getToken(userEmail);
+       //traiter les messages FCM en arrière-plan
+      messaging().setBackgroundMessageHandler(async remoteMessage => {
+      console.log('Message handled in the background!', JSON.stringify(remoteMessage));
+       });
       // Handle FCM messages
       const unsubscribe = messaging().onTokenRefresh(token => {
         console.log('FCM Token refreshed:', token);
