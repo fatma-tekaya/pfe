@@ -5,7 +5,7 @@ import database from '@react-native-firebase/database';
 import firestore from '@react-native-firebase/firestore';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { AuthContext } from '../context/AuthContext'; // Adjust the path as needed
-
+import Entypo from 'react-native-vector-icons/Entypo';
 const NotifScreen = ({ setUnseenCount }) => {
   const { userInfo } = useContext(AuthContext);
   const [notifications, setNotifications] = useState([]);
@@ -94,7 +94,7 @@ const NotifScreen = ({ setUnseenCount }) => {
         style={styles.deleteButton}
         onPress={() => deleteNotification(item.id)}
       >
-        <Ionicons name="close-circle" size={24} color="gray" />
+          <Entypo name="cross" size={25} color="gray" />
       </TouchableOpacity>
     </View>
   );

@@ -5,6 +5,7 @@ import {
   ImageBackground,
   TextInput,
   TouchableOpacity,
+  StyleSheet,
   Alert
 } from 'react-native';
 import React, { useState, useContext, useEffect } from 'react';
@@ -94,27 +95,23 @@ const HomeScreen = ({ navigation }) => {
             />
           </TouchableOpacity>
         </View>
+
+        <View style={styles.separator} />
         <View
           style={{
             flexDirection: 'row',
-            borderColor: '#C6C6C6',
-            borderWidth: 1,
-            borderRadius: 8,
-            paddingHorizontal: 8,
-            marginBottom: 20
+            justifyContent: 'space-between',
+            marginVertical: 8,
           }}>
-          <Feather
-            name="search"
-            size={20}
-            color="#C6C6C6"
-            style={{ marginRight: 5, marginTop: 15 }}
-          />
-          <TextInput
-            style={{ color: 'black' }}
-            placeholderTextColor={'grey'}
-            placeholder="Search"
-          />
+          <Text
+            style={{color: 'black', fontSize: 18, fontFamily: 'Roboto-Medium'}}>
+            Upcoming Features
+          </Text>
+          <TouchableOpacity onPress={() => {navigation.navigate('Doctors')}}>
+            <Text style={{color: '#0aada8'}}>Search for a Doctor</Text>
+          </TouchableOpacity>
         </View>
+
         <Carousel
           ref={c => {
             this._carousel = c;
@@ -155,5 +152,17 @@ const HomeScreen = ({ navigation }) => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  separator: {
+marginHorizontal:-50,
+marginTop:-15,
+marginBottom:10,
+    height: 1,
+    backgroundColor: '#d3d3d3',
+    width:{windowWidth },
+  },
+
+});
 
 export default HomeScreen;

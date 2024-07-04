@@ -14,7 +14,7 @@ const sendNotification = async (userToken, message,userId) => {
     if (userToken) {
         const payload = {
             notification: {
-                title: 'Alerte signe vital',
+                title: 'Vital Sign Alert',
                 body: message,
             },
             to: userToken
@@ -50,15 +50,24 @@ const sendNotification = async (userToken, message,userId) => {
 const checkVitalSign = (sign) => {
     const alerts = [];
 
-    if (sign.heartRate > 100) {
-        alerts.push(`High heart rate detected at ${sign.heartRate} bpm`);
+    if (sign.heartRate > 100 && sign.heartRate <= 120) {
+        alerts.push(`Moderate high heart rate detected at ${sign.heartRate} bpm`);
+    } else if (sign.heartRate > 120) {
+        alerts.push(`Severe high heart rate detected at ${sign.heartRate} bpm`);
     }
-    if (sign.spo2 < 95) {
-        alerts.push(`Low SPO2 level detected at${sign.spo2}%`);
+    
+    if (sign.spo2 >= 90 && sign.spo2 < 95) {
+        alerts.push(`Moderate low SPO2 level detected at ${sign.spo2}%`);
+    } else if (sign.spo2 < 90) {
+        alerts.push(`Severe low SPO2 level detected at ${sign.spo2}%`);
     }
-    if (sign.temp > 37.5) {
-        alerts.push(`High temperature detected at${sign.temp}°C`);
+    
+    if (sign.temp > 37.5 && sign.temp <= 39) {
+        alerts.push(`Moderate high temperature detected at ${sign.temp}°C`);
+    } else if (sign.temp > 39) {
+        alerts.push(`Severe high temperature detected at ${sign.temp}°C`);
     }
+    
 
     return alerts;
 };

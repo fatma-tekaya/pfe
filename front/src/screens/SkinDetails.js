@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import { colors } from '../styles/colors';
 
 const SkinDetails = ({ route }) => {
@@ -7,9 +7,9 @@ const SkinDetails = ({ route }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Prediction Result</Text>
-      <Image source={{ uri: result.image }} style={styles.image} />
+      <Image source={{ uri: result.imageUrl }} style={styles.image} />  
       <View style={styles.resultContainer}>
-        <Text style={styles.resultText}>{result.predictedClass}</Text>
+        <Text style={styles.resultText}>{result.label}</Text>
       </View>
       <Text style={styles.description}>{result.description}</Text>
       <Text style={styles.adviceTitle}>Advice:</Text>

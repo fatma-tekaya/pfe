@@ -111,7 +111,7 @@ export const tipsAndAdvices = [
       , 'Surveiller régulièrement son rythme cardiaque: Il est utile de surveiller régulièrement son rythme cardiaque, en particulier si des facteurs de risque de maladies cardiovasculaires sont présents ou si des symptômes inhabituels sont ressentis.'
     ],
     title: 'bpm',
-    subtitle: 'Heartbeat',
+    subtitle: 'Heart Rate',
     id: '3',
   },
   {

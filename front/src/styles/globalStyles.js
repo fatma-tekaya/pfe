@@ -52,10 +52,10 @@ export const globalStyles = StyleSheet.create({
     /*robot*/
     emptyText: {
         fontFamily: 'Outfit-Light',
-        fontSize: 16,
+        fontSize: 20,
         color: colors.bleu,
         textAlign: 'center',
-        marginTop: 20,
+        marginTop: -100,
     },
     emptyContainer: {
         flex: 1,
@@ -66,6 +66,6 @@ export const globalStyles = StyleSheet.create({
     emptyGif: {
         width: 200,
         height: 200,
-        marginBottom: 20,
+        marginBottom: 150,
     },
 })

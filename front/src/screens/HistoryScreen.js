@@ -4,29 +4,48 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/MaterialIcons';  // Ensure this is correctly imported
 import { BASE_URL } from '../config';
 import { AuthContext } from '../context/AuthContext';
+import Entypo from 'react-native-vector-icons/Entypo';
+
+const anomalyInfo = {
+  Acne: {
+    description: 'Acne is a skin condition that occurs when your hair follicles become plugged with oil and dead skin cells, leading to whiteheads, blackheads, or pimples.',
+  },
+  Eczema: {
+    description: "Eczema, or atopic dermatitis, is a condition that makes your skin red and itchy. It's common in children but can occur at any age.",
+  },
+  Rosacea: {
+    description: 'Rosacea is a common skin condition that causes redness and visible blood vessels in your face. It may also produce small, red, pus-filled bumps.',
+  },
+  'Actinic Keratosis': {
+    description: 'Actinic Keratosis is a rough, scaly patch on your skin that develops from years of exposure to the sun, and can sometimes progress to skin cancer.',
+  },
+  'Basal Cell Carcinoma': {
+    description: 'Basal Cell Carcinoma is a type of skin cancer that begins in the basal cells. It often manifests as a slightly transparent bump on the sun-exposed skin.',
+  },
+ 
+};
 
 const HistoryScreen = ({ navigation }) => {
   const [captures, setCaptures] = useState([]);
   const { userToken, setIsLoading } = useContext(AuthContext);
 
   useEffect(() => {
-    console.log("hellooo")
     fetchCaptures();
   }, []);
 
   const fetchCaptures = async () => {
     setIsLoading(true);
     try {
-      console.log("hellooo222")
-
       const response = await axios.get(`${BASE_URL}/getCaptures`, {
         headers: { Authorization: `Bearer ${userToken}` }
       });
-      console.log("finitoooo",response)
       setIsLoading(false);
-      setCaptures(response.data);
-    
-
+      const capturesWithDescriptions = response.data.map(capture => ({
+        ...capture,
+        description: anomalyInfo[capture.label]?.description || 'No description available.',
+        imageUrl: `${BASE_URL}/${capture.path.replace(/\\/g, '/')}`,  // Ensure imageUrl is correctly set
+      }));
+      setCaptures(capturesWithDescriptions);
     } catch (error) {
       setIsLoading(false);
       console.error('Failed to fetch captures:', error);
@@ -50,18 +69,24 @@ const HistoryScreen = ({ navigation }) => {
   };
 
   const renderItem = ({ item }) => {
-    const imageUrl = `${BASE_URL}/${item.path.replace(/\\/g, '/')}`;
+    const { imageUrl, label, description, _id } = item;
 
     return (
-      <View style={styles.itemContainer}>
+      <TouchableOpacity 
+        style={styles.itemContainer} 
+        onPress={() => navigation.navigate('Anomaly Info', { result: item })}  // Ensure item is passed correctly
+      >
         <Image source={{ uri: imageUrl }} style={styles.image} />
         <View style={styles.infoContainer}>
-          <Text style={styles.label}>{item.label}</Text>
-          <TouchableOpacity onPress={() => handleDelete(item._id)} style={styles.deleteIcon}>
-            <Icon name="delete" size={24} color="red" />
-          </TouchableOpacity>
+          <Text style={styles.label}>{label}</Text>
+          <Text style={styles.description} numberOfLines={2} ellipsizeMode="tail">
+            {description}
+          </Text>
         </View>
-      </View>
+        <TouchableOpacity onPress={() => handleDelete(_id)} style={styles.deleteIcon}>
+          <Entypo name="cross" size={25} color="gray" />
+        </TouchableOpacity>
+      </TouchableOpacity>
     );
   };
 
@@ -75,7 +100,6 @@ const HistoryScreen = ({ navigation }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -98,16 +122,19 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-between',
-    alignItems: 'center'
   },
   label: {
     fontSize: 18,
     color: '#333'
   },
+  description: {
+    fontSize: 14,
+    color: '#666',
+  },
   deleteIcon: {
-    marginLeft: 10
+    marginTop: -50
   }
 });
 

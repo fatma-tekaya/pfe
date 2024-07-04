@@ -9,6 +9,7 @@ const ConversationSchema = new Schema({
         text: { type: String, required: true },
         timestamp: { type: Date, default: Date.now },
     }],
+     createdAt: { type: Date, default: Date.now }
 });
 
 

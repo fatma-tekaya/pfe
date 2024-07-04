@@ -41,7 +41,8 @@ const ConversationsListScreen = ({ navigation }) => {
             const newConversation = {
                 conversationId: newConversationId,
                 title: 'Current Conversation',
-                lastMessage: 'Tap to continue...'
+                lastMessage: 'Tap to continue...',
+                createdAt: new Date().toISOString() // Set the current time for the new conversation
             };
             setIsLoading(false);
             setConversations([newConversation, ...conversations]);
@@ -100,7 +101,9 @@ const ConversationsListScreen = ({ navigation }) => {
             console.error('Invalid item encountered', item);
             return null;
         }
-
+    
+        const createdAt = item.createdAt ? new Date(item.createdAt).toLocaleString() : 'Now';
+    
         return (
             <TouchableOpacity
                 style={styles.item}
@@ -115,13 +118,15 @@ const ConversationsListScreen = ({ navigation }) => {
                     >
                         {item.lastMessage}
                     </Text>
+                    <Text style={styles.timestamp}>{createdAt}</Text>
                 </View>
                 <TouchableOpacity style={styles.deleteButton} onPress={() => deleteConversation(conversationId)}>
-                    <Entypo name="cross" size={20} color="gray" />
+                    <Entypo name="cross" size={25} color="gray" />
                 </TouchableOpacity>
             </TouchableOpacity>
         );
     };
+    
 
     return (
         <View style={styles.container}>
@@ -157,6 +162,11 @@ const styles = StyleSheet.create({
         flex: 1,
         marginTop: 20,
     },
+    timestamp: {
+        marginTop: 4,
+        fontSize: 12,
+        color: '#888'
+      },
     header: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
@@ -168,9 +178,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#008ef7',
         paddingVertical: 10,
-        paddingHorizontal: 20,
+        paddingHorizontal: 10,
         borderRadius: 30,
-        marginBottom: '20%',
+        marginTop: '5%',
+        marginBottom: '5%',
     },
 
     addButtonText: {
@@ -180,17 +191,19 @@ const styles = StyleSheet.create({
         fontFamily: 'Outfit-Light',
     },
     item: {
+      
         backgroundColor: '#f8f8f8',
-        paddingHorizontal: 20,
-        marginVertical: 8,
-        marginHorizontal: 16,
+        paddingHorizontal: 10,
+        paddingVertical: 2,
+        marginVertical: 2,
+        marginHorizontal: 14,
         borderRadius: 10,
         elevation: 3,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.22,
         shadowRadius: 2.22,
-        minHeight: 80,
+        minHeight: 60,
         height: 100,
         flexDirection: 'row',
         alignItems: 'center',
@@ -207,13 +220,18 @@ const styles = StyleSheet.create({
         color: '#666',
         flex: 1,
         marginRight: 10,
+      paddingVertical:0,
+        marginVertical: 2,
+        marginHorizontal: 5,
     },
     itemContent: {
         flex: 1,
+        
     },
     
     deleteButton: {
         position: 'absolute',
+        
         top: 10,
         right: 10,
     },

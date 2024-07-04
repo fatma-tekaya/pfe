@@ -14,28 +14,33 @@ import { BASE_URL } from '../config';
 import axios from 'axios';
 import { colors } from '../styles/colors';
 
-
 const ConversationScreen = ({ route }) => {
   const { conversationId } = route.params;
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
-  const { userToken } = useContext(AuthContext);
+  const { userToken, userInfo } = useContext(AuthContext);
+
+  
 
   useEffect(() => {
     fetchMessages();
   }, [userToken, conversationId]);
-
+  
   const fetchMessages = async () => {
     try {
       const response = await axios.get(`${BASE_URL}/getConversation/${conversationId}`, {
         headers: { Authorization: `Bearer ${userToken}` },
       });
-      setMessages(response.data.messages);
+      setMessages(response.data.messages.map(message => ({
+        ...message,
+        isSender: message.sender === userInfo.user.fullname
+      })));
     } catch (error) {
       console.error('Failed to fetch messages:', error);
     }
   };
+  
 
   const sendMessage = async () => {
     if (input.trim()) {
@@ -43,7 +48,7 @@ const ConversationScreen = ({ route }) => {
         _id: Date.now().toString(),
         text: input,
         isSender: true,
-        senderName: 'You',
+        senderName: userInfo.user.fullname,
         receiverName: 'AI',
       };
       setMessages(prevMessages => [...prevMessages, newMessage]);
@@ -60,7 +65,7 @@ const ConversationScreen = ({ route }) => {
           text: response.data.response,
           isSender: false,
           senderName: 'AI',
-          receiverName: 'You',
+          receiverName: userInfo.user.fullname,
         }]);
       } catch (error) {
         console.error('Error sending message:', error);
@@ -72,24 +77,25 @@ const ConversationScreen = ({ route }) => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={messages}
-        renderItem={({ item }) => (
-          <View style={[styles.messageContainer, item.isSender ? styles.senderContainer : styles.receiverContainer]}>
-            <View style={[styles.message, item.isSender ? styles.sender : styles.receiver]}>
-              <Text style={styles.text}>
-                <Text style={styles.name}>{item.isSender ? 'You : ' : 'AI : '}</Text>
-                {item.text}
-              </Text>
-            </View>
-          </View>
-        )}
-        keyExtractor={item => item._id}
-        ListFooterComponent={
-          isLoadingResponse && <ActivityIndicator size="small" color='#076a90' />
-        }
-        contentContainerStyle={{ paddingBottom: 10 }}
-      />
+     <FlatList
+  data={messages}
+  renderItem={({ item }) => (
+    <View style={[styles.messageContainer, item.isSender ? styles.senderContainer : styles.receiverContainer]}>
+      <View style={[styles.message, item.isSender ? styles.sender : styles.receiver]}>
+        <Text style={styles.text}>
+          <Text style={styles.name}>{item.isSender ? `${userInfo.user.fullname} : ` : 'AI : '}</Text>
+          {item.text}
+        </Text>
+      </View>
+    </View>
+  )}
+  keyExtractor={item => item._id}
+  ListFooterComponent={
+    isLoadingResponse && <ActivityIndicator size="small" color='#076a90' />
+  }
+  contentContainerStyle={{ paddingBottom: 10 }}
+/>
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -99,7 +105,7 @@ const ConversationScreen = ({ route }) => {
           onChangeText={setInput}
         />
         <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
-          <Ionicons name="send" size={24} color="white" />
+          <Ionicons name="send" size={24}  color="white" />
         </TouchableOpacity>
       </View>
     </View>
@@ -138,7 +144,7 @@ const styles = StyleSheet.create({
   text: {
     color: '#333',
     fontSize: 16,
-    fontFamily:'Outfit-Light'
+    fontFamily: 'Outfit-Light',
   },
   sender: {
     backgroundColor: '#DCF8C6',
@@ -147,7 +153,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fbfbfb',
   },
   name: {
-    fontFamily:'Outfit-ExtraLight',
+    fontFamily: 'Outfit-ExtraLight',
     fontSize: 14,
     color: '#555',
     marginBottom: 8,

@@ -8,6 +8,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { colors } from '../styles/colors';
 import { globalStyles } from '../styles/globalStyles';
 import Toast from 'react-native-toast-message';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 const FavoriteScreen = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -37,6 +38,7 @@ const FavoriteScreen = ({ navigation }) => {
       setBase64Image(image.data);
     });
   };
+
   const anomalyInfo = {
     Acne: {
       description: 'Acne is a skin condition that occurs when your hair follicles become plugged with oil and dead skin cells, leading to whiteheads, blackheads, or pimples.',
@@ -63,8 +65,8 @@ const FavoriteScreen = ({ navigation }) => {
       advice: 'Consult a dermatologist for potential treatment options such as surgical removal or topical treatments.',
       moreInfoUrl: 'https://www.google.nl/',
     },
-   
   };
+
   const uploadImage = async () => {
     if (!selectedImage || !base64Image) {
       Toast.show({
@@ -93,8 +95,8 @@ const FavoriteScreen = ({ navigation }) => {
       if (predictionResponse.data && predictionResponse.data.predicted_class) {
         const className = predictionResponse.data.predicted_class;
         const resultData = {
-          image: selectedImage,
-          predictedClass: className,
+          imageUrl: selectedImage,  // Ensure imageUrl is correctly set here
+          label: className,
           description: anomalyInfo[className].description,
           advice: anomalyInfo[className].advice,
         };
@@ -132,7 +134,7 @@ const FavoriteScreen = ({ navigation }) => {
       console.error('Error uploading image:', error);
       Toast.show({
         type: 'error',
-        text1: 'Faild',
+        text1: 'Failed',
         text2: 'Failed to upload image',
         text1Style: { fontSize: 14 },
         text2Style: { fontSize: 14 }
@@ -166,19 +168,21 @@ const FavoriteScreen = ({ navigation }) => {
         <View style={styles.imageContainer}>
           <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
           <TouchableOpacity style={styles.deleteButton} onPress={removeImage}>
-            <MaterialIcons name="cancel" size={35} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.analyzeButton} onPress={uploadImage}>
-            <Text style={styles.buttonText}>Predict disease</Text>
+          <Entypo name="cross" size={35} color="gray" />
           </TouchableOpacity>
         </View>
+      )}
+      {selectedImage && (
+        <TouchableOpacity style={styles.analyzeButton} onPress={uploadImage}>
+          <Text style={styles.buttonText}>Predict disease</Text>
+        </TouchableOpacity>
       )}
       {!selectedImage && (
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={styles.cameraButton} onPress={takePhotoFromCamera}>
             <MaterialIcons name="photo-camera" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text>Or</Text>
+          <Text style={{color:'black'}}>Or</Text>
           <TouchableOpacity onPress={pickImageFromLibrary}>
             <Text style={styles.choosePhotoText}>Choose Photo</Text>
           </TouchableOpacity>
@@ -203,7 +207,7 @@ const styles = StyleSheet.create({
   historyText: {
     color: colors.blue_ciel,
     fontFamily: 'Outfit-Medium',
-    fontSize:18
+    fontSize: 18,
   },
   imageContainer: {
     position: 'relative',
@@ -211,7 +215,7 @@ const styles = StyleSheet.create({
   },
   selectedImage: {
     width: '100%',
-    height: 300,
+    height: 500,
     borderRadius: 10,
   },
   deleteButton: {
@@ -222,14 +226,12 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   analyzeButton: {
-    position: 'absolute',
-    bottom: 10,
-    left: '43%',
-    transform: [{ translateX: -50 }],
     backgroundColor: '#0f3f61',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonText: {
     color: '#fff',
@@ -240,9 +242,10 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop:5,
   },
   cameraButton: {
-    backgroundColor:'#008ef7',
+    backgroundColor: '#008ef7',
     borderRadius: 50,
     padding: 15,
     justifyContent: 'center',
@@ -251,13 +254,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    marginBottom: 10,
+ 
   },
   choosePhotoText: {
     color: colors.blue_ciel,
     fontFamily: 'Outfit-Medium',
-    fontSize: 15,
-    marginVertical: 5,
+    fontSize: 20,
+    marginBottom:100
   },
 });
 
