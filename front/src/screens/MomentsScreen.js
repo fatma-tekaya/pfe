@@ -3,27 +3,27 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-nati
 import Icon from 'react-native-vector-icons/FontAwesome6';
 
 const specialties = [
-  { name: 'Dentiste', icon: 'tooth' },
-  { name: 'Gynécologue', icon: 'person-pregnant' },
-  { name: 'Laboratoire', icon: 'flask' },
-  { name: 'Vétérinaire', icon: 'paw' },
-  { name: 'Généraliste', icon: 'stethoscope' },
-  { name: 'Sexologue', icon: 'venus-mars' },
-  { name: 'Dermatologue', icon: 'hand-dots' },
-  { name: 'Ophtalmologue', icon: 'eye' },
-  { name: 'Orthopédiste', icon: 'bone' },
-  { name: 'ORL', icon: 'ear-listen' },
-  { name: 'Psychiatre', icon: 'brain' },
-  { name: 'Cardiologue', icon: 'heart-pulse' },
-  { name: 'Gastro', icon: 'virus' },
-  { name: 'Pédiatre', icon: 'person-breastfeeding' },
-  { name: 'Rhumatologue', icon: 'wheelchair' },
-  { name: 'Neurologue', icon: 'brain' },
-  { name: 'Pneumologue', icon: 'lungs' },
-  { name: 'Nutritionniste', icon: 'apple-whole' },
-  { name: 'Pédopsychiatre', icon: 'head-side-virus' },
-  { name: 'Diabétologue', icon: 'droplet' },
-  { name: 'Néphrologue', icon: 'stethoscope' },
+  { name: 'Dentist', icon: 'tooth' },
+  { name: 'Gynecologist', icon: 'person-pregnant' },
+  { name: 'Laboratory', icon: 'flask' },
+  { name: 'Veterinarian', icon: 'paw' },
+  { name: 'General Practitioner', icon: 'stethoscope' },
+  { name: 'Sexologist', icon: 'venus-mars' },
+  { name: 'Dermatologist', icon: 'hand-dots' },
+  { name: 'Ophthalmologist', icon: 'eye' },
+  { name: 'Orthopedist', icon: 'bone' },
+  { name: 'ENT', icon: 'ear-listen' },
+  { name: 'Psychiatrist', icon: 'brain' },
+  { name: 'Cardiologist', icon: 'heart-pulse' },
+  { name: 'Gastroenterologist', icon: 'virus' },
+  { name: 'Pediatrician', icon: 'person-breastfeeding' },
+  { name: 'Rheumatologist', icon: 'wheelchair' },
+  { name: 'Neurologist', icon: 'brain' },
+  { name: 'Pulmonologist', icon: 'lungs' },
+  { name: 'Nutritionist', icon: 'apple-whole' },
+  { name: 'Child Psychiatrist', icon: 'head-side-virus' },
+  { name: 'Diabetologist', icon: 'droplet' },
+  { name: 'Nephrologist', icon: 'stethoscope' },
 ];
 
 const MomentsScreen = ({ navigation }) => {
@@ -53,19 +53,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 20,
   },
-  header: {
-    marginVertical: 20,
-  },
-  headerText: {
-    fontSize: 24,
-    fontFamily:'Outfit-Regular',
-    textAlign: 'center',
-  },
   specialtiesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginTop:20
+    marginTop: 20,
   },
   specialtyButton: {
     width: '30%',
@@ -90,14 +82,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     color: '#333',
-  },
-  allSpecialtiesButton: {
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  allSpecialtiesText: {
-    fontSize: 16,
-    color: '#007bff',
   },
 });
 

@@ -20,7 +20,7 @@ const DoctorsStackNavigator = () => (
       name="Specialities"
       component={MomentsScreen}
       options={{
-        headerShown: true,
+        headerShown: false,
         title: 'Specialities',
         headerTitleStyle: {
             fontFamily: 'Outfit-Medium',
@@ -33,7 +33,7 @@ const DoctorsStackNavigator = () => (
       name="Doctors List"
       component={DoctorsScreen}
       options={{
-        headerShown: true,
+        headerShown: false,
         title: 'Doctors List',
         headerTitleStyle: {
             fontFamily: 'Outfit-Medium',
@@ -72,7 +72,7 @@ const AuthStack = () => {
         drawerIcon: ({ color }) => (
           <Icon name="user-doctor" size={22} color={color} />
         ),  
-       
+        headerShown: true,
 
       }} />
       <Drawer.Screen name="Settings" component={SettingsScreen} options={{

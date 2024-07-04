@@ -208,6 +208,7 @@ const TabNavigator = () => {
         name="Profile"
         component={ProfileScreen}
         options={{
+          headerShown: true,
           tabBarStyle: {
             backgroundColor: colors.gray_fonce,
           },

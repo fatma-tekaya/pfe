@@ -9,7 +9,7 @@ const SpoComp = ({ data }) => {
             <CircularProgress
                 value={data}
                 valueSuffix={'%'}
-                radius={80}
+                radius={60}
                 progressValueStyle={styles.progressValueStyle}
                 activeStrokeColor={'#2465FD'}
                 activeStrokeSecondaryColor={'#C25AFF'}

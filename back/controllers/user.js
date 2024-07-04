@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
-const Patient = require("../models/Patient"); // Importer le modèle Patient
+const Patient = require("../models/Patient");
+const Doctor = require("../models/Doctor");
 const { db } = require('../firebase/index');
 const bcrypt = require("bcrypt");
 const cloudinary = require("../helper/imageUpload");
@@ -638,5 +639,21 @@ exports.saveFCMToken = async (req, res) => {
   } catch (error) {
     console.error('Erreur lors de l\'enregistrement du token', error);
     res.status(500).send('Erreur lors de l\'enregistrement du token');
+  }
+};
+
+exports.getDoctorsBySpecialty = async (req, res) => {
+  const specialty = req.params.specialty;
+  console.log("Specialty requested:", specialty); // Ceci affichera la spécialité demandée
+
+  try {
+      const doctors = await Doctor.find({ specialty: specialty });
+      console.log(`Found ${doctors.length} doctors for specialty: ${specialty}`);
+      return res.status(200).json(doctors);
+     
+
+  } catch (error) {
+      console.log("Error fetching doctors:", error);
+      res.status(500).json({ message: "Server error", error: error.message });
   }
 };

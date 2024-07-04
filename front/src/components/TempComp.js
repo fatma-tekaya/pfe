@@ -18,7 +18,7 @@ const TempComp = ({ data }) => {
         <View style={styles.container}>
           <CircularProgress
             value={data}
-            radius={80}
+            radius={60}
             maxValue={45}
             valueSuffix={'°'}
             activeStrokeColor={'#796EFF'}

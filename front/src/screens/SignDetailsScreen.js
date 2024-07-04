@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View, Image, Modal, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { tipsAndAdvices } from '../model/data'
+import { tipsAndAdvices } from '../model/data';
+
 const SignDetailsScreen = ({ navigation, route }) => {
   const { id } = route.params;
   const selectedItem = tipsAndAdvices.find(item => item.id === id);
@@ -16,106 +17,57 @@ const SignDetailsScreen = ({ navigation, route }) => {
   };
 
   return (
-
     <View>
-      <ScrollView style={{ height: '93%' }} >
-        <Image source={selectedItem.poster[0]}
-          style={{ width: 'auto', height: 250 }}
+      <ScrollView style={{ height: '98%' }}>
+        <Image
+          source={selectedItem.poster[0]}
+          style={{ width: '100%', height: 180 }}
         />
         <View style={styles.textContainer}>
-          <Text style={{
-            fontFamily: 'Outfit-Medium',
-            fontSize: 25,
-            color: '#0f3f61'
-          }}>{selectedItem.subtitle}</Text>
-          <View style={{
-            display: 'flex',
-            flexDirection: 'row',
-            gap: 5,
-            alignItems: 'center'
-          }}>
-            <Text style={{
-              fontFamily: 'Outfit-Light',
-              fontSize: 20
-            }} >{selectedItem.marge}</Text>
-          </View>
+          <Text style={styles.subtitle}>{selectedItem.subtitle}</Text>
         </View>
-        {/* horizental line */}
-        <View style={{
-          marginHorizontal: 15,
-          borderWidth: 0.2,
-          borderColor: '#5db7ba',
-          marginTop: 10,
-          marginBottom: 10
-        }}></View>
-        {/* informations */}
+        <View style={styles.horizontalLine}></View>
         <View style={styles.textContainer}>
-          <Text style={{
-            fontFamily: 'Outfit-Medium',
-            fontSize: 23
-          }}>Informations</Text>
-          <Text style={{
-            fontFamily: 'Outfit-Regular', color: "gray", lineHeight: 25,
-            fontSize: 16
-          }} >{selectedItem.details}</Text>
+          <Text style={styles.heading}>Description</Text>
+          <Text style={styles.details}>{selectedItem.details}</Text>
         </View>
-        {/* horizental line */}
-        <View style={{
-          marginHorizontal: 15,
-          borderWidth: 0.2,
-          borderColor: '#5db7ba',
-          marginTop: 10,
-          marginBottom: 10
-        }}></View>
-        {/* conseils */}
+        <View style={styles.horizontalLine}></View>
         <View style={styles.textContainer}>
-          <Text style={{
-            fontFamily: 'Outfit-Medium',
-            fontSize: 23
-          }}>Conseils</Text>
-          <Text style={{
-            fontFamily: 'Outfit-Regular', color: "gray", lineHeight: 25,
-            fontSize: 16
-          }} >
-            {selectedItem.advices.map((advice, index) => (
+          <Text style={styles.heading}>Symptoms</Text>
+          <Text style={styles.details}>
+            {selectedItem.advices1.map((advice, index) => (
               <Text key={index}>
-
                 {"- " + advice}
                 {"\n"}
               </Text>
-            ))}</Text>
+            ))}
+          </Text>
         </View>
-        {/* horizental line */}
-        <View style={{
-          marginHorizontal: 15,
-          borderWidth: 0.2,
-          borderColor: '#5db7ba',
-          marginTop: 10,
-          marginBottom: 10
-        }}></View>
-        {/* photos */}
+        <View style={styles.horizontalLine}></View>
         <View style={styles.textContainer}>
-          <Text style={{
-            fontFamily: 'Outfit-Medium',
-            fontSize: 23
-          }}>Photos</Text>
+          <Text style={styles.heading}>Home Remedies</Text>
+          <Text style={styles.details}>
+            {selectedItem.advices.map((advice, index) => (
+              <Text key={index}>
+                {"- " + advice}
+                {"\n"}
+              </Text>
+            ))}
+          </Text>
+        </View>
+        <View style={styles.horizontalLine}></View>
+        <View style={styles.textContainer}>
+          <Text style={styles.heading}>More</Text>
           <View style={styles.imageContainer}>
-
             {selectedItem.poster.map((image, index) => (
-              index !== 0 &&
-              <TouchableOpacity key={index.toString()} onPress={() => openImageModal(image)}>
-                <Image
-                  source={image}
-                  style={{
-                    width: '40%',
-                    height: '50%',
-                    aspectRatio: 1,
-                    flex: 1,
-                    borderRadius: 15,
-                    margin: 7
-                  }}
-                />
-              </TouchableOpacity>
+              index !== 0 && (
+                <TouchableOpacity key={index.toString()} onPress={() => openImageModal(image)}>
+                  <Image
+                    source={image}
+                    style={styles.fullImage}
+                  />
+                </TouchableOpacity>
+              )
             ))}
           </View>
           <Modal visible={selectedImage !== null} transparent={true}>
@@ -127,19 +79,11 @@ const SignDetailsScreen = ({ navigation, route }) => {
             </View>
           </Modal>
         </View>
-        <TouchableOpacity style={styles.btnContainer1}>
-          <Text style={{
-            textAlign: 'center',
-            fontFamily: 'Outfit-Medium',
-            color: '#5db7ba',
-            fontSize: 18
-          }}>Voir Plus</Text>
-        </TouchableOpacity>
-      </ScrollView >
-    </View >
-
+      </ScrollView>
+    </View>
   );
 }
+
 const styles = StyleSheet.create({
   backBtnContainer: {
     position: 'absolute',
@@ -147,9 +91,10 @@ const styles = StyleSheet.create({
     padding: 20
   },
   textContainer: {
-    padding: 20,
+    padding: 12,
     display: 'flex',
-    gap: 7
+    gap: 7,
+    color: "grey"
   },
   btnContainer1: {
     padding: 10,
@@ -169,18 +114,21 @@ const styles = StyleSheet.create({
     marginEnd: 10,
     flex: 1
   },
-  //a verifier
   container: {
     flex: 1,
     padding: 10,
   },
-
   imageContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center'
+    justifyContent: 'space-between'
   },
-
+  fullImage: {
+    width: 160, // Fixed width to ensure proper display
+    height: 160, // Fixed height to ensure proper display
+    borderRadius: 15,
+    margin: 5 // Small margin for spacing
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -197,17 +145,43 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 18,
+    color: "black"
   },
   modalImage: {
     width: '100%',
     height: '60%',
-    aspectRatio: 1,
     borderRadius: 15,
   },
-})
+  subtitle: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 23,
+    color: '#0f3f61',
+    color: "grey"
+  },
+  horizontalLine: {
+    marginHorizontal: 10,
+    borderWidth: 0.2,
+    borderColor: '#5db7ba',
+    marginTop: 5,
+    marginBottom: 5
+  },
+  heading: {
+    fontFamily: 'Outfit-Medium',
+    fontSize: 20,
+    color: "grey"
+  },
+  details: {
+    fontFamily: 'Outfit-Regular',
+    color: "gray",
+    lineHeight: 22,
+    fontSize: 15
+  },
+  btnText: {
+    textAlign: 'center',
+    fontFamily: 'Outfit-Medium',
+    color: '#5db7ba',
+    fontSize: 10
+  }
+});
 
-export default SignDetailsScreen
-
-
-
-
+export default SignDetailsScreen;

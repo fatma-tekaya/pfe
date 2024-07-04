@@ -8,28 +8,34 @@ export const sliderData = [
     image: require('../assets/images/homescreen/2.jpg'),
   },
   {
+    title: 'Forth Game',
+    image: require('../assets/images/peau111.jpg'),
+  },
+  {
     title: 'Third Game',
     image: require('../assets/images/homescreen/4.jpg'),
   },
+
 ];
 
 export const healthTracker = [
   {
-    poster: require('../assets/images/1.jpg'),
+    poster: require('../assets/images/human.jpg'),
     title: '°C',
-    subtitle: 'Human body temperature',
+    subtitle: 'Fever',
     id: '1',
   },
+ 
   {
-    poster: require('../assets/images/2.jpg'),
-    title: 'mmHg',
-    subtitle: 'Blood Pressure',
+    poster: require('../assets/images/Hypertension.jpg'),
+    title: '°C',
+    subtitle: 'Hypertension ',
     id: '2',
   },
   {
-    poster: require('../assets/images/3.jpg'),
-    title: 'bpm',
-    subtitle: 'Heart Rate',
+    poster: require('../assets/images/Asthma.jpg'),
+    title: '°C',
+    subtitle: 'Asthma ',
     id: '3',
   },
   {
@@ -41,13 +47,13 @@ export const healthTracker = [
   {
     poster: require('../assets/images/5.jpg'),
     title: 'Symptoms',
-    subtitle: 'Covid',
+    subtitle: 'Covid 19',
     id: '5',
   },
   {
     poster: require('../assets/images/6.jpg'),
     title: 'Symptoms',
-    subtitle: 'Headache',
+    subtitle: 'Migraine',
     id: '6',
   },
 ];
@@ -55,13 +61,13 @@ export const healthTracker = [
 export const tipsAndAdvices = [
   {
     poster: [
-      require('../assets/images/1.jpg'),
+      require('../assets/images/human.jpg'),
       require('../assets/images/temp2.jpg'),
       require('../assets/images/img1.jpg'),
 
     ],
-    title: '°C',
-    subtitle: 'Human temperature',
+    title: 'Symptoms',
+    subtitle: 'Fever',
     marge: 'Between 36° - 37,5°',
     details: 'It is essential to monitor your body temperature for any signs of discomfort or illness. This section will guide you on how to take your temperature correctly and provide you with tips on what the different readings mean. Understanding normal body temperature values ​​is crucial to assessing your health. In general, normal body temperature is around 36.5 to 37.5 degrees Celsius (or 97.7 to 99.5 degrees Fahrenheit). A temperature above this range may indicate fever, which is generally defined as a body temperature above 38 degrees Celsius (or 100.4 degrees Fahrenheit). Conversely, a body temperature below the normal range can signal hypothermia, which occurs when the body loses more heat than it produces, often due to prolonged exposure cold. Understanding these values ​​will help you correctly interpret your temperature measurements and take appropriate action to maintain your well-being.',
     advices: [
@@ -71,49 +77,65 @@ export const tipsAndAdvices = [
       "Médicaments antipyrétiques: Si la fièvre est très inconfortable, tu peux prendre des médicaments en vente libre comme le paracétamol ou l'ibuprofène pour réduire la fièvre et soulager les douleurs.",
       "Compresse d'eau froide: Tu peux utiliser une compresse d'eau froide sur le front pour aider à abaisser la température corporelle.",
       "Consultation médicale: Si la fièvre persiste pendant plusieurs jours, s'accompagne de symptômes graves, ou si tu as des préoccupations particulières, consulte un professionnel de la santé."
-    ],
+    ], advices1: ["Throbbing or Pulsating Pain: Typically on one side of the head, but can occur on both sides.",
+      "Nausea and Vomiting: Many people with migraines experience gastrointestinal symptoms.",
+      "Sensitivity to Light and Sound: Bright lights and loud noises can worsen the headache.",
+      "Aura: Some individuals experience visual disturbances such as flashing lights, zigzag lines, or temporary loss of vision before or during a migraine.",
+      "Other Sensory Disturbances: Tingling or numbness in the face or hands, difficulty speaking, and dizziness.",
+  ],
     id: '1',
   },
   {
+
     poster: [
-      require('../assets/images/7.jpg'),
-      require('../assets/images/tension.png'),
-      require('../assets/images/tension2.jpg'),
+      require('../assets/images/Hypertension.jpg'),
+      require('../assets/images/peau11.png'),
+      require('../assets/images/peau22.png'),
+      
+
 
     ],
-    title: 'mmHg',
-    marge: '120/80 mmHg',
-    details: 'La tension artérielle est la mesure de la force exercée par le sang contre les parois des artères. Une pression artérielle normale, généralement autour de 120/80 mmHg, est essentielle pour la santé cardiovasculaire. Trop élevée (hypertension) ou trop basse, elle peut augmenter le risque de maladies cardiovasculaires ou causer des symptômes tels que des étourdissements. Les facteurs de risque incluent l\'hérédité, le mode de vie et certaines conditions médicales. Contrôler la pression artérielle grâce à des mesures de style de vie saines et, si nécessaire, des médicaments, est crucial pour maintenir une bonne santé cardiovasculaire.',
-    advices: ['Adopte une alimentation saine: Privilégie une alimentation riche en fruits, légumes, grains entiers, et faible en sel, en gras saturés et en sucre ajouté. Cela peut aider à maintenir un poids santé et à réduire la pression artérielle.',
-      'Fais de l\'exercice régulièrement: L\'activité physique régulière, comme la marche, la natation ou le vélo, peut aider à abaisser la pression artérielle et à maintenir un cœur en bonne santé.',
-      'Limite ta consommation d\'alcool: La consommation excessive d\'alcool peut augmenter la pression artérielle. Limite ta consommation à des quantités modérées, comme recommandé par les lignes directrices de santé.',
-      'Évite le tabac: Le tabagisme augmente la pression artérielle et endommage les artères. Si tu fumes, arrêter peut améliorer ta santé cardiovasculaire.',
-      'Gère ton stress: Le stress chronique peut contribuer à une pression artérielle élevée. Trouve des méthodes de gestion du stress qui fonctionnent pour toi, comme la méditation, le yoga, ou simplement prendre du temps pour des activités relaxantes.',
-      'Surveille ta tension régulièrement: Prends l\'habitude de vérifier ta pression artérielle régulièrement, surtout si tu as des antécédents familiaux d\'hypertension ou si tu présentes d\'autres facteurs de risque.'
-
+    marge: 'Different Types',
+    details: 'Les maladies de la peau, également connues sous le nom de dermatoses, englobent un large éventail de conditions qui affectent la peau. Ces affections peuvent varier en gravité, de légères irritations cutanées à des maladies graves et invalidantes. Parmi les maladies de la peau les plus courantes, on trouve l\'eczéma, le psoriasis, l\'acné, la dermatite atopique, les infections fongiques et les allergies cutanées. Les symptômes peuvent inclure des rougeurs, des démangeaisons, des éruptions cutanées, des squames, des plaies, des cloques ou des lésions cutanées. De nombreux facteurs peuvent contribuer au développement de maladies de la peau, notamment les prédispositions génétiques, les infections, les allergies, le stress, les déséquilibres hormonaux, les irritants environnementaux et les conditions médicales sous-jacentes. Le diagnostic et le traitement des maladies de la peau peuvent varier en fonction de la cause spécifique et de la gravité de la condition.',
+    advices: ['Maintenir une bonne hygiène cutanée: Nettoyez votre peau régulièrement avec un nettoyant doux adapté à votre type de peau. Évitez les nettoyants agressifs qui peuvent irriter la peau.',
+      'Hydrater la peau: Utilisez une crème hydratante adaptée à votre type de peau pour maintenir une barrière cutanée saine et prévenir la sécheresse.',
+      'Protéger la peau du soleil: Utilisez un écran solaire à large spectre avec un FPS d\'au moins 30, même par temps nuageux. Portez des vêtements protecteurs et un chapeau lorsque vous êtes exposé au soleil.'],
+      advices1: ["Throbbing or Pulsating Pain: Typically on one side of the head, but can occur on both sides.",
+        "Nausea and Vomiting: Many people with migraines experience gastrointestinal symptoms.",
+        "Sensitivity to Light and Sound: Bright lights and loud noises can worsen the headache.",
+        "Aura: Some individuals experience visual disturbances such as flashing lights, zigzag lines, or temporary loss of vision before or during a migraine.",
+        "Other Sensory Disturbances: Tingling or numbness in the face or hands, difficulty speaking, and dizziness.",
     ],
-    subtitle: 'Blood pressure',
+      title: 'Symptoms',
+    subtitle: 'Hypertension',
     id: '2',
   },
   {
+
     poster: [
-      require('../assets/images/3.jpg'),
-      require('../assets/images/rh1.jpg'),
-      require('../assets/images/rh2.png'),
+      require('../assets/images/Asthma.jpg'),
+      require('../assets/images/peau11.png'),
+      require('../assets/images/peau22.png'),
+      
+
 
     ],
-    marge: 'Entre 60bpm - 100 bpm',
-    details: 'Le rythme cardiaque fait référence au nombre de battements cardiaques par minute (bpm). Il est régulé par le système nerveux autonome et peut varier en fonction de divers facteurs tels que l\'activité physique, le stress, la température corporelle et même les émotions. Un rythme cardiaque normal chez un adulte au repos se situe généralement entre 60 et 100 bpm. Un rythme cardiaque plus élevé que la normale peut être causé par l\'exercice, le stress ou certaines conditions médicales, tandis qu\'un rythme cardiaque anormalement bas peut être le résultat de conditions telles que la bradycardie. Surveiller régulièrement son rythme cardiaque peut aider à détecter les anomalies potentielles et à prendre des mesures appropriées pour maintenir une santé cardiaque optimale.    ',
-    advices: ['Faire de l\'exercice régulièrement: L\'exercice cardiovasculaire, comme la marche, la course à pied, la natation ou le vélo, peut renforcer le muscle cardiaque et maintenir un rythme cardiaque régulier et efficace.',
-      'Manger équilibré: Adopter une alimentation saine et équilibrée, riche en fruits, légumes, grains entiers, et faible en gras saturés, en sucre ajouté et en sel, peut aider à maintenir un poids santé et à réduire le risque de maladies cardiovasculaires.',
-      'Gérer le stress: Le stress chronique peut affecter le rythme cardiaque. Trouver des techniques de gestion du stress telles que la méditation, le yoga, la respiration profonde ou simplement prendre du temps pour des activités relaxantes peut aider à maintenir un rythme cardiaque régulier.',
-      'Éviter les substances nocives: Éviter le tabac et limiter la consommation d\'alcool et de caféine peut aider à maintenir un rythme cardiaque sain.',
-      , 'Surveiller régulièrement son rythme cardiaque: Il est utile de surveiller régulièrement son rythme cardiaque, en particulier si des facteurs de risque de maladies cardiovasculaires sont présents ou si des symptômes inhabituels sont ressentis.'
+    marge: 'Different Types',
+    details: 'Les maladies de la peau, également connues sous le nom de dermatoses, englobent un large éventail de conditions qui affectent la peau. Ces affections peuvent varier en gravité, de légères irritations cutanées à des maladies graves et invalidantes. Parmi les maladies de la peau les plus courantes, on trouve l\'eczéma, le psoriasis, l\'acné, la dermatite atopique, les infections fongiques et les allergies cutanées. Les symptômes peuvent inclure des rougeurs, des démangeaisons, des éruptions cutanées, des squames, des plaies, des cloques ou des lésions cutanées. De nombreux facteurs peuvent contribuer au développement de maladies de la peau, notamment les prédispositions génétiques, les infections, les allergies, le stress, les déséquilibres hormonaux, les irritants environnementaux et les conditions médicales sous-jacentes. Le diagnostic et le traitement des maladies de la peau peuvent varier en fonction de la cause spécifique et de la gravité de la condition.',
+    advices: ['Maintenir une bonne hygiène cutanée: Nettoyez votre peau régulièrement avec un nettoyant doux adapté à votre type de peau. Évitez les nettoyants agressifs qui peuvent irriter la peau.',
+      'Hydrater la peau: Utilisez une crème hydratante adaptée à votre type de peau pour maintenir une barrière cutanée saine et prévenir la sécheresse.',
+      'Protéger la peau du soleil: Utilisez un écran solaire à large spectre avec un FPS d\'au moins 30, même par temps nuageux. Portez des vêtements protecteurs et un chapeau lorsque vous êtes exposé au soleil.'],
+      advices1: ["Throbbing or Pulsating Pain: Typically on one side of the head, but can occur on both sides.",
+        "Nausea and Vomiting: Many people with migraines experience gastrointestinal symptoms.",
+        "Sensitivity to Light and Sound: Bright lights and loud noises can worsen the headache.",
+        "Aura: Some individuals experience visual disturbances such as flashing lights, zigzag lines, or temporary loss of vision before or during a migraine.",
+        "Other Sensory Disturbances: Tingling or numbness in the face or hands, difficulty speaking, and dizziness.",
     ],
-    title: 'bpm',
-    subtitle: 'Heart Rate',
+      title: 'Symptoms',
+    subtitle: 'Asthma',
     id: '3',
   },
+ 
   {
 
     poster: [
@@ -129,7 +151,13 @@ export const tipsAndAdvices = [
     advices: ['Maintenir une bonne hygiène cutanée: Nettoyez votre peau régulièrement avec un nettoyant doux adapté à votre type de peau. Évitez les nettoyants agressifs qui peuvent irriter la peau.',
       'Hydrater la peau: Utilisez une crème hydratante adaptée à votre type de peau pour maintenir une barrière cutanée saine et prévenir la sécheresse.',
       'Protéger la peau du soleil: Utilisez un écran solaire à large spectre avec un FPS d\'au moins 30, même par temps nuageux. Portez des vêtements protecteurs et un chapeau lorsque vous êtes exposé au soleil.'],
-    title: 'Different Types',
+      advices1: ["Throbbing or Pulsating Pain: Typically on one side of the head, but can occur on both sides.",
+        "Nausea and Vomiting: Many people with migraines experience gastrointestinal symptoms.",
+        "Sensitivity to Light and Sound: Bright lights and loud noises can worsen the headache.",
+        "Aura: Some individuals experience visual disturbances such as flashing lights, zigzag lines, or temporary loss of vision before or during a migraine.",
+        "Other Sensory Disturbances: Tingling or numbness in the face or hands, difficulty speaking, and dizziness.",
+    ],
+      title: 'Different Types',
     subtitle: 'Skin diseases',
     id: '4',
   },
@@ -146,8 +174,14 @@ export const tipsAndAdvices = [
       'Pratiquer une bonne hygiène des mains: Lavez-vous régulièrement les mains avec de l\'eau et du savon pendant au moins 20 secondes, en particulier après être allé aux toilettes, avoir toussé ou éternué, ou avoir été en contact avec des surfaces publiques.',
       'Porter un masque facial: Portez un masque facial lorsque vous êtes en public, en particulier dans les espaces clos où la distanciation physique est difficile à maintenir.',
       'Pratiquer la distanciation sociale: Essayez de maintenir une distance d\'au moins un mètre avec les autres personnes qui ne vivent pas avec vous, en particulier dans les lieux publics.'],
-    title: 'Symptoms',
-    subtitle: 'Covid',
+      advices1: ["Throbbing or Pulsating Pain: Typically on one side of the head, but can occur on both sides.",
+        "Nausea and Vomiting: Many people with migraines experience gastrointestinal symptoms.",
+        "Sensitivity to Light and Sound: Bright lights and loud noises can worsen the headache.",
+        "Aura: Some individuals experience visual disturbances such as flashing lights, zigzag lines, or temporary loss of vision before or during a migraine.",
+        "Other Sensory Disturbances: Tingling or numbness in the face or hands, difficulty speaking, and dizziness.",
+    ],
+      title: 'Symptoms',
+    subtitle: 'Covid 19',
     id: '5',
   },
   {
@@ -159,14 +193,17 @@ export const tipsAndAdvices = [
 
     ],
     marge: 'Symptoms',
-    details: 'Les maux de tête, aussi connus sous le nom de céphalées, sont une affection courante qui peut être causée par divers facteurs tels que le stress, la fatigue, la déshydratation, les tensions musculaires ou des conditions médicales sous-jacentes. Les symptômes peuvent varier en intensité et en durée, allant d\'une gêne légère à une douleur lancinante et persistante. Pour soulager les maux de tête, il est souvent recommandé de se reposer dans un endroit calme et sombre, de boire suffisamment d\'eau pour rester hydraté, et de pratiquer des techniques de relaxation telles que la respiration profonde ou la méditation. Dans certains cas, des analgésiques en vente libre peuvent également être efficaces pour soulager la douleur. Cependant, si les maux de tête sont fréquents, sévères ou accompagnés d\'autres symptômes tels que des nausées, des vomissements ou une vision floue, il est important de consulter un professionnel de la santé pour obtenir un diagnostic précis et un plan de traitement approprié.',
-    advices: ['Hydratation: Assurez-vous de boire suffisamment d\'eau tout au long de la journée pour éviter la déshydratation, qui peut souvent être un déclencheur de maux de tête.',
-  'Gestion du stress: Pratiquez des techniques de relaxation telles que la méditation, la respiration profonde ou le yoga pour réduire le stress, qui peut souvent être un facteur contributif aux maux de tête.',
-  'Gestion du sommeil: Assurez-vous de maintenir un horaire de sommeil régulier et de qualité. Le manque de sommeil ou un sommeil de mauvaise qualité peut aggraver les maux de tête.',
-  'Pratiquez une bonne posture: Adoptez une posture correcte lorsque vous êtes assis ou debout pour éviter les tensions musculaires qui peuvent déclencher des maux de tête.'
+    details: 'A migraine is a type of headache characterized by intense, throbbing pain, usually on one side of the head. It can last from a few hours to several days and is often accompanied by other symptoms such as nausea, vomiting, and sensitivity to light and sound.',
+    advices: ["Cold Compress: Apply a cold pack or cloth to your forehead for 15-20 minutes.",
+      "Dark and Quiet Room: Rest in a dark, quiet room to reduce sensory stimulation.",
+      "Hydration: Sip water or an electrolyte drink slowly."
   ],
+  advices1: ["Throbbing or Pulsating Pain: Typically on one side of the head, but can occur on both sides.",
+    "Nausea and Vomiting: Many people with migraines experience gastrointestinal symptoms.",
+    "Sensitivity to Light and Sound: Bright lights and loud noises can worsen the headache.",
+],
     title: 'Symptoms',
-    subtitle: 'Headache',
+    subtitle: 'Migraine',
     id: '6',
   },
 ];

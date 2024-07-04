@@ -74,12 +74,12 @@ const SigneVitauxScreen = () => {
                         </View>
 
                         <View style={styles.dataSection}>
-                            <Text style={styles.sectionTitle}>Oxygen rate</Text>
+                            <Text style={styles.sectionTitle}>Oxygen Saturation</Text>
                             <SpoComp data={spoData} />
                         </View>
 
                         <View style={styles.dataSection}>
-                            <Text style={styles.sectionTitle}>Cardiac frequency</Text>
+                            <Text style={styles.sectionTitle}>Heart Rate</Text>
                             <HeartRateComp data={hrData} />
                         </View>
                     </View>
@@ -95,7 +95,7 @@ const SigneVitauxScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        padding: 0,
     },
     loadingContainer: {
         flex: 1,
@@ -116,13 +116,13 @@ const styles = StyleSheet.create({
     },
     dataSection: {
         alignSelf: 'stretch',
-        marginBottom: 30,
+        marginBottom: 10,
     },
     sectionTitle: {
         fontFamily: 'Outfit-Medium',
         fontSize: 25,
         color: '#0f3f61',
-        marginBottom: 20,
+        marginBottom: 10,
     },
     noDataContainer: {
         flex: 1,

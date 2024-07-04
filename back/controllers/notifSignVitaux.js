@@ -84,28 +84,32 @@ const startListening = () => {
             // Get prediction from Flask API
             const prediction = await processPredictions(vitals);
 
-
+            // Check the prediction result
             if (prediction && prediction.length > 0) {
-                // Send notification only if an anomaly is detected
-                if (prediction[0] === "Abnormal") {
-
+                if (prediction[0] === 1) { // Check for abnormal condition
                     const abnormalVitals = checkVitalSign(vitals);
                     const message = `Abnormal value detected in vital signs: ${abnormalVitals.join(', ')}`;
+
                     // Query MongoDB for the user's FCM token
                     try {
                         const user = await Patient.findOne({ email });
                         if (user && user.FCMtoken) {
-                            await sendNotification(user.FCMtoken, message,userId);
+                            await sendNotification(user.FCMtoken, message, userId);
                         } else {
                             console.log('Patient not found in MongoDB or FCM token is missing');
                         }
                     } catch (error) {
                         console.error('Error querying MongoDB:', error);
                     }
+                } else {
+                    // Log or handle the normal condition if necessary
+                    console.log('No abnormalities detected, no notification sent.');
                 }
             } else {
                 console.log('Prediction failed or returned no result');
             }
+        } else {
+            console.log('No vital signs data available for prediction.');
         }
     });
     console.log('Listening for vital signs changes...');
@@ -116,16 +120,18 @@ const processPredictions = async (vitals) => {
     try {
         // Map input vitals to the expected feature names
         const formattedVitals = {
-            " HR (BPM)": vitals.heartRate,
-            " SpO2 (%)": vitals.spo2,
-            "TEMP (*C)": vitals.temp
+            "HR (BPM)": vitals.heartRate,   // Notice the leading space and exact casing
+            "SpO2 (%)": vitals.spo2,        // Same here
+            "TEMP (*C)": vitals.temp         // And here
         };
+        
         const response = await axios.post('http://192.168.1.22:5002/predict', formattedVitals, {
             headers: {
                 'Content-Type': 'application/json'
             }
         });
         return response.data.predictions;
+        clg
     } catch (error) {
         console.error('Error fetching predictions from Flask API:', error);
     }

@@ -11,7 +11,8 @@ const {
   resetPassword,
   confirmEmailAndRegisterUser,
   saveFCMToken,
-  refresh
+  refresh,
+  getDoctorsBySpecialty
 } = require("../controllers/user");
 const {
   updatevitalsigns,
@@ -61,6 +62,8 @@ router.post("/reset-password", resetPassword);
 router.post('/save-token', saveFCMToken);
 router.post('/updatesigns', updatevitalsigns);
 router.get('/getVitals', getVitals);
+// Assurez-vous que le middleware 'isAuth' si utilisé est approprié pour cette route
+router.get('/doctors/:specialty', isAuth, getDoctorsBySpecialty);
 
 
 

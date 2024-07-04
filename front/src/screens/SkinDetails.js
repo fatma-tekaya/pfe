@@ -1,19 +1,40 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Linking ,Alert} from 'react-native';
 import { colors } from '../styles/colors';
 
+
 const SkinDetails = ({ route }) => {
+
+  const openURL = async (url) => {
+    const supported = await Linking.canOpenURL(url);
+  
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      Alert.alert(`Don't know how to open this URL: ${url}`);
+    }
+  };
+  
+
+
   const { result } = route.params;
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Prediction Result</Text>
-      <Image source={{ uri: result.imageUrl }} style={styles.image} />  
+   
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: result.imageUrl }} style={styles.image} />
+      </View>
       <View style={styles.resultContainer}>
         <Text style={styles.resultText}>{result.label}</Text>
       </View>
       <Text style={styles.description}>{result.description}</Text>
       <Text style={styles.adviceTitle}>Advice:</Text>
       <Text style={styles.advice}>{result.advice}</Text>
+      
+      <TouchableOpacity onPress={() => openURL(result.moreInfoUrl)}>
+        <Text style={styles.urlText}>More Information</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -25,7 +46,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f8f9fa',
   },
-  image: {
+  imageContainer: {
     width: 300,
     height: 400,
     borderRadius: 10,
@@ -35,6 +56,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 5,
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
   title: {
     color: colors.bleu,
@@ -81,6 +107,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
     paddingHorizontal: 10,
+  },
+  urlText: {
+    fontSize: 18,
+    fontFamily: 'Outfit-Medium',
+    color: '#007bff',
+    marginTop: 10,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
   },
 });
 

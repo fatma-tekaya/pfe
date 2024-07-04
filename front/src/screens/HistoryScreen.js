@@ -69,7 +69,7 @@ const HistoryScreen = ({ navigation }) => {
   };
 
   const renderItem = ({ item }) => {
-    const { imageUrl, label, description, _id } = item;
+    const { imageUrl, label, description, _id ,advice} = item;
 
     return (
       <TouchableOpacity 

@@ -99,6 +99,7 @@ const FavoriteScreen = ({ navigation }) => {
           label: className,
           description: anomalyInfo[className].description,
           advice: anomalyInfo[className].advice,
+          moreInfoUrl:anomalyInfo[className].moreInfoUrl,
         };
 
         navigation.navigate('Anomaly Info', { result: resultData });

@@ -10,7 +10,7 @@ const HeartRateComp = ({ data }) => {
         <View style={styles.container}>
             <CircularProgress
                 value={data}
-                radius={75}
+                radius={60}
                 maxValue={maxHeartRate}
                 textColor="#FF6347"
                 activeStrokeColor="#FF6347"
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 30,
+        marginBottom: 0,
     },
     textStyle: {
         fontSize: 30,
