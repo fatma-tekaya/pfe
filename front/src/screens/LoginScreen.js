@@ -100,10 +100,10 @@ const LoginScreen = ({ navigation }) => {
           value={email}
           icon={
             <MaterialIcons
-              name="alternate-email"
+              name="email"
               size={20}
               color="#666"
-              style={{ marginRight: 5 }}
+              style={{ marginRight: 5 ,marginTop:6}}
             />
           }
 
@@ -152,11 +152,11 @@ const LoginScreen = ({ navigation }) => {
           onPress={handleSignIn}
         />
         <Text style={{ textAlign: 'center',fontFamily: 'Outfit-Medium',color: '#666', marginBottom: 10 }}>
-          Or, login with ...
+          Or, 
         </Text>
         <View
           style={{
-            flexDirection: 'row',
+            
             alignItems: 'center', // Alignez les éléments verticalement au centre
             marginBottom: 10,
           }}>
@@ -167,7 +167,7 @@ const LoginScreen = ({ navigation }) => {
             style={globalStyles.buttonContainer}
           >
             <GoogleSVG height={24} width={24} />
-            <Text style={globalStyles.buttonText}>login with gmail</Text>
+            <Text style={globalStyles.buttonText}>Login with Google</Text>
           </TouchableOpacity>
         </View>
         <View

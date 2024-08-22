@@ -112,10 +112,10 @@ const RegisterScreen = ({ navigation }) => {
           onChangeText={text => setEmail(text)}
           icon={
             <MaterialIcons
-              name="alternate-email"
+              name="email"
               size={20}
               color="#666"
-              style={{ marginRight: 5 }}
+              style={{ marginRight: 5 , marginTop:5}}
             />
           }
           keyboardType="email-address"
@@ -178,11 +178,11 @@ const RegisterScreen = ({ navigation }) => {
         <Text style={{
           textAlign: 'center', color: '#666', marginBottom: 20, fontFamily: 'Outfit-Medium',
         }}>
-          Or, login with email ...
+          Or,
         </Text>
         <View
           style={{
-            flexDirection: 'row',
+      
             alignItems: 'center', // Alignez les éléments verticalement au centre
             marginBottom: 20,
           }}>
@@ -193,7 +193,7 @@ const RegisterScreen = ({ navigation }) => {
             style={globalStyles.buttonContainer}
           >
             <GoogleSVG height={24} width={24} />
-            <Text style={globalStyles.buttonText}>login with gmail</Text>
+            <Text style={globalStyles.buttonText}>Register with Google</Text>
           </TouchableOpacity>
         </View>
         <View

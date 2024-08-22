@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
+import React, { useState, useContext ,useEffect} from 'react';
+
 import ImagePicker from 'react-native-image-crop-picker';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
@@ -9,12 +9,53 @@ import { colors } from '../styles/colors';
 import { globalStyles } from '../styles/globalStyles';
 import Toast from 'react-native-toast-message';
 import Entypo from 'react-native-vector-icons/Entypo';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Image, Animated, Easing } from 'react-native';
 
 const FavoriteScreen = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const { userToken, setIsLoading } = useContext(AuthContext);
   const [base64Image, setBase64Image] = useState(null);
+  const [translateAnim] = useState(new Animated.Value(0));
+  const [rotateAnim] = useState(new Animated.Value(0)); // Initial rotation is 0
 
+  const startFloatingAndRotateAnimation = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(translateAnim, {
+            toValue: 10,  // Move slightly down
+            duration: 2000,
+            easing: Easing.inOut(Easing.quad),
+            useNativeDriver: true
+          }),
+          Animated.timing(rotateAnim, {
+            toValue: 1,  // Rotate slightly (e.g., to 5 degrees)
+            duration: 2000,
+            easing: Easing.inOut(Easing.quad),
+            useNativeDriver: true
+          })
+        ]),
+        Animated.parallel([
+          Animated.timing(translateAnim, {
+            toValue: -10,  // Move slightly up
+            duration: 2000,
+            easing: Easing.inOut(Easing.quad),
+            useNativeDriver: true
+          }),
+          Animated.timing(rotateAnim, {
+            toValue: -1,  // Rotate back slightly (e.g., to -5 degrees)
+            duration: 2000,
+            easing: Easing.inOut(Easing.quad),
+            useNativeDriver: true
+          })
+        ])
+      ])
+    ).start();
+  };
+  
+  useEffect(() => {
+    startFloatingAndRotateAnimation();
+  }, []);
   const pickImageFromLibrary = () => {
     ImagePicker.openPicker({
       width: 300,
@@ -150,20 +191,50 @@ const FavoriteScreen = ({ navigation }) => {
     setBase64Image(null);
   };
 
+
+
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('History')}>
-          <Text style={styles.historyText}>View Previous Results</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('History')}style={styles.addButton}>
+        <MaterialIcons name="history" size={17} color="#fff" />
+          <Text style={styles.addButtonText}>Check Your History</Text>
         </TouchableOpacity>
       </View>
       {!selectedImage ? (
-        <View style={globalStyles.emptyContainer}>
-          <Image
-            source={require('../assets/images/robot.gif')}
-            style={globalStyles.emptyGif}
-          />
-          <Text style={globalStyles.emptyText}>Please provide your photo for disease detection.</Text>
+        <View >
+       <Animated.View
+  style={{
+    transform: [
+      { translateY: translateAnim },
+      { rotate: rotateAnim.interpolate({
+        inputRange: [-1, 1],
+        outputRange: ['-5deg', '5deg']  // Adjust the degree of rotation as needed
+      }) }
+    ],
+    width: 280,
+    height: 280,
+
+marginLeft:150,
+marginTop:100,
+    marginTop: 50,
+    alignSelf: 'center'
+  }}
+>
+        <Image
+          source={require('../assets/images/dermatology.png')}
+          style={{
+            width: '60%',
+            height: '60%',
+          }}
+        />
+      </Animated.View>
+          <Text style={{fontFamily: 'Outfit-Light',
+        fontSize: 20,
+        color: colors.bleu,
+        textAlign: 'center',
+        marginTop: -50}}>Ready to check your skin? Upload a photo now!</Text>
         </View>
       ) : (
         <View style={styles.imageContainer}>
@@ -179,24 +250,60 @@ const FavoriteScreen = ({ navigation }) => {
         </TouchableOpacity>
       )}
       {!selectedImage && (
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={styles.cameraButton} onPress={takePhotoFromCamera}>
-            <MaterialIcons name="photo-camera" size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text style={{color:'black'}}>Or</Text>
-          <TouchableOpacity onPress={pickImageFromLibrary}>
-            <Text style={styles.choosePhotoText}>Choose Photo</Text>
-          </TouchableOpacity>
-        </View>
+   <View style={styles.buttonsContainer}>
+   <TouchableOpacity style={styles.addButtonLink} onPress={takePhotoFromCamera}>
+     <MaterialIcons name="photo-camera" size={28}  color= '#008ef7'  />
+     <Text style={styles.addButtonTextLink  }>Take Photo</Text>
+   </TouchableOpacity>
+   <Text style={styles.orText}>Or</Text>
+   <TouchableOpacity style={styles.addButtonLink} onPress={pickImageFromLibrary}>
+     <MaterialIcons name="photo-library" size={28}  color='#008ef7'  />
+     <Text style={styles.addButtonTextLink}>Choose Photo</Text>
+   </TouchableOpacity>
+ </View>
+ 
       )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  addButtonLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 5,  // Reduced padding
+    paddingHorizontal: 5,
+    marginTop: '5%',
+    marginBottom: '5%',
+  },
+
+  addButtonTextLink: {
+    color: '#008ef7',  // Bright color to give a link-like appearance
+    marginLeft: 6,
+    fontSize: 16,
+    fontFamily: 'Outfit-Light',
+    textDecorationLine: 'underline',  // Underline to emphasize the link appearance
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#008ef7',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 30,
+    marginTop: '5%',
+    marginBottom: '5%',
+},
+
+addButtonText: {
+    color: '#fff',
+    marginLeft: 6,
+    fontSize: 16,
+    fontFamily: 'Outfit-Light',
+},
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#F5F5F5',
     padding: 20,
   },
   header: {
@@ -227,7 +334,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   analyzeButton: {
-    backgroundColor: '#0f3f61',
+    backgroundColor: '#008ef7',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
@@ -240,29 +347,40 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   buttonsContainer: {
-    flexDirection: 'column',
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop:5,
+  
   },
+
   cameraButton: {
     backgroundColor: '#008ef7',
-    borderRadius: 50,
-    padding: 15,
-    justifyContent: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
- 
+    justifyContent: 'center',
+    padding: 10,
+    borderRadius: 5,
   },
-  choosePhotoText: {
-    color: colors.blue_ciel,
-    fontFamily: 'Outfit-Medium',
-    fontSize: 20,
-    marginBottom:100
+  galleryButton: {
+    backgroundColor: '#008ef7',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    borderRadius: 5,
   },
+  buttonText: {
+    marginLeft: 8,
+    color: '#fff',
+    fontSize: 16,
+  },
+  orText: {
+    color: colors.bleu,
+    fontSize: 16,
+    paddingHorizontal: 10,
+  }
+
 });
 
 export default FavoriteScreen;

@@ -10,7 +10,8 @@ const captureSchema = new Schema({
   label: {
     type: String,
     required: true
-  }
+  },
+  timestamp: { type: Date, default: Date.now }
 });
 
 const patientSchema = new Schema({
@@ -35,6 +36,12 @@ const patientSchema = new Schema({
   avatar: {
     type: String,
     default: null,
+  },
+  appRating: {
+    type: Number,
+    default: null,  
+    min: 1,         
+    max: 5          
   },
   captures: [captureSchema],
   conversations: [{ type: Schema.Types.ObjectId, ref: 'Conversation' }],

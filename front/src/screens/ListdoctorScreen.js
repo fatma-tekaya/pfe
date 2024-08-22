@@ -1,17 +1,22 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, TextInput } from 'react-native';
 import axios from 'axios';
+import { colors } from '../styles/colors';
 import { BASE_URL } from '../config';
 import { AuthContext } from '../context/AuthContext';
-import EvilIcons from 'react-native-vector-icons/EvilIcons';
+import Icon from 'react-native-vector-icons/FontAwesome'; 
+import InputField from '../components/InputField';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 
 const DoctorsScreen = ({ route }) => {
   const { specialty } = route.params;
   const { userToken } = useContext(AuthContext);
   const [doctors, setDoctors] = useState([]);
+  const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -22,6 +27,7 @@ const DoctorsScreen = ({ route }) => {
         });
         if (response.status === 200) {
           setDoctors(response.data);
+          setFilteredDoctors(response.data);
         } else {
           setError('Failed to load doctors due to server error');
         }
@@ -35,51 +41,69 @@ const DoctorsScreen = ({ route }) => {
     fetchDoctors();
   }, [specialty]);
 
+  useEffect(() => {
+    if (searchQuery === '') {
+      setFilteredDoctors(doctors);
+    } else {
+      const filtered = doctors.filter(doctor =>
+        doctor.fullname.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredDoctors(filtered);
+    }
+  }, [searchQuery, doctors]);
+  
+
   return (
     <View style={styles.container}>
+    
+      <View style={styles.searchContainer}>
+        <Icon name="search" size={20} color="#666" style={styles.searchIcon} />
+        <InputField
+         // style={styles.searchBar}
+         label={"Search by name..."}
+       
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
       {loading ? (
         <Text style={styles.loading}>Loading doctors...</Text>
       ) : error ? (
         <Text style={styles.error}>{error}</Text>
       ) : (
         <FlatList
-          data={doctors}
+          data={filteredDoctors}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.card} onPress={() => console.log('Doctor selected', item.fullname)}>
-              <Image
-                source={require('../assets/images/docc.png') }
-                style={styles.image}
-              />
-              <View style={styles.infoContainer}>
-                <View style={styles.attributeContainer}>
-                  <Text style={styles.label}>Name:</Text>
-                  <Text style={styles.value}>{item.fullname}</Text>
-                </View>
-                <View style={styles.attributeContainer}>
-                  <Text style={styles.label}>Specialty:</Text>
-                  <Text style={styles.value}>{item.specialty}</Text>
-                </View>
-                <View style={styles.attributeContainer}>
-                  <Text style={styles.label}>Address:</Text>
-                  <Text style={styles.value}>{item.address}</Text>
-                </View>
-                <View style={styles.attributeContainer}>
-                  <Text style={styles.label}>Phone:</Text>
-                  <Text style={styles.value}>{item.phoneNumber}</Text>
-                </View>
-                <View style={styles.attributeContainer}>
-                  <Text style={styles.label}>Office Hours:</Text>
-                  <Text style={styles.value}>{item.officeHours}</Text>
-                </View>
-                <View style={styles.attributeContainer}>
-                  <Text style={styles.label}>Email:</Text>
-                  <Text style={styles.value}>{item.email}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
+           
+
+  <TouchableOpacity style={styles.card} onPress={() => console.log('Doctor selected', item.fullname)}>
+  <Image    source={require('../assets/images/docc.png')} style={styles.image} />
+  <View style={styles.infoContainer}>
+    <Text style={styles.doctorName}>{item.fullname}</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <MaterialCommunityIcons name="map-marker" size={16} color="#00aeef" style={{marginRight:13}} />
+      <Text style={styles.infoText}>{item.address}</Text>
+    </View>
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <MaterialCommunityIcons name="phone" size={16} color="#00aeef" style={{marginRight:13}}/>
+      <Text style={styles.infoText}>{item.phoneNumber}</Text>
+    </View>
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <MaterialCommunityIcons name="email" size={16} color="#00aeef" style={{marginRight:13}}/>
+      <Text style={styles.infoText}>{item.email}</Text>
+    </View>
+  </View>
+</TouchableOpacity>
+
+
+
+           
           )}
-          ListEmptyComponent={<Text style={styles.noData}>No doctors found for this specialty.</Text>}
+          ListEmptyComponent={
+            <Text style={styles.noData}>No doctors found {searchQuery ? `with the name "${searchQuery}"` : `for this specialty`}.
+            </Text>
+          }
         />
       )}
     </View>
@@ -89,62 +113,63 @@ const DoctorsScreen = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f7',  // Lighter grey for the background
+    padding: 12,
+    marginTop:15
   },
   card: {
-    flexDirection: 'row',
-    padding: 15,
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    padding: 16,
     marginBottom: 10,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e1e1e1',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  searchContainer:{},
+  searchIcon:{
+    marginLeft:360,
+    marginBottom:-25
   },
   image: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    marginRight: 15,
+    marginRight: 35,
   },
   infoContainer: {
     flex: 1,
   },
-  attributeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 5,
-    justifyContent: 'space-between',
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
+  doctorName: {
+    fontSize: 18,
+    fontWeight: 'bold',
     color: '#333',
+    marginBottom: 4,
   },
-  value: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'right',
-    flex: 1,
+  infoText: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 2,
   },
-  loading: {
-    marginTop: 20,
-    textAlign: 'center',
-    fontSize: 16,
-    color: '#000',
-  },
-  error: {
-    textAlign: 'center',
-    color: 'red',
-    fontSize: 16,
+  icon: {
+    fontSize: 18,
+    color: colors.bleu_bleu,
+    marginRight: 6,
   },
   noData: {
     textAlign: 'center',
-    fontSize: 16,
+    color: '#aaa',
     marginTop: 20,
-    color: '#000',
+    fontSize: 16,
   },
 });
 
-
 export default DoctorsScreen;
+
+
+

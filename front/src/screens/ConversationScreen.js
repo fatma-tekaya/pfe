@@ -13,6 +13,7 @@ import { AuthContext } from '../context/AuthContext';
 import { BASE_URL } from '../config';
 import axios from 'axios';
 import { colors } from '../styles/colors';
+import { globalStyles } from '../styles/globalStyles';
 
 const ConversationScreen = ({ route }) => {
   const { conversationId } = route.params;

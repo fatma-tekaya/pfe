@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
+import { colors } from '../styles/colors';
+
 
 const specialties = [
   { name: 'Dentist', icon: 'tooth' },
@@ -9,21 +11,26 @@ const specialties = [
   { name: 'Veterinarian', icon: 'paw' },
   { name: 'General Practitioner', icon: 'stethoscope' },
   { name: 'Sexologist', icon: 'venus-mars' },
-  { name: 'Dermatologist', icon: 'hand-dots' },
-  { name: 'Ophthalmologist', icon: 'eye' },
+
+
   { name: 'Orthopedist', icon: 'bone' },
   { name: 'ENT', icon: 'ear-listen' },
   { name: 'Psychiatrist', icon: 'brain' },
   { name: 'Cardiologist', icon: 'heart-pulse' },
-  { name: 'Gastroenterologist', icon: 'virus' },
+  
   { name: 'Pediatrician', icon: 'person-breastfeeding' },
-  { name: 'Rheumatologist', icon: 'wheelchair' },
+
   { name: 'Neurologist', icon: 'brain' },
-  { name: 'Pulmonologist', icon: 'lungs' },
+  { name: 'Nephrologist', icon: 'stethoscope' },
   { name: 'Nutritionist', icon: 'apple-whole' },
   { name: 'Child Psychiatrist', icon: 'head-side-virus' },
   { name: 'Diabetologist', icon: 'droplet' },
-  { name: 'Nephrologist', icon: 'stethoscope' },
+ 
+  { name: 'Dermatologist', icon: 'hand-dots' },
+  { name: 'Ophthalmologist', icon: 'eye' },
+  { name: 'Gastroenterologist', icon: 'virus' },
+  { name: 'Rheumatologist', icon: 'wheelchair' },
+  { name: 'Pulmonologist', icon: 'lungs' },
 ];
 
 const MomentsScreen = ({ navigation }) => {
@@ -50,7 +57,7 @@ const MomentsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     paddingHorizontal: 20,
   },
   specialtiesContainer: {

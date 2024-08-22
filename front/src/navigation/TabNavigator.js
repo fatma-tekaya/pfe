@@ -18,11 +18,21 @@ import database from '@react-native-firebase/database';
 import firestore from '@react-native-firebase/firestore';
 import { colors } from '../styles/colors';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
+import MomentsScreen from '../screens/MomentsScreen';
+import DoctorsScreen from '../screens/ListdoctorScreen';
+const getHeaderVisibility = (route) => {
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'defaultRoute';
+  if (routeName === 'defaultRoute' || routeName === 'AnotherScreenWithoutHeader') {
+    return false;
+  }
+  return true;
+};
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const MessagesStack = createNativeStackNavigator();
 const FavoriteStack = createNativeStackNavigator();
+DoctorsStack= createNativeStackNavigator();
+
 const FavoriteStackNavigator = () => (
   <FavoriteStack.Navigator>
     <FavoriteStack.Screen name="Favorite" component={FavoriteScreen}
@@ -69,7 +79,37 @@ const MessagesStackNavigator = () => (
   </MessagesStack.Navigator>
 );
 
+const DoctorsStackNavigator = () => (
+  <DoctorsStack.Navigator>
+   <DoctorsStack.Screen
+      name="Specialities"
+      component={MomentsScreen}
+      options={{
+      //  headerShown: true,
+        title: 'Specialities',
+        headerTitleStyle: {
+          fontFamily: 'Outfit-Medium',
+          fontSize: 20,
+        //  color: colors.blue_fonce
+        },
+      }}
+    />
+    <DoctorsStack.Screen
+      name="Doctors List"
+      component={DoctorsScreen}
+      options={({ route }) => ({
+        //headerShown: true,
+        title: `${route.params.specialty}`,  // Dynamically setting the title based on the passed specialty
+        headerTitleStyle: {
+          fontFamily: 'Outfit-Medium',
+          fontSize: 20,
+         // color: colors.blue_fonce
+        },
+      })}
+    />
 
+  </DoctorsStack.Navigator>
+);
 
 const HomeStack = () => {
   return (
@@ -86,9 +126,15 @@ const HomeStack = () => {
           title: route.params.title,
         })}
       />
+       <Stack.Screen
+       name="Doctors" 
+       component={DoctorsStackNavigator}
+       options={({ route }) => ({ headerShown: false })} 
+      />
     </Stack.Navigator>
   );
 };
+
 const TabNavigator = () => {
   const { userInfo } = useContext(AuthContext);
   const [unseenCount, setUnseenCount] = useState(0);

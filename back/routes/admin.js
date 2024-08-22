@@ -17,7 +17,7 @@ router.get ("/get-doctors", isAuth , checkRole('admin'), adminController.getAllD
 router.post('/create-doctor', isAuth, checkRole('admin'), adminController.createDoctor);
 router.put('/modif-Doctor', isAuth, checkRole('admin'), adminController.modifDoctor);
 router.delete('/delete-doctor/:id', isAuth, checkRole('admin'), adminController.deleteDoctor);
-
+router.get('/average-rating', isAuth, checkRole('admin'), adminController.average);
 //Stat managing routes
 // Route to get statistics of doctors grouped by their specialty
 router.get('/stats/doctors-by-specialty', isAuth, checkRole('admin'), adminController.getDoctorsBySpecialty);

@@ -110,7 +110,7 @@ const ConversationsListScreen = ({ navigation }) => {
                 onPress={() => navigation.navigate('Conversation', { conversationId })}
             >
                 <View style={styles.itemContent}>
-                    <Text style={styles.title}>{item.title}</Text>
+                   
                     <Text
                         style={styles.lastMessage}
                         numberOfLines={2}
@@ -119,10 +119,11 @@ const ConversationsListScreen = ({ navigation }) => {
                         {item.lastMessage}
                     </Text>
                     <Text style={styles.timestamp}>{createdAt}</Text>
-                </View>
+              
                 <TouchableOpacity style={styles.deleteButton} onPress={() => deleteConversation(conversationId)}>
                     <Entypo name="cross" size={25} color="gray" />
                 </TouchableOpacity>
+                </View>
             </TouchableOpacity>
         );
     };
@@ -149,7 +150,11 @@ const ConversationsListScreen = ({ navigation }) => {
                             source={require('../assets/images/robot.gif')}
                             style={globalStyles.emptyGif}
                         />
-                        <Text style={globalStyles.emptyText}>Let's start a new chat to assist you!</Text>
+                        <Text style={{  fontFamily: 'Outfit-Light',
+        fontSize: 20,
+        color: colors.bleu,
+        textAlign: 'center',
+        marginTop: -110}}>   Let’s start a new chat and address your       health concerns together!   </Text>
                     </View>
                 }
             />
@@ -158,6 +163,18 @@ const ConversationsListScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+    loginButton: {
+        backgroundColor: colors.bleu_bleu, // Use the color from your colors file
+       
+        borderRadius: 10,
+        elevation: 3, // Add some shadow/elevation for better UI
+      },
+      loginButtonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontFamily: 'Outfit-Medium',
+        textAlign: 'center', // Center align the button text
+      },
     container: {
         flex: 1,
         marginTop: 20,
@@ -191,20 +208,24 @@ const styles = StyleSheet.create({
         fontFamily: 'Outfit-Light',
     },
     item: {
-      
+        borderRadius: 8,
+        color:'#888',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 2,
+       position: 'relative',
+
+
         backgroundColor: '#f8f8f8',
         paddingHorizontal: 10,
-        paddingVertical: 2,
-        marginVertical: 2,
-        marginHorizontal: 14,
-        borderRadius: 10,
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.22,
-        shadowRadius: 2.22,
+        paddingVertical: 18,
+        marginVertical: 5,
+        marginHorizontal: 10,
+          // position: 'relative',
         minHeight: 60,
-        height: 100,
+       // height: 80,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -226,14 +247,14 @@ const styles = StyleSheet.create({
     },
     itemContent: {
         flex: 1,
-        
+        direction:'row',
+        justifyContent: 'space-between',
     },
     
     deleteButton: {
         position: 'absolute',
-        
-        top: 10,
-        right: 10,
+       marginTop:-15,
+        marginLeft:350
     },
 
 });

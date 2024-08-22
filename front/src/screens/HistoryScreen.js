@@ -5,24 +5,34 @@ import Icon from 'react-native-vector-icons/MaterialIcons';  // Ensure this is c
 import { BASE_URL } from '../config';
 import { AuthContext } from '../context/AuthContext';
 import Entypo from 'react-native-vector-icons/Entypo';
+import { colors } from '../styles/colors';
 
 const anomalyInfo = {
   Acne: {
     description: 'Acne is a skin condition that occurs when your hair follicles become plugged with oil and dead skin cells, leading to whiteheads, blackheads, or pimples.',
+    advice: 'Keep your face clean, avoid popping pimples, and use non-comedogenic makeup.',
+    moreInfoUrl: 'https://www.google.nl/',
   },
   Eczema: {
     description: "Eczema, or atopic dermatitis, is a condition that makes your skin red and itchy. It's common in children but can occur at any age.",
+    advice: 'Moisturize regularly, avoid harsh soaps and detergents, and consider using a humidifier in dry weather.',
+    moreInfoUrl: 'https://www.google.nl/',
   },
   Rosacea: {
     description: 'Rosacea is a common skin condition that causes redness and visible blood vessels in your face. It may also produce small, red, pus-filled bumps.',
+    advice: 'Avoid triggers like hot drinks, spicy foods, and alcohol. Use gentle skin care products and consider medical therapies if symptoms persist.',
+    moreInfoUrl: 'https://www.google.nl/',
   },
   'Actinic Keratosis': {
     description: 'Actinic Keratosis is a rough, scaly patch on your skin that develops from years of exposure to the sun, and can sometimes progress to skin cancer.',
+    advice: 'Seek shade, wear sun-protective clothing, and apply sunscreen regularly.',
+    moreInfoUrl: 'https://www.google.nl/',
   },
   'Basal Cell Carcinoma': {
     description: 'Basal Cell Carcinoma is a type of skin cancer that begins in the basal cells. It often manifests as a slightly transparent bump on the sun-exposed skin.',
+    advice: 'Consult a dermatologist for potential treatment options such as surgical removal or topical treatments.',
+    moreInfoUrl: 'https://www.google.nl/',
   },
- 
 };
 
 const HistoryScreen = ({ navigation }) => {
@@ -42,8 +52,12 @@ const HistoryScreen = ({ navigation }) => {
       setIsLoading(false);
       const capturesWithDescriptions = response.data.map(capture => ({
         ...capture,
-        description: anomalyInfo[capture.label]?.description || 'No description available.',
-        imageUrl: `${BASE_URL}/${capture.path.replace(/\\/g, '/')}`,  // Ensure imageUrl is correctly set
+       
+         description: anomalyInfo[capture.label]?.description || 'No description available.',
+         advice: anomalyInfo[capture.label]?.advice || 'No advice available.',
+        imageUrl: `${BASE_URL}/${capture.path.replace(/\\/g, '/')}`,  
+        createdAt: new Date(capture.timestamp).toLocaleDateString() + ' ' + new Date(capture.timestamp).toLocaleTimeString(), // Formatting timestamp
+       
       }));
       setCaptures(capturesWithDescriptions);
     } catch (error) {
@@ -82,10 +96,12 @@ const HistoryScreen = ({ navigation }) => {
           <Text style={styles.description} numberOfLines={2} ellipsizeMode="tail">
             {description}
           </Text>
-        </View>
+          <Text style={styles.timestamp}>{item.createdAt}</Text>
+       
         <TouchableOpacity onPress={() => handleDelete(_id)} style={styles.deleteIcon}>
           <Entypo name="cross" size={25} color="gray" />
         </TouchableOpacity>
+        </View>
       </TouchableOpacity>
     );
   };
@@ -103,39 +119,63 @@ const HistoryScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    backgroundColor: '#fff'
+  //  padding: 10,
+  paddingTop:16,
+  backgroundColor: colors.background,
   },
   itemContainer: {
+    borderRadius: 8,
+    color:'#888',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
+   position: 'relative',
+
+
+    backgroundColor: '#f8f8f8',
+    paddingHorizontal: 10,
+    paddingVertical: 18,
+    marginVertical: 5,
+    marginHorizontal: 10,
+      // position: 'relative',
+    minHeight: 60,
+   // height: 80,
     flexDirection: 'row',
-    marginBottom: 10,
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    borderRadius: 5,
-    padding: 10
+    justifyContent: 'space-between',
   },
   image: {
     width: 70,
     height: 70,
-    borderRadius: 5,
+   // borderRadius: 35,  // Rendre l'image circulaire
     marginRight: 10
   },
   infoContainer: {
     flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'space-between',
+    justifyContent: 'center',  // Centrer verticalement le contenu à l'intérieur
   },
   label: {
     fontSize: 18,
+    fontWeight: 'bold',  // Rendre le texte plus lisible
     color: '#333'
   },
   description: {
     fontSize: 14,
     color: '#666',
   },
+  timestamp: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 4
+  },
   deleteIcon: {
-    marginTop: -50
+    position: 'absolute',
+    right: 0,  // Ajuster la position à droite
+    top: -12,    // Ajuster la position en haut
   }
 });
+
 
 export default HistoryScreen;

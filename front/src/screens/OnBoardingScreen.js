@@ -8,7 +8,7 @@ const OnBoardingScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.imageContainer}>
         <Image
-          source={require('../assets/images/bcgg.jpg')} // Ensure the correct path
+          source={require('../assets/images/logovff-sarr.png')} // Ensure the correct path
           style={styles.image}
           resizeMode="contain" // Adjust this to "cover", "contain", "stretch", "repeat", "center" as per requirement
         />
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor:"white",
+    backgroundColor: colors.background,
   },
   imageContainer: {
     width: '100%',
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     height: 300, // Adjust height as needed
   },
   textContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent overlay for text
+    backgroundColor: colors.background, // Semi-transparent overlay for text
     borderRadius: 10,
     padding: 20,
     alignItems: 'center',

@@ -14,38 +14,38 @@ import TabNavigator from './TabNavigator';
 import { colors } from '../styles/colors';
 const DoctorsStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
-const DoctorsStackNavigator = () => (
-  <DoctorsStack.Navigator>
-    <DoctorsStack.Screen
-      name="Specialities"
-      component={MomentsScreen}
-      options={{
-        headerShown: false,
-        title: 'Specialities',
-        headerTitleStyle: {
-            fontFamily: 'Outfit-Medium',
-            fontSize: 20,
-            color:colors.blue_fonce
-          },
-      }}
-    />
-    <DoctorsStack.Screen
-      name="Doctors List"
-      component={DoctorsScreen}
-      options={{
-        headerShown: false,
-        title: 'Doctors List',
-        headerTitleStyle: {
-            fontFamily: 'Outfit-Medium',
-            fontSize: 20,
-            color:colors.blue_fonce
-          },
-      }}
-      //options={({ route }) => ({ title: route.params.speciality })}
-    />
+// const DoctorsStackNavigator = () => (
+//   <DoctorsStack.Navigator>
+//     <DoctorsStack.Screen
+//       name="Specialities"
+//       component={MomentsScreen}
+//       options={{
+//         headerShown: false,
+//         title: 'Specialities',
+//         headerTitleStyle: {
+//             fontFamily: 'Outfit-Medium',
+//             fontSize: 20,
+//             color:colors.blue_fonce
+//           },
+//       }}
+//     />
+//     <DoctorsStack.Screen
+//       name="Doctors List"
+//       component={DoctorsScreen}
+//       options={{
+//         headerShown: false,
+//         title: 'Doctors List',
+//         headerTitleStyle: {
+//             fontFamily: 'Outfit-Medium',
+//             fontSize: 20,
+//             color:colors.blue_fonce
+//           },
+//       }}
+//       //options={({ route }) => ({ title: route.params.speciality })}
+//     />
 
-  </DoctorsStack.Navigator>
-);
+//   </DoctorsStack.Navigator>
+// );
 const AuthStack = () => {
 
   return (
@@ -68,13 +68,13 @@ const AuthStack = () => {
         )
       }} />
 
-      <Drawer.Screen name="Doctors" component={DoctorsStackNavigator} options={{
+      {/* <Drawer.Screen name="Doctors" component={DoctorsStackNavigator} options={{
         drawerIcon: ({ color }) => (
           <Icon name="user-doctor" size={22} color={color} />
         ),  
         headerShown: true,
 
-      }} />
+      }} /> */}
       <Drawer.Screen name="Settings" component={SettingsScreen} options={{
         drawerIcon: ({ color }) => (
           <Ionicons name="settings-outline" size={22} color={color} />

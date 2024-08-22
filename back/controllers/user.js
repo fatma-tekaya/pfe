@@ -657,3 +657,44 @@ exports.getDoctorsBySpecialty = async (req, res) => {
       res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+
+exports.rateApp = async (req, res) => {
+  const { user } = req; // Utilisateur passé par le middleware
+  const { appRating } = req.body; // Note de l'application envoyé par le client
+
+  if (!appRating || appRating < 1 || appRating > 5) {
+    return res.status(400).json({ success: false, message: "Invalid rating value, it must be between 1 and 5." });
+  }
+  
+
+  try {
+    user.appRating = appRating;
+    await user.save();
+
+    res.status(200).json({ success: true, message: "App rated successfully", appRating: user.appRating });
+  } catch (error) {
+    console.error("Error updating app rating:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+exports.getUserFeedback = async (req, res) => {
+  const { user } = req; 
+
+  try {
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Unauthorized access' });
+    }
+
+    const appRating = user.appRating || null;
+
+    return res.status(200).json({
+      success: true,
+      appRating,
+    });
+  } catch (error) {
+    console.error('Error fetching user feedback:', error);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};

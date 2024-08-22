@@ -101,7 +101,7 @@ const ProfileScreen = () => {
                 />
               </View>
             ) : (
-              <MaterialIcons name="photo-camera" size={100} color="#2F4F4F" />
+              <MaterialIcons name="photo-camera" size={100} color={colors.bleu_bleu}/>
             )}
             <TouchableOpacity
               style={styles.photoButton}

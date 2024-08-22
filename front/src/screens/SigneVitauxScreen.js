@@ -62,14 +62,18 @@ const SigneVitauxScreen = () => {
         <View style={styles.container}>
             {loading ? (
                 <View style={styles.loadingContainer}>
-                    <Text style={styles.loadingText}>Récupération des données</Text>
+                    <Text style={styles.loadingText}>Retrieving Smartwatch Data</Text>
                     <ActivityIndicator size="large" color="#5db7ba" />
                 </View>
             ) : (
                 (tempData !== 0 && spoData !== 0 && hrData !== 0) ? (
                     <View style={styles.dataContainer}>
+                      <View style={styles.dataSection}>
+                            <Text style={styles.sectionTitle}>Heart Rate</Text>
+                            <HeartRateComp data={hrData} />
+                        </View>
                         <View style={styles.dataSection}>
-                            <Text style={styles.sectionTitle}>Temperature</Text>
+                            <Text style={styles.sectionTitle}>Body Temperature</Text>
                             <TempComp data={tempData} />
                         </View>
 
@@ -78,10 +82,7 @@ const SigneVitauxScreen = () => {
                             <SpoComp data={spoData} />
                         </View>
 
-                        <View style={styles.dataSection}>
-                            <Text style={styles.sectionTitle}>Heart Rate</Text>
-                            <HeartRateComp data={hrData} />
-                        </View>
+                        
                     </View>
                 ) : (
                     <View style={styles.noDataContainer}>

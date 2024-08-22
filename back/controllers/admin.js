@@ -305,3 +305,24 @@ exports.getPatientGenderDistribution = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
+exports.average = async (req, res) => {
+    try {
+        const result = await Patient.aggregate([
+          { $match: { appRating: { $ne: null } } },
+          { $group: { _id: null, averageRating: { $avg: "$appRating" } } }
+        ]);
+     //   console.log(result); // Log the output of the aggregation to see what's happening
+        if (result.length > 0 && result[0].averageRating !== null) {
+            res.json({ averageRating: parseFloat(result[0].averageRating.toFixed(2)) });
+
+        } else {
+          res.json({ averageRating: "No ratings yet" });
+        }
+    } catch (error) {
+        console.error("Error calculating average rating:", error);
+        res.status(500).send("Error calculating average rating");
+    }
+};
+
+  

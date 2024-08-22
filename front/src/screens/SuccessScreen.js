@@ -1,14 +1,21 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
 import { colors } from '../styles/colors';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const ResetScreen = ({ navigation, route }) => {
   const { email } = route.params;
   
   return (
     <View style={styles.container}>
+      <MaterialIcons
+              name="verified"
+              size={80}
+              color="#076a90"
+              style={{ alignContent:'center',marginBottom:20 }}
+            />
       <Text style={styles.successText}>
-      Your Account has been registred successfully {email}
+      Your Account has been registred successfully with {email}
       </Text>
       <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
         <Text style={styles.loginButtonText}>Please Login</Text>
@@ -26,10 +33,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   successText: {
-    fontSize: 20,
+    fontSize: 18,
     marginBottom: 20,
-    color: 'black',
+    color: '#20315f',
     fontFamily: 'Outfit-Medium',
+    
     textAlign: 'center', // Center align the text
   },
   loginButton: {

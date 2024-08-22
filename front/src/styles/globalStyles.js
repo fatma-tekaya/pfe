@@ -61,7 +61,7 @@ export const globalStyles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 50,
+        marginTop: 70,
     },
     emptyGif: {
         width: 200,

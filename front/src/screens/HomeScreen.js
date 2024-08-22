@@ -105,10 +105,10 @@ const HomeScreen = ({ navigation }) => {
           }}>
           <Text
             style={{color: 'black', fontSize: 18, fontFamily: 'Roboto-Medium'}}>
-            Upcoming Features
+            Explore Our Features
           </Text>
           <TouchableOpacity onPress={() => {navigation.navigate('Doctors')}}>
-            <Text style={{color: '#0aada8'}}>Search for a Doctor</Text>
+            <Text style={{color: '#0aada8',marginBottom:5}}>Search for a Doctor</Text>
           </TouchableOpacity>
         </View>
 

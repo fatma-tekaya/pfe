@@ -4,7 +4,7 @@ const {
   createUser,
   userSignIn,
   uploadProfile,
-  signOut,
+  rateApp,
   signInWithGoogle,
   uploadPicture,
   forgotPassword,
@@ -12,7 +12,8 @@ const {
   confirmEmailAndRegisterUser,
   saveFCMToken,
   refresh,
-  getDoctorsBySpecialty
+  getDoctorsBySpecialty,
+  getUserFeedback
 } = require("../controllers/user");
 const {
   updatevitalsigns,
@@ -56,7 +57,7 @@ router.post("/refresh" ,verifyRefreshToken, refresh);
 //router.post("/sign-out", isAuth, signOut);
 router.post("/google-signin", signInWithGoogle);
 router.put("/upload-profile", isAuth,checkRole('patient'), uploads.single("profile"), uploadProfile);
-router.put("/upload-picture", isAuth,checkRole('patient'), uploads.single("picture"), uploadPicture);
+router.put("/upload-picture", isAuth, uploads.single("picture"), uploadPicture);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.post('/save-token', saveFCMToken);
@@ -64,8 +65,8 @@ router.post('/updatesigns', updatevitalsigns);
 router.get('/getVitals', getVitals);
 // Assurez-vous que le middleware 'isAuth' si utilisé est approprié pour cette route
 router.get('/doctors/:specialty', isAuth, getDoctorsBySpecialty);
-
-
+router.post('/rate-app',  isAuth, rateApp);
+router.get('/user-feedback', isAuth, getUserFeedback);
 
 
 

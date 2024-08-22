@@ -4,7 +4,8 @@ import { AuthContext } from '../context/AuthContext';
 import InputField from '../components/InputField';
 import CustomButton from '../components/CustomButton';
 import Toast from 'react-native-toast-message';
-
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { colors } from '../styles/colors';
 const ConfirmationSentScreen = ({ navigation, route }) => {
   const [verificationCode, setVerificationCode] = useState('');
   const { email } = route.params;
@@ -38,7 +39,7 @@ const ConfirmationSentScreen = ({ navigation, route }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.innerContainer}>
         <Text style={styles.title}>
-          Your confirmation mail has been sent successfully to {email}
+          Your verification code has been sent successfully to {email}
         </Text>
         <Text style={styles.subtitle}>
           Please enter the received verification code
@@ -46,6 +47,7 @@ const ConfirmationSentScreen = ({ navigation, route }) => {
         <InputField
           label={'Verification Code'}
           value={verificationCode}
+          icon={<MaterialIcons name="vpn-key" size={20} color="#666" style={{marginTop:6}} />}
           onChangeText={text => setVerificationCode(text)}
           style={styles.inputField}
         />
@@ -56,13 +58,14 @@ const ConfirmationSentScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.background,
   },
   innerContainer: {
     paddingHorizontal: 25,
+    paddingVertical: 265,
   },
   title: {
     fontSize: 20,
